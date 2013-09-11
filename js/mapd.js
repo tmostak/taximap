@@ -1,6 +1,7 @@
 // Events:
 // mapdreload:       tell MapD to reload
 // pointmapreload:   tell PointMap to reload
+// heatmapreload:    tell HeatMap to reload
 // geocodeend:       geocoding service is ready
 
 var BBOX = {
@@ -28,15 +29,17 @@ var MapD = {
   dataend: null,
   services: {
     pointmap: null,
+    heatmap: null,
     geotrends: null,
     topktokens: null, 
     tweets: null,
     graph: null
   },
 
-  init: function(map, pointmap, geotrends, topktokens, tweets, graph) {
+  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph) {
     this.map = map;
     this.services.pointmap = pointmap;
+    this.services.heatmap = heatmap;
     this.services.geotrends = geotrends;
     this.services.topktokens = topktokens;
     this.services.tweets = tweets;
@@ -59,7 +62,7 @@ var MapD = {
 
   reload: function() {
     console.log('in reload');
-    //this.services.geotrends.reload();
+    this.services.geotrends.reload();
     this.services.topktokens.reload();
     this.services.tweets.reload();
     this.services.graph.reload();
@@ -71,10 +74,11 @@ var MapD = {
     var oldEnd = this.timeend;
     this.timestart = start;
     this.timeend = end;
-    //this.services.geotrends.reload();
+    this.services.geotrends.reload();
     this.services.topktokens.reload();
     this.services.tweets.reload();
     this.services.pointmap.reload();
+    this.services.heatmap.reload();
     this.timestart = oldStart;
     this.timeend = oldEnd;
   },
@@ -196,7 +200,7 @@ var GeoTrends = {
   },
 
   reload: function() {
-    $.getJSON(this.getURL()).done($.proxy(onTrends, this, this.mapd.queryTerms));
+    //$.getJSON(this.getURL()).done($.proxy(onTrends, this, this.mapd.queryTerms));
   } 
 };
 
@@ -261,6 +265,43 @@ var PointMap = {
     this.wms.mergeNewParams(this.getParams());
   }
 };
+
+var HeatMap = {
+  mapd: MapD,
+  wms: null,
+  params: {
+    request: "GetMap",
+    sql: null,
+    bbox: null,
+    width: null,
+    height: null,
+    layers: "heatmap",
+    maxval: "auto", 
+    format: "image/png",
+    transparent: true
+  },
+
+  init: function(wms) {
+    this.wms = wms;
+    this.wms.events.register('retile', this, this.setWMSParams);
+    $(document).on('heatmapreload', $.proxy(this.reload, this));
+  },
+
+  setWMSParams: function() {
+    this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
+  },
+
+  getParams: function() {
+    this.params.sql = "select goog_x, goog_y from " + this.mapd.table;
+    this.params.sql += this.mapd.getWhere();
+    return this.params;
+  },
+
+  reload: function() {
+    this.wms.mergeNewParams(this.getParams());
+  }
+};
+
 
 var Tweets = 
 {
@@ -499,6 +540,7 @@ var Search = {
     }
     $(document).trigger({type: 'mapdreload'});
     $(document).trigger({type: 'pointmapreload'});
+    $(document).trigger({type: 'heatmapreload'});
     return false;
   },
 
@@ -541,7 +583,7 @@ var Settings = {
     var currentGridSize = this.geotrends.getGridSize();
     if (size != currentGridSize[0]) {
       this.geotrends.setGridSize(size);
-      //this.geotrends.reload();
+      this.geotrends.reload();
     }
   }
 }

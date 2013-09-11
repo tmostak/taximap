@@ -4,7 +4,8 @@ var map;
 var vectors;
 var markers;
 var words;
-//var pointLayer;
+var pointLayer;
+var heatLayer;
 var baseLayer;
 
 function init()
@@ -16,17 +17,21 @@ function init()
   var extent = new OpenLayers.Bounds(BBOX.US.split(','));  
   map.zoomToExtent(extent);
   pointLayer = new OpenLayers.Layer.WMS("Point Maps", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1});
+  heatLayer = new OpenLayers.Layer.WMS("Heat Maps", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1});
+  map.addLayer(heatLayer);
   map.addLayer(pointLayer);
 
-  MapD.init(map, PointMap, GeoTrends, TopKTokens, Tweets, Chart);
+  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart);
   Tweets.init($('div#tweets'));
   PointMap.init(pointLayer);
+  HeatMap.init(heatLayer);
   Search.init(map, $('form#search'), $('input#termsInput'), $('input#locationInput'));
   Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   MapD.start();
   baseLayer.display(false);
   pointLayer.display(false);
+  heatLayer.display(false);
 }
 
 function onTrends(filterWords, json) 

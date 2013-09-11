@@ -84,6 +84,8 @@ Node = AddMethods(Node, {
 
   // given a list of nodes, return clusters of neighboring nodes
   formCluster: function(nodes) {
+  map.addLayer(pointLayer);
+  map.addLayer(heatLayer);
     var clusters = [];
     var remainingNodes = $.extend(true, [], nodes);
   
