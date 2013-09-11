@@ -17,8 +17,8 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  host: "http://localhost:3001/",
-  table: "gt",
+  host: "http://localhost:8080/",
+  table: "geo_tweets",
 //  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
 //  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
   timestart: null,
@@ -60,7 +60,7 @@ var MapD = {
 
   reload: function() {
     console.log('in reload');
-    this.services.geotrends.reload();
+    //this.services.geotrends.reload();
     this.services.topktokens.reload();
     this.services.tweets.reload();
     this.services.graph.reload();
@@ -72,7 +72,7 @@ var MapD = {
     var oldEnd = this.timeend;
     this.timestart = start;
     this.timeend = end;
-    this.services.geotrends.reload();
+    //this.services.geotrends.reload();
     this.services.topktokens.reload();
     this.services.tweets.reload();
     this.services.pointmap.reload();
@@ -471,7 +471,7 @@ var Settings = {
     var currentGridSize = this.geotrends.getGridSize();
     if (size != currentGridSize[0]) {
       this.geotrends.setGridSize(size);
-      this.geotrends.reload();
+      //this.geotrends.reload();
     }
   }
 }
