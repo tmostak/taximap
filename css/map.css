@@ -161,9 +161,15 @@ div#tweets {
 }
 
 .tweet-profile {
+  float: left;
   font-weight: bold;
   font-size: 12px;
   color: #333;
+}
+
+.tweet-time {
+  margin-left: 60%;
+  color: #777;
 }
 
 .tweet-content {

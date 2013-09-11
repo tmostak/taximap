@@ -16,12 +16,12 @@ function init()
 
   var extent = new OpenLayers.Bounds(BBOX.US.split(','));  
   map.zoomToExtent(extent);
+  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart);
   pointLayer = new OpenLayers.Layer.WMS("Point Maps", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1});
   heatLayer = new OpenLayers.Layer.WMS("Heat Maps", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1});
-  map.addLayer(heatLayer);
+  //map.addLayer(heatLayer);
   map.addLayer(pointLayer);
 
-  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart);
   Tweets.init($('div#tweets'));
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);

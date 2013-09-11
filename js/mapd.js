@@ -18,7 +18,8 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  host: "http://192.168.1.90:8080/",
+  //host: "http://192.168.1.90:8080/",
+  host: "http://www.velocidy.net:7000/",
   table: "tweets",
 //  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
 //  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
@@ -37,6 +38,9 @@ var MapD = {
   },
 
   init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph) {
+    if (window.location.search == "?local")
+        this.host = "http://sirubu.velocidy.net:8080";
+      
     this.map = map;
     this.services.pointmap = pointmap;
     this.services.heatmap = heatmap;
@@ -110,7 +114,7 @@ var MapD = {
     for (i in array) {
       array[i] = "'" + array[i] + "'";
     }
-    var whereTerms = array.join(" or tweet_text ilike ");
+    var whereTerms = array.join(" and tweet_text ilike ");
     whereTerms = "(tweet_text ilike " + whereTerms + ") ";
     return whereTerms;
   },
@@ -404,6 +408,8 @@ var Tweets =
     var header = $('<div></div>').addClass("tweet-header").appendTo(container);
     var content = $('<p></p>').addClass("tweet-content").appendTo(container);
     var profile = $('<a></a>').addClass("tweet-profile").appendTo(header);
+    var timeText = $('<div></div>').addClass("tweet-time").appendTo(header);
+    timeText.html(time.toLocaleString());
     content.html(twttr.txt.autoLink(text));
     profile.html(user);
     profile.attr('href', 'https://twitter.com/' + user);
