@@ -271,9 +271,20 @@ var Tweets =
     sql: null,
     bbox: null,
   },
+  pointStyle: null,
+  pointStyleMap: null,
 
   init: function(viewDiv) {
     this.viewDiv = viewDiv;
+    this.pointStyle = new OpenLayers.Style({
+    'fillColor': '#D00000',
+    'fillOpacity': 1.0,
+    'strokeWidth': 0,
+    'pointRadius': 3 
+    });
+    this.pointStyleMap = new OpenLayers.StyleMap({
+    'default': this.pointStyle
+    });
   },
 
   getTimeRangeURL: function() {
@@ -300,6 +311,16 @@ var Tweets =
     console.log('in onTweets');
     this.viewDiv.empty();
     if (json == null) return;
+    if (vectors) map.removeLayer(vectors);
+    vectors = new OpenLayers.Layer.Vector("Vector Layer");
+    vectors.styleMap = this.pointStyleMap;
+    map.addLayer(vectors);
+    vectors.setZIndex(Number(pointLayer.getZIndex()) + 1);
+    if (markers) map.removeLayer(markers);
+    markers = new OpenLayers.Layer.Markers("Markers Layer");
+    map.addLayer(markers);
+    markers.setZIndex(Number(vectors.getZIndex()) + 1);
+
     var results = json.results;
     for (i in results)
     {
@@ -313,7 +334,7 @@ var Tweets =
   add: function(tweet) {
     var user = tweet.sender_name;
     var text = tweet.tweet_text;
-    tweet.time = tweet.time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
+    //tweet.time = tweet.time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
     var time = new Date(tweet.time * 1000);
     var x = tweet.goog_x;
     var y = tweet.goog_y;
@@ -332,6 +353,8 @@ var Tweets =
     container.data({tweet: tweet, urls: urls, hashtags: hashtags, users: users});
     container.mouseenter(this.onMouseEnter);
     container.mouseleave(this.onMouseLeave);
+    this.addPoint(x,y);
+
   },
 
   addPopup: function(x, y, html) {
@@ -343,8 +366,16 @@ var Tweets =
     console.log(popup);
   },
 
+  addPoint: function(x,y) {
+    var point = new OpenLayers.Geometry.Point(x,y);
+    var featurePoint = new OpenLayers.Feature.Vector(point);
+    vectors.addFeatures([featurePoint]);
+  }, 
+
   // this points to <li> container 
   onMouseEnter: function() {
+    console.log("hi");
+    console.log(markers);
     var tweet = $(this).data('tweet');
     var user = tweet.sender_name;
     var x = tweet.goog_x;

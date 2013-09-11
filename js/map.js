@@ -4,6 +4,7 @@ var map;
 var vectors;
 var markers;
 var words;
+//var pointLayer;
 var baseLayer;
 
 function init()
