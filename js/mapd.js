@@ -271,19 +271,28 @@ var Tweets =
     sql: null,
     bbox: null,
   },
-  pointStyle: null,
+  defaultPointStyle: null,
+  tempPointStyle: null,
   pointStyleMap: null,
+  mouseOverFeatureControl: null,
 
   init: function(viewDiv) {
     this.viewDiv = viewDiv;
-    this.pointStyle = new OpenLayers.Style({
+    this.defaultPointStyle = new OpenLayers.Style({
     'fillColor': '#D00000',
     'fillOpacity': 1.0,
     'strokeWidth': 0,
     'pointRadius': 3 
     });
+    this.tempPointStyle = new OpenLayers.Style({
+    'fillColor': '#D00000',
+    'fillOpacity': 1.0,
+    'strokeWidth': 0,
+    'pointRadius': 5 
+    });
     this.pointStyleMap = new OpenLayers.StyleMap({
-    'default': this.pointStyle
+    'default': this.defaultPointStyle,
+    'temporary': this.tempPointStyle
     });
   },
 
@@ -314,6 +323,17 @@ var Tweets =
     if (vectors) map.removeLayer(vectors);
     vectors = new OpenLayers.Layer.Vector("Vector Layer");
     vectors.styleMap = this.pointStyleMap;
+    this.mouseOverFeatureControl = new OpenLayers.Control.SelectFeature (vectors, 
+      { hover: true,
+        renderIntent: "temporary",
+        eventListeners: { 
+          featurehighlighted: this.onPointHover,
+          featureunhighlighted: this.offPointHover
+      }
+    });
+    map.addControl(this.mouseOverFeatureControl);
+    this.mouseOverFeatureControl.activate();
+
     map.addLayer(vectors);
     vectors.setZIndex(Number(pointLayer.getZIndex()) + 1);
     if (markers) map.removeLayer(markers);
@@ -327,11 +347,11 @@ var Tweets =
       var result = results[i];
       if (!result || !result.tweet_text)
         continue;
-      this.add(result);
+      this.add(result, i);
     }
   },
 
-  add: function(tweet) {
+  add: function(tweet, index) {
     var user = tweet.sender_name;
     var text = tweet.tweet_text;
     //tweet.time = tweet.time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
@@ -351,10 +371,18 @@ var Tweets =
     var hashtags = twttr.txt.extractHashtags(text);
     var users = twttr.txt.extractMentions(text);
     container.data({tweet: tweet, urls: urls, hashtags: hashtags, users: users});
-    container.mouseenter(this.onMouseEnter);
-    container.mouseleave(this.onMouseLeave);
-    this.addPoint(x,y);
+    container.mouseenter($.proxy(this.onMouseEnter,this, container));
+    container.mouseleave($.proxy(this.onMouseLeave,this, container));
+    this.addPoint(x,y,index);
 
+  },
+  
+  onPointHover: function(e) {
+    $(".tweet-container").eq(e.feature.data.index).addClass("container-hover");
+    //$(".tweet-container").eq(e.feature.data.index).addClass("tweet-container > hover");
+  },
+  offPointHover: function(e) {
+      $(".tweet-container").eq(e.feature.data.index).removeClass("container-hover");
   },
 
   addPopup: function(x, y, html) {
@@ -366,29 +394,35 @@ var Tweets =
     console.log(popup);
   },
 
-  addPoint: function(x,y) {
+  addPoint: function(x,y,index) {
     var point = new OpenLayers.Geometry.Point(x,y);
-    var featurePoint = new OpenLayers.Feature.Vector(point);
+    var featurePoint = new OpenLayers.Feature.Vector(point, {index: index});
     vectors.addFeatures([featurePoint]);
   }, 
 
   // this points to <li> container 
-  onMouseEnter: function() {
-    console.log("hi");
-    console.log(markers);
-    var tweet = $(this).data('tweet');
+  onMouseEnter: function(container) {
+    console.log(this);
+    var index = $(container).index();
+    this.mouseOverFeatureControl.highlight(vectors.features[index]);
+    /*
+    var tweet = $(container).data('tweet');
+    console.log(tweet);
     var user = tweet.sender_name;
     var x = tweet.goog_x;
     var y = tweet.goog_y;
     var label = new OpenLayers.Label(x, y, user, null, null, null);
     label.addTo(markers);
     $(label.getIcon()).addClass('label-user');
-    $(this).data('label', label);
+    $(container).data('label', label);
+    */
   },
 
   // this points to <li> container 
-  onMouseLeave: function() {
-    $(this).data('label').erase();
+  onMouseLeave: function(container) {
+    var index = $(container).index();
+    this.mouseOverFeatureControl.unhighlight(vectors.features[index]);
+    //$(container).data('label').erase();
   },
 };
 

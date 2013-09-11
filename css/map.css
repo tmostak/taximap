@@ -150,6 +150,12 @@ div#tweets {
   background-image: linear-gradient(#fff, #eee 75%, #ccc)
 }
 
+.container-hover {
+  border: 1px solid rgba(0,0,0,.3);
+  background-image: linear-gradient(#fff, #eee 75%, #ccc)
+}
+
+
 .tweet-header {
   padding: 0 0 3px 0;
 }
