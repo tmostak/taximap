@@ -17,8 +17,8 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  host: "http://localhost:8080/",
-  table: "geo_tweets",
+  host: "http://192.168.1.90:8080/",
+  table: "tweets",
 //  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
 //  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
   timestart: null,
@@ -46,8 +46,7 @@ var MapD = {
   },
 
   start: function() {
-    $.getJSON(this.services.tweets.getDataRangeURL(0)).done($.proxy(this.setDataStart, this));
-    $.getJSON(this.services.tweets.getDataRangeURL(1)).done($.proxy(this.setDataEnd, this));
+    $.getJSON(this.services.tweets.getTimeRangeURL()).done($.proxy(this.setDataTimeRange, this));
   },
 
   startCheck: function() {
@@ -89,6 +88,14 @@ var MapD = {
     this.dataend = json.results[0].time;
     this.startCheck();
   },
+
+
+  setDataTimeRange: function(json) {
+    this.datastart = json.results[0].min;
+    this.dataend = json.results[0].max;
+    this.startCheck();
+  },
+
 
   setQueryTerms: function(queryTerms) {
     this.queryTerms = queryTerms.trim().split(" ").filter(function(d) {return d});
@@ -269,10 +276,8 @@ var Tweets =
     this.viewDiv = viewDiv;
   },
 
-  getDataRangeURL: function(max) {
-    this.params.sql = "select time from " + this.mapd.table;
-    this.params.sql += " order by time" + (max?  " desc": "");
-    this.params.sql += " limit 1";
+  getTimeRangeURL: function() {
+    this.params.sql = "select min(time), max(time) from " + this.mapd.table;
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
