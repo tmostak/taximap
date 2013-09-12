@@ -25,7 +25,7 @@ function init()
   Tweets.init($('div#tweets'));
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
-  Search.init(map, $('form#search'), $('input#termsInput'), $('input#locationInput'));
+  Search.init(map, $('form#search'), $('input#termsInput'), $('input#userInput'), $('input#locationInput'));
   Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   MapD.start();

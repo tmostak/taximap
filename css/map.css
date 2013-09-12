@@ -122,8 +122,9 @@ div#map {
 }
 
 div#control {
-  position: relative;
+  position: absolute;
   width: 400px;
+  height: 100%;
   top: 40px;
   border-radius: 5px;
   webkit-box-shadow: 3px 0 3px rgba(0,0,0,.25);
@@ -133,7 +134,14 @@ div#control {
 
 div#tweets { 
   margin-top: 20px;
+  position: relative;
+  height: 50%;
 }
+
+div#cloud {
+  margin-top: 20px;
+}
+
 
 .tweet-container {
   list-style:none;

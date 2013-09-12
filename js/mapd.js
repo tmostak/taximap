@@ -26,6 +26,7 @@ var MapD = {
   timestart: null,
   timeend: null,
   queryTerms: [],
+  user: null,
   datastart: null,
   dataend: null,
   services: {
@@ -105,6 +106,10 @@ var MapD = {
   },
 
 
+  setUser: function(user) {
+    this.user = user;
+  },
+
   setQueryTerms: function(queryTerms) {
     this.queryTerms = queryTerms.trim().split(" ").filter(function(d) {return d});
   },
@@ -123,6 +128,8 @@ var MapD = {
     var where = "";
     var timestart = this.timestart;
     var timeend = this.timeend;
+    var user = this.user;
+    console.log("user 1: " + user);
     var queryTerms = this.queryTerms;
     if (options) {
       if (options.time) {
@@ -131,6 +138,10 @@ var MapD = {
       }
       if ("queryTerms" in options)
         queryTerms = options.queryTerms;
+      if ("user" in options) {
+        user = options.user;
+        console.log("user 2: " + user);
+      }
     }
 
     if (timestart)
@@ -141,6 +152,8 @@ var MapD = {
       queryTerms = this.parseQueryTerms(queryTerms);
       where += queryTerms + " and ";
     }
+    if (user)
+      where += "sender_name ilike '" + user + "' and ";
     if (where)
       where = " where " + where.substr(0, where.length-5);
     console.log(where);
@@ -306,6 +319,11 @@ var HeatMap = {
   }
 };
 
+/*
+var GetNearestTweet = {
+  mapd: MapD,
+*/
+    
 
 var Tweets = 
 {
@@ -320,24 +338,40 @@ var Tweets =
   tempPointStyle: null,
   pointStyleMap: null,
   mouseOverFeatureControl: null,
+  selectFeatureControl: null,
 
   init: function(viewDiv) {
     this.viewDiv = viewDiv;
     this.defaultPointStyle = new OpenLayers.Style({
-    'fillColor': '#D00000',
-    'fillOpacity': 1.0,
+    'fillColor': '#C00',
+    'fillOpacity': 0.0,
+    //'strokeColor': '#000',
     'strokeWidth': 0,
-    'pointRadius': 3 
+    'pointRadius': 0 
     });
     this.tempPointStyle = new OpenLayers.Style({
-    'fillColor': '#D00000',
+    'fillColor': '#C00',
+    'externalGraphic': 'img/twitter-bird.png', 
+    'strokeColor': '#000',
     'fillOpacity': 1.0,
-    'strokeWidth': 0,
-    'pointRadius': 5 
+    'strokeWidth': 1,
+    'pointRadius': 20 
     });
+
+    this.selectedPointStyle = new OpenLayers.Style({
+      graphicName: "star",
+      pointRadius: 10,
+      fillOpacity: 1.0,
+      strokeColor: "#000",
+      fillColor: '${selectColor}'
+    });
+    
+    
+
     this.pointStyleMap = new OpenLayers.StyleMap({
     'default': this.defaultPointStyle,
-    'temporary': this.tempPointStyle
+    'temporary': this.tempPointStyle,
+    'select': this.selectedPointStyle
     });
   },
 
@@ -351,7 +385,7 @@ var Tweets =
   getURL: function(options) {
     this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere(options);
-    this.params.sql += " order by time desc limit 20";
+    this.params.sql += " order by time desc limit 100";
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
@@ -369,15 +403,24 @@ var Tweets =
     vectors = new OpenLayers.Layer.Vector("Vector Layer");
     vectors.styleMap = this.pointStyleMap;
     this.mouseOverFeatureControl = new OpenLayers.Control.SelectFeature (vectors, 
-      { hover: true,
-        renderIntent: "temporary",
-        eventListeners: { 
+      { hover: false,
+        renderIntent: "temporary"
+        /* eventListeners: { 
           featurehighlighted: this.onPointHover,
           featureunhighlighted: this.offPointHover
       }
+      */
     });
     map.addControl(this.mouseOverFeatureControl);
     this.mouseOverFeatureControl.activate();
+
+    this.selectFeatureControl = new OpenLayers.Control.SelectFeature (vectors, 
+      {
+        //renderIntent: "select"
+      });
+
+    map.addControl(this.selectFeatureControl);
+    this.selectFeatureControl.activate();
 
     map.addLayer(vectors);
     vectors.setZIndex(Number(pointLayer.getZIndex()) + 1);
@@ -417,13 +460,17 @@ var Tweets =
     var urls = twttr.txt.extractUrls(text);
     var hashtags = twttr.txt.extractHashtags(text);
     var users = twttr.txt.extractMentions(text);
-    container.data({tweet: tweet, urls: urls, hashtags: hashtags, users: users});
+    var selectColor = this.getRandomColor(); 
+    container.data({tweet: tweet, urls: urls, hashtags: hashtags, users: users, selectColor: selectColor});
     container.mouseenter($.proxy(this.onMouseEnter,this, container));
     container.mouseleave($.proxy(this.onMouseLeave,this, container));
-    this.addPoint(x,y,index);
+    container.click($.proxy(this.onClick,this,container));
+    //container.mouseup($.proxy(this.onUnClick,this,container));
+    this.addPoint(x,y,index, selectColor);
 
   },
-  
+ 
+
   onPointHover: function(e) {
     $(".tweet-container").eq(e.feature.data.index).addClass("container-hover");
     //$(".tweet-container").eq(e.feature.data.index).addClass("tweet-container > hover");
@@ -441,11 +488,27 @@ var Tweets =
     console.log(popup);
   },
 
-  addPoint: function(x,y,index) {
+  addPoint: function(x,y,index, selectColor) {
     var point = new OpenLayers.Geometry.Point(x,y);
-    var featurePoint = new OpenLayers.Feature.Vector(point, {index: index});
+    var featurePoint = new OpenLayers.Feature.Vector(point, {index: index, selectColor: selectColor});
     vectors.addFeatures([featurePoint]);
   }, 
+
+  getRandomColor: function() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ )
+      color += letters[Math.round(Math.random() * 15)];
+      return color;
+  },
+
+  onClick: function(container) {
+    var index = $(container).index();
+    if (OpenLayers.Util.indexOf(vectors.selectedFeatures,vectors.features[index]) == -1)
+      this.selectFeatureControl.select(vectors.features[index]);
+    else
+      this.selectFeatureControl.unselect(vectors.features[index]);
+  },
 
   // this points to <li> container 
   onMouseEnter: function(container) {
@@ -468,7 +531,13 @@ var Tweets =
   // this points to <li> container 
   onMouseLeave: function(container) {
     var index = $(container).index();
-    this.mouseOverFeatureControl.unhighlight(vectors.features[index]);
+    //if (OpenLayers.Util.indexOf(vectors.selectedFeatures,vectors.features[index]) == -1)
+    if (OpenLayers.Util.indexOf(vectors.selectedFeatures,vectors.features[index]) == -1)
+      this.mouseOverFeatureControl.unhighlight(vectors.features[index]);
+    else {
+      // need to reselect element
+      this.selectFeatureControl.select(vectors.features[index]);
+    }
     //$(container).data('label').erase();
   },
 };
@@ -515,15 +584,18 @@ var Search = {
   map: null,
   form: null,
   termsInput: null,
+  userInput: null,
   locationInput: null,
   terms: '',
+  user: '',
   location: '',
   locationChanged: false,
 
-  init: function(map, form, termsInput, locationInput) {
+  init: function(map, form, termsInput, userInput, locationInput) {
     this.map = map;
     this.form = form;
     this.termsInput = termsInput;
+    this.userInput = userInput;
     this.locationInput = locationInput;
     this.geocoder.setMap(this.map);
     this.form.submit($.proxy(this.onSearch, this));
@@ -537,7 +609,9 @@ var Search = {
     var location = this.locationInput.val();
     this.locationChanged = this.location != location;
     this.terms = terms;
+    this.user = this.userInput.val();
     this.mapd.setQueryTerms(this.terms);
+    this.mapd.setUser(this.user);
 
     if (this.locationChanged) {
       this.location = location;
@@ -636,8 +710,7 @@ var Chart =
   reload: function() {
     var queryTerms = this.queryTerms.slice(0);
     // for now, time range always corresponds to entire data range
-    var options = {queryTerms: this.mapd.queryTerms, 
-                   time: {timestart: this.mapd.datastart, timeend: this.mapd.dataend }};
+    var options = {queryTerms: this.mapd.queryTerms, user: this.mapd.user, time: {timestart: this.mapd.datastart, timeend: this.mapd.dataend }};
     $.getJSON(this.getURL(options)).done($.proxy(this.onChart, this, this.mapd.queryTerms, true));
   },
 
@@ -680,7 +753,7 @@ var Chart =
     console.log('in onCompare');
     var queryTerms = terms.trim().split(" ").filter(function(d) {return d});
     // for now, time range always corresponds to entire data range
-    var options = {queryTerms: queryTerms, time: {timestart: this.mapd.datastart, timeend: this.mapd.dataend }};
+    var options = {queryTerms: queryTerms, user: this.mapd.user,  time: {timestart: this.mapd.datastart, timeend: this.mapd.dataend }};
     $.getJSON(this.getURL(options)).done($.proxy(this.onChart, this, queryTerms, false));
   }
 }
