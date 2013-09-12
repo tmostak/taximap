@@ -223,12 +223,17 @@ var GeoTrends = {
 
 var TopKTokens = {
   mapd: MapD,
+  cloudDiv: null, 
   params: {
     request: "GetTopKTokens",
     sql: null,
     bbox: null,
     k: 20,
     stoptable: "long_stop"
+  },
+
+  init: function(cloudDiv) {
+    this.cloudDiv = cloudDiv;
   },
 
   getURL: function() {
@@ -240,8 +245,15 @@ var TopKTokens = {
   },
 
   reload: function() {
-    $.getJSON(this.getURL()).done(function(json) {console.log(json)});
+    //$.getJSON(this.getURL()).done(function(json) {console.log(json)});
+    $.getJSON(this.getURL()).done($.proxy(this.onLoad, this));
+  },
+  onLoad: function(json) {
+    console.log(json);
   }
+
+
+
 };
 
 var PointMap = {
@@ -328,6 +340,7 @@ var GetNearestTweet = {
 var Tweets = 
 {
   mapd: MapD,
+  sortDiv: null,  
   viewDiv: null,
   params: {
     request: "GetFeatureInfo",
@@ -341,7 +354,10 @@ var Tweets =
   selectFeatureControl: null,
   sortDesc: null,
 
-  init: function(viewDiv) {
+  init: function(sortDiv, viewDiv) {
+    console.log("SortDiv: " + sortDiv);
+    console.log(viewDiv);
+    this.sortDiv = sortDiv;
     this.viewDiv = viewDiv;
     this.defaultPointStyle = new OpenLayers.Style({
     'fillColor': '#C00',
@@ -367,15 +383,35 @@ var Tweets =
       fillColor: '${selectColor}'
     });
     
-    
-
     this.pointStyleMap = new OpenLayers.StyleMap({
     'default': this.defaultPointStyle,
     'temporary': this.tempPointStyle,
     'select': this.selectedPointStyle
     });
+
     this.sortDesc = true;
+
+    $("<div id='sortPref'>Sort by <a href='javascript:void(0)' id='oldSort'>Oldest</a> <a href='javascript:void(0)' id='newSort'>Newest</a></div>").appendTo(this.sortDiv);
+    $('#oldSort').click($.proxy(this.oldSortFunc, this));
+    $('#newSort').click($.proxy(this.newSortFunc, this));
+    
+
   },
+  oldSortFunc: function () { 
+    if (this.sortDesc == true) {
+        this.sortDesc = false;
+        this.reload();
+        $(this.viewDiv).scrollTop(0);
+        
+      }
+   },
+   newSortFunc: function () { 
+      if (this.sortDesc == false) {
+        this.sortDesc = true;
+        this.reload();
+        $(this.viewDiv).scrollTop(0);
+      }
+   },
 
   getTimeRangeURL: function() {
     this.params.sql = "select min(time), max(time) from " + this.mapd.table;
@@ -408,7 +444,6 @@ var Tweets =
   onTweets: function(json) {
     console.log('in onTweets');
     this.viewDiv.empty();
-    $("<div id='sortPref'>Sort by <a href='javascript:void(0)' id='oldSort'>Oldest</a> <a href='javascript:void(0)' id='newSort'>Newest</a></div>").appendTo(this.viewDiv);
     if (this.sortDesc) {
       $("#newSort").addClass("link-visited");
       $("#oldSort").removeClass("link-visited");
@@ -417,22 +452,8 @@ var Tweets =
       $("#oldSort").addClass("link-visited");
       $("#newSort").removeClass("link-visited");
     }
-    var oldSortFunc = function () { 
-      if (this.sortDesc == true) {
-        this.sortDesc = false;
-        this.reload();
-      }
-   };
-   var newSortFunc = function () { 
-      if (this.sortDesc == false) {
-        this.sortDesc = true;
-        this.reload();
-      }
-   };
 
     //$('#oldSort').click($.proxy(this.oldSortFunc, this));
-    $('#oldSort').click($.proxy(oldSortFunc, this));
-    $('#newSort').click($.proxy(newSortFunc, this));
     var container = $('').appendTo(this.viewDiv);
 
     if (json == null) return;

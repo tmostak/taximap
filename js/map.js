@@ -22,7 +22,8 @@ function init()
   //map.addLayer(heatLayer);
   map.addLayer(pointLayer);
 
-  Tweets.init($('div#tweets'));
+  Tweets.init($('div#sortOrder'), $('div#tweets'));
+  TopKTokens.init($('div#cloud'));
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
   Search.init(map, $('form#search'), $('input#termsInput'), $('input#userInput'), $('input#locationInput'));

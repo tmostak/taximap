@@ -133,6 +133,7 @@ div#control {
 }
 
 div#tweets { 
+  border-radius: 5px;
   margin-top: 10px;
   height: 50%;
   overflow-y: scroll;
