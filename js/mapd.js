@@ -249,6 +249,16 @@ var TopKTokens = {
     $.getJSON(this.getURL()).done($.proxy(this.onLoad, this));
   },
   onLoad: function(json) {
+    this.cloudDiv.empty();
+    var cloud = $('<div></div>').appendTo(this.cloudDiv);
+    var tokens = json.tokens; 
+    var counts = json.tokens; 
+    var numTokens = tokens.length;
+    for (var i = 0; i < numTokens; i++) 
+      $('<li>' + tokens[i] + '</li>').appendTo(cloud);
+      
+    console.log("Cloud " + cloud);
+    console.log(cloud);
     console.log(json);
   }
 
