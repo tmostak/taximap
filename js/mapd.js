@@ -339,6 +339,7 @@ var Tweets =
   pointStyleMap: null,
   mouseOverFeatureControl: null,
   selectFeatureControl: null,
+  sortDesc: null,
 
   init: function(viewDiv) {
     this.viewDiv = viewDiv;
@@ -373,6 +374,7 @@ var Tweets =
     'temporary': this.tempPointStyle,
     'select': this.selectedPointStyle
     });
+    this.sortDesc = true;
   },
 
   getTimeRangeURL: function() {
@@ -385,7 +387,7 @@ var Tweets =
   getURL: function(options) {
     this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere(options);
-    this.params.sql += " order by time desc limit 100";
+    this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
@@ -394,10 +396,45 @@ var Tweets =
   reload: function() {
     $.getJSON(this.getURL()).done($.proxy(this.onTweets, this));
   },
-
+  //oldSortFunc :function () { 
+  //    console.log("oldsort");
+  //    if (this.sortDesc == true) {
+  //      console.log ("old sorting");
+  //      this.sortDesc = false;
+  //      this.reload();
+  //    }
+  // },
+   
   onTweets: function(json) {
     console.log('in onTweets');
     this.viewDiv.empty();
+    $("<div id='sortPref'>Sort by <a href='javascript:void(0)' id='oldSort'>Oldest</a> <a href='javascript:void(0)' id='newSort'>Newest</a></div>").appendTo(this.viewDiv);
+    if (this.sortDesc) {
+      $("#newSort").addClass("link-visited");
+      $("#oldSort").removeClass("link-visited");
+    }
+    else {
+      $("#oldSort").addClass("link-visited");
+      $("#newSort").removeClass("link-visited");
+    }
+    var oldSortFunc = function () { 
+      if (this.sortDesc == true) {
+        this.sortDesc = false;
+        this.reload();
+      }
+   };
+   var newSortFunc = function () { 
+      if (this.sortDesc == false) {
+        this.sortDesc = true;
+        this.reload();
+      }
+   };
+
+    //$('#oldSort').click($.proxy(this.oldSortFunc, this));
+    $('#oldSort').click($.proxy(oldSortFunc, this));
+    $('#newSort').click($.proxy(newSortFunc, this));
+    var container = $('').appendTo(this.viewDiv);
+
     if (json == null) return;
     if (vectors) map.removeLayer(vectors);
     vectors = new OpenLayers.Layer.Vector("Vector Layer");
