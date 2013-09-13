@@ -78,6 +78,15 @@ div#submit-icon {
   padding: 0;
 }
 
+#promo {
+  position: relative;
+  float: left;
+  color:#fff;
+  font-size: 22px;
+  font-weight: bold;
+  //padding-top:5px;
+}
+
 .settings-button {
   margin: 4px 10px 4px 0;
   padding: 0;
@@ -161,8 +170,8 @@ div#tweets {
 }
 
 div#cloud {
-  margin-top: 10px;
-  height: 20%;
+  margin-top: 0px;
+  height: 22%;
 }
 
 div#sortPref {
@@ -232,6 +241,11 @@ div#numTokensText {
 .tweet-popup { 
   color: #555;
   font-size: 12px;
+}
+
+.logo-image {
+  width: 92px;
+  height:40px;
 }
 
 .sprites { 
