@@ -687,8 +687,17 @@ var Search = {
   user: '',
   location: '',
   locationChanged: false,
+  io: null,
 
   init: function(map, form, termsInput, userInput, locationInput) {
+    $(document).on('propertychange keyup input paste', 'input.search-input', function() {
+      var io = $(this).val().length ? 1: 0;
+      $(this).next('.iconClear').stop().fadeTo(300,io);
+      }).on('click', '.iconClear', function() {
+          $(this).delay(300).fadeTo(300,0).prev('input').val('');
+          Search.form.submit();
+          });
+
     this.map = map;
     this.form = form;
     this.termsInput = termsInput;

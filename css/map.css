@@ -33,15 +33,33 @@ div#topbar button:hover {
 }
 
 .search-input {
+  position: relative;
+  float: left;
   height: 20px;
   width: 200px;
   margin: 4px 0 4px 10px;
   padding: 4px;
+  padding-right: 17px;
   border-radius: 3px;
   border: 1px solid #232323;
   webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
   box-shadow: 0 0 2px rgba(255,255,255,.25);
 }
+
+
+span.iconClear{
+  position:absolute;
+  right:10px;    
+  top: 10px;
+  display:none;
+  cursor:pointer;
+  font: bold 1em sans-serif;
+  color:#38468F;  
+                                    }
+                                    span.iconClear:hover{
+                                        color:#f52;
+                                      }
+
 
 button#submit { 
   height: 30px;
@@ -133,19 +151,28 @@ div#control {
 }
 
 div#tweets { 
-  border-radius: 5px;
+  //border-radius: 5px;
+  //border-top: 1px solid #888;
+  border-bottom: 2px solid #888;
   margin-top: 10px;
-  height: 42%;
+  height: 48%;
   overflow-y: scroll;
   overflow-x: hidden;
 }
 
 div#cloud {
   margin-top: 10px;
-  height: 26%;
+  height: 20%;
 }
 
 div#sortPref {
+  font-size: 12px;
+  color: #555;
+  margin: 0px;
+  padding-left: 10px;
+}
+
+div#numTokensText {
   font-size: 12px;
   color: #555;
   margin: 0px;
