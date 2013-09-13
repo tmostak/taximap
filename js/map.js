@@ -16,7 +16,7 @@ function init()
 
   var extent = new OpenLayers.Bounds(BBOX.US.split(','));  
   map.zoomToExtent(extent);
-  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart);
+  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search);
   pointLayer = new OpenLayers.Layer.WMS("Point Maps", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1});
   heatLayer = new OpenLayers.Layer.WMS("Heat Maps", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1});
   //map.addLayer(heatLayer);
@@ -33,6 +33,10 @@ function init()
   baseLayer.display(false);
   pointLayer.display(false);
   heatLayer.display(false);
+}
+
+function numberWithCommas(n) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function onTrends(filterWords, json) 

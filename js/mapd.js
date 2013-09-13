@@ -1,6 +1,4 @@
 // Events:
-// mapdreload:       tell MapD to reload
-// pointmapreload:   tell PointMap to reload
 // heatmapreload:    tell HeatMap to reload
 // geocodeend:       geocoding service is ready
 
@@ -35,10 +33,11 @@ var MapD = {
     geotrends: null,
     topktokens: null, 
     tweets: null,
-    graph: null
+    graph: null,
+    search: null
   },
 
-  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph) {
+  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search) {
     if (window.location.search == "?local")
         this.host = "http://sirubu.velocidy.net:8080";
       
@@ -49,6 +48,7 @@ var MapD = {
     this.services.topktokens = topktokens;
     this.services.tweets = tweets;
     this.services.graph = graph;
+    this.services.search = search;
     this.map.events.register('moveend', this, this.reload);
     $(document).on('mapdreload', $.proxy(this.reload, this));
   },
@@ -228,12 +228,13 @@ var TopKTokens = {
     request: "GetTopKTokens",
     sql: null,
     bbox: null,
-    k: 20,
+    k: 30,
     stoptable: "long_stop"
   },
 
   init: function(cloudDiv) {
     this.cloudDiv = cloudDiv;
+    $(this.cloudDiv).on("click", $.proxy(this.addClickedWord, this)); 
   },
 
   getURL: function() {
@@ -243,6 +244,19 @@ var TopKTokens = {
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
   },
+  addClickedWord: function(event) {
+    var token = event.originalEvent.srcElement.innerText;
+    console.log("circle cloud token: " + token);
+    if (token == event.originalEvent.srcElement.innerHTML) {
+      console.log(this.mapd);
+      this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
+      this.mapd.services.search.form.submit();
+
+
+      //to make sure we're actually clicking on word
+      console.log(token);
+    }
+  },
 
   reload: function() {
     //$.getJSON(this.getURL()).done(function(json) {console.log(json)});
@@ -250,16 +264,25 @@ var TopKTokens = {
   },
   onLoad: function(json) {
     this.cloudDiv.empty();
-    var cloud = $('<div></div>').appendTo(this.cloudDiv);
+
     var tokens = json.tokens; 
-    var counts = json.tokens; 
+    var counts = json.counts; 
+    var n =json.n;
     var numTokens = tokens.length;
-    for (var i = 0; i < numTokens; i++) 
-      $('<li>' + tokens[i] + '</li>').appendTo(cloud);
-      
-    console.log("Cloud " + cloud);
-    console.log(cloud);
-    console.log(json);
+    var wordArray = new Array(numTokens);
+    var percentFactor = 100.0 / n;
+    var tokenRatio = 1.0 / counts[2];
+    $('#numTokensText').text("# Tokens: " + numberWithCommas(n));
+    for (var t = 0; t < numTokens; t++) {
+      //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
+        var percent = counts[t] * percentFactor;
+        var textPercent = "%" + percent.toFixed(3);
+        wordArray[t] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
+    }
+    console.log(wordArray);
+    this.cloudDiv.jQCloud(wordArray);
+    console.log("clouddiv");
+    console.log(this.cloudDiv);
   }
 
 
