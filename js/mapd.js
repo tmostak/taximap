@@ -224,6 +224,7 @@ var GeoTrends = {
 var TopKTokens = {
   mapd: MapD,
   cloudDiv: null, 
+  defaultK: 30,
   params: {
     request: "GetTopKTokens",
     sql: null,
@@ -240,6 +241,8 @@ var TopKTokens = {
   getURL: function() {
     this.params.sql = "select tweet_text from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere();
+    var numQueryTerms = this.mapd.queryTerms.length;
+    this.params.k = this.defaultK + numQueryTerms;
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
@@ -269,15 +272,18 @@ var TopKTokens = {
     var counts = json.counts; 
     var n =json.n;
     var numTokens = tokens.length;
-    var wordArray = new Array(numTokens);
+    var numQueryTerms = this.mapd.queryTerms.length;
+    var wordArray = new Array(numTokens - numQueryTerms);
     var percentFactor = 100.0 / n;
-    var tokenRatio = 1.0 / counts[2];
+    console.log("numqueryterms");
+    console.log(numQueryTerms);
+    var tokenRatio = 1.0 / counts[2 + numQueryTerms];
     $('#numTokensText').text("# Tokens: " + numberWithCommas(n));
-    for (var t = 0; t < numTokens; t++) {
+    for (var t = numQueryTerms; t < numTokens; t++) {
       //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
         var percent = counts[t] * percentFactor;
         var textPercent = "%" + percent.toFixed(3);
-        wordArray[t] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
+        wordArray[t - numQueryTerms] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
     }
     console.log(wordArray);
     this.cloudDiv.jQCloud(wordArray);
