@@ -10,16 +10,17 @@ var baseLayer;
 
 function init()
 { 
-  map = new OpenLayers.Map('map', {projection: "EPSG:900913"});
+  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':false})], projection: "EPSG:900913"});
   baseLayer = new OpenLayers.Layer.Google("Google Maps", {numZoomLevels: 20});
   map.addLayer(baseLayer);
 
   var extent = new OpenLayers.Bounds(BBOX.US.split(','));  
   map.zoomToExtent(extent);
   MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search);
-  pointLayer = new OpenLayers.Layer.WMS("Point Maps", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1});
-  heatLayer = new OpenLayers.Layer.WMS("Heat Maps", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1});
-  //map.addLayer(heatLayer);
+  pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1});
+  heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1});
+  heatLayer.setVisibility(false);
+  map.addLayer(heatLayer);
   map.addLayer(pointLayer);
 
   Tweets.init($('div#sortOrder'), $('div#tweets'));

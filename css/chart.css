@@ -2,6 +2,7 @@
   position: relative;
   font: 10px sans-serif;
   border-radius: 5px;
+  //border-bottom: 2px;
   webkit-box-shadow: 3px 0 3px rgba(0,0,0,.25);
   box-shadow: 3px 0 3px rgba(0,0,0,.25);
 }

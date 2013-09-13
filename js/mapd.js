@@ -497,7 +497,7 @@ var Tweets =
 
     if (json == null) return;
     if (vectors) map.removeLayer(vectors);
-    vectors = new OpenLayers.Layer.Vector("Vector Layer");
+    vectors = new OpenLayers.Layer.Vector("Vector Layer", {'displayInLayerSwitcher': false});
     vectors.styleMap = this.pointStyleMap;
     this.mouseOverFeatureControl = new OpenLayers.Control.SelectFeature (vectors, 
       { hover: false,
@@ -522,7 +522,7 @@ var Tweets =
     map.addLayer(vectors);
     vectors.setZIndex(Number(pointLayer.getZIndex()) + 1);
     if (markers) map.removeLayer(markers);
-    markers = new OpenLayers.Layer.Markers("Markers Layer");
+    markers = new OpenLayers.Layer.Markers("Markers Layer", {'displayInLayerSwitcher': false});
     map.addLayer(markers);
     markers.setZIndex(Number(vectors.getZIndex()) + 1);
 
@@ -694,9 +694,9 @@ var Search = {
       var io = $(this).val().length ? 1: 0;
       $(this).next('.iconClear').stop().fadeTo(300,io);
       }).on('click', '.iconClear', function() {
-          $(this).delay(300).fadeTo(300,0).prev('input').val('');
-          Search.form.submit();
-          });
+        $(this).delay(300).fadeTo(300,0).prev('input').val('');
+        Search.form.submit();
+      });
 
     this.map = map;
     this.form = form;
