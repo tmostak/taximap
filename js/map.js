@@ -10,17 +10,20 @@ var baseLayers;
 
 function init()
 { 
-  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':false})], projection: "EPSG:900913"});
+  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913"});
 
-  //baseLayers = new Array(
-  baseLayer = new OpenLayers.Layer.Google("Google Maps", {numZoomLevels: 20});
-  map.addLayer(baseLayer);
+  baseLayers = new Array(new OpenLayers.Layer.Google("Google Roadmap", {type: google.maps.MapTypeId.ROADMAP}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Topo", {type: google.maps.MapTypeId.TERRAIN}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Hybrid", {type: google.maps.MapTypeId.HYBRID}, {isBaseLayer: true}), new OpenLayers.Layer.OSM("OpenStreeMap", {isBaseLayer: true}),  new OpenLayers.Layer("Blank",{isBaseLayer: true}));
+  map.addLayers(baseLayers);
 
-  var extent = new OpenLayers.Bounds(BBOX.US.split(','));  
+
+  //baseLayer = new OpenLayers.Layer.Google("Google Maps", {numZoomLevels: 20});
+  //map.addLayer(baseLayer);
+
+  var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
   map.zoomToExtent(extent);
   MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search);
-  pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1});
-  heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1});
+  pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.2, "displayInLayerSwitcher": false});
+  heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1.2, "displayInLayerSwitcher": false});
   heatLayer.setVisibility(false);
   map.addLayer(heatLayer);
   map.addLayer(pointLayer);
@@ -34,7 +37,7 @@ function init()
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   MapD.start();
-  baseLayer.display(false);
+  //baseLayer.display(false);
   pointLayer.display(false);
   heatLayer.display(false);
 }
@@ -116,7 +119,7 @@ function onTrends(filterWords, json)
   map.addLayer(markers);
   vectors.display(true);
   markers.display(true);
-  baseLayer.display(false);
+  //baseLayer.display(false);
   //console.log(map);
   var selectStyle = {fillColor: "black", fillOpacity: 0.4, strokeWidth: 0.5, strokeDashstyle: "dot", labelOutlineOpacity: 0.4, labelOutlineColor: "black", fontSize: "14px"};
   var selectFeature = new OpenLayers.Control.SelectFeature(vectors, {hover: true, highlightOnly: true, selectStyle: selectStyle});                

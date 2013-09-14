@@ -88,14 +88,20 @@ div#submit-icon {
 }
 
 .settings-button {
-  margin: 4px 10px 4px 0;
+  margin: 12px 0px 0px 0px;
   padding: 0;
   bottom: 0;
-  border-radius: 3px;
-  border: 1px solid #232323;
+  //border: none!important;
+  //border-radius: 3px;
+  //border: 0px solid #232323;
+  border: 0px solid #222;
   background-image: linear-gradient(#eee, #ccc 75%, #bbb);
-  webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
-  box-shadow: 0 0 2px rgba(255,255,255,.25);
+  //webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
+  //box-shadow: 0 0 2px rgba(255,255,255,.25);
+}
+
+.settings-button:hover {
+    border: 0px solid '#222';
 }
 
 button#gridSmall { 
@@ -248,20 +254,48 @@ div#numTokensText {
   height:40px;
 }
 
-#pointButtonImg {
-    width: 222px;
-    height:31px;
-    background: url('../img/points-button.png') no-repeat center center;
+.pointButtonOffImg {
+    border: none!important;
+    width: 208px;
+    height:29px;
+    background: url('../img/point-button-bw.png') no-repeat center center;
     opacity: 1.0;
 }
 
-#heatButtonImg {
-    width: 222px;
-    height: 31px;
-    background: url('../img/heatmap-button.png') no-repeat center center;
+.pointButtonOnImg {
+    width: 208px;
+    height:29px;
+    background: url('../img/point-button-full.png') no-repeat center center;
     opacity: 1.0;
 }
 
+.pointButtonHoverImg {
+    width: 208px;
+    height:29px;
+    background: url('../img/point-button-full.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+.heatButtonOffImg {
+    width: 208px;
+    height: 29px;
+    background: url('../img/heatmap-button-bw.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+.heatButtonOnImg {
+    width: 208px;
+    height: 29px;
+    background: url('../img/heatmap-button-full.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+.heatButtonHoverImg {
+    width: 208px;
+    height:29px;
+    background: url('../img/heatmap-button-full.png') no-repeat center center;
+    opacity: 1.0;
+}
 .sprites { 
   width: 16px;
   height: 16px;

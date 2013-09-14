@@ -407,19 +407,21 @@ var Tweets =
     });
     this.tempPointStyle = new OpenLayers.Style({
     'fillColor': '#C00',
-    'externalGraphic': 'img/twitter-bird.png', 
+    //'externalGraphic': 'img/twitter-bird.png', 
+    'externalGraphic': 'img/target.png', 
     'strokeColor': '#000',
     'fillOpacity': 1.0,
     'strokeWidth': 1,
-    'pointRadius': 20 
+    'pointRadius': 15 
     });
 
     this.selectedPointStyle = new OpenLayers.Style({
-      graphicName: "star",
-      pointRadius: 10,
+      //graphicName: "star",
+      pointRadius: 5,
       fillOpacity: 1.0,
       strokeColor: "#000",
-      fillColor: '${selectColor}'
+      fillColor: '#FD4E01'
+      //fillColor: '${selectColor}'
     });
     
     this.pointStyleMap = new OpenLayers.StyleMap({
@@ -761,14 +763,22 @@ var Settings = {
     this.heatLayer = heatLayer;
     this.pointButton = pointButton;
     this.heatButton = heatButton;
+    this.pointButton.addClass("pointButtonOnImg");
+    this.heatButton.addClass("heatButtonOffImg");
+   $(this.pointButton).hover($.proxy(function() {this.pointButton.addClass("pointButtonHoverImg");}, this), $.proxy(function () {this.pointButton.removeClass("pointButtonHoverImg");}, this));
+   $(this.heatButton).hover($.proxy(function() {this.heatButton.addClass("heatButtonHoverImg");}, this), $.proxy(function () {this.heatButton.removeClass("heatButtonHoverImg");}, this));
+
     $(this.pointButton).click($.proxy(function() {
     this.pointLayer.setVisibility(!this.pointOn);
     this.pointOn = !this.pointOn;
+    this.pointButton.toggleClass("pointButtonOffImg").toggleClass("pointButtonOnImg");
     }, this));
     $(this.heatButton).click($.proxy(function() {
       this.heatLayer.setVisibility(!this.heatOn);
       this.heatOn = !this.heatOn;
+      this.heatButton.toggleClass("heatButtonOffImg").toggleClass("heatButtonOnImg");
     }, this));
+  }
 }
   /*
   geotrends: GeoTrends,
@@ -797,7 +807,7 @@ var Settings = {
   */
 
 
-}
+//}
 
 var Chart = 
 {
