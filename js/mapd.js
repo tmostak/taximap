@@ -749,6 +749,28 @@ var Search = {
 }
 
 var Settings = {
+  pointLayer: null,
+  heatLayer: null,
+  pointOn: true,
+  heatOn: false,
+  pointButton: null,
+  heatButton: null,
+
+  init: function(pointLayer, heatLayer, pointButton, heatButton) {
+    this.pointLayer = pointLayer;
+    this.heatLayer = heatLayer;
+    this.pointButton = pointButton;
+    this.heatButton = heatButton;
+    $(this.pointButton).click($.proxy(function() {
+    this.pointLayer.setVisibility(!this.pointOn);
+    this.pointOn = !this.pointOn;
+    }, this));
+    $(this.heatButton).click($.proxy(function() {
+      this.heatLayer.setVisibility(!this.heatOn);
+      this.heatOn = !this.heatOn;
+    }, this));
+}
+  /*
   geotrends: GeoTrends,
   gridSmall: null,
   gridMedium: null,
@@ -772,6 +794,9 @@ var Settings = {
       this.geotrends.reload();
     }
   }
+  */
+
+
 }
 
 var Chart = 

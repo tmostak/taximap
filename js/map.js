@@ -6,11 +6,13 @@ var markers;
 var words;
 var pointLayer;
 var heatLayer;
-var baseLayer;
+var baseLayers;
 
 function init()
 { 
   map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':false})], projection: "EPSG:900913"});
+
+  //baseLayers = new Array(
   baseLayer = new OpenLayers.Layer.Google("Google Maps", {numZoomLevels: 20});
   map.addLayer(baseLayer);
 
@@ -28,7 +30,8 @@ function init()
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
   Search.init(map, $('form#search'), $('input#termsInput'), $('input#userInput'), $('input#locationInput'));
-  Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
+  Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
+  //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   MapD.start();
   baseLayer.display(false);

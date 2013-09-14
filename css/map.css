@@ -248,6 +248,20 @@ div#numTokensText {
   height:40px;
 }
 
+#pointButtonImg {
+    width: 222px;
+    height:31px;
+    background: url('../img/points-button.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+#heatButtonImg {
+    width: 222px;
+    height: 31px;
+    background: url('../img/heatmap-button.png') no-repeat center center;
+    opacity: 1.0;
+}
+
 .sprites { 
   width: 16px;
   height: 16px;
