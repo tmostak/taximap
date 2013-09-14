@@ -18,6 +18,7 @@ var LineChart =
     container: null,
     svg: null,
     info: null,
+    settingsDiv: null,
     optionsDiv: null,
     compareDiv: null,
     detailsDiv: null
@@ -33,9 +34,27 @@ var LineChart =
     this.elems.container = container;
     this.zoomCallback = zoomCallback;
     this.compareCallback = compareCallback;
+  
+    this.elems.settingsDiv = container.append("div").attr("class", "chart-settings");
 
-    var margin = {top: 25, right: 30, bottom: 25, left: 45},
-        width = 400 - margin.left - margin.right,
+    this.elems.compareDiv = this.elems.settingsDiv.append("div")
+        .attr("class", "chart-compare");
+
+    var form =  this.elems.compareDiv.append("form")
+        .on("submit", $.proxy(this.compare, this));
+
+    var compareInput = form.append("input")
+        .attr("class", "compare-input")
+        .attr("type", "text")
+        .attr("placeholder", " Compare");
+
+    this.elems.detailsDiv = this.elems.settingsDiv.append("div")
+        .attr("class", "chart-details");
+
+    
+    var margin = {top: 25, right: 30, bottom: 25, left: 420},
+        //width = 400 - margin.left - margin.right,
+        width = 1980 - margin.left - margin.right,
         height = 160 - margin.top - margin.bottom;
 
     this.x = d3.time.scale().range([0, width]);
@@ -58,11 +77,14 @@ var LineChart =
 
     var svg = this.elems.container
         .attr("class", "chart")
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
+         .append("svg")
+       //.attr("width", width + margin.left + margin.right)
+        .attr("width", width )
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+       .attr("transform", "translate(" + 50 + "," + margin.top + ")");
+       //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        //.attr("margin-left", margin.left);
     this.elems.svg = svg;
 
     svg.append("g")
@@ -112,7 +134,7 @@ var LineChart =
 //         .attr("class", "sprites trends")
 //         .attr("title", "trends")
 //        .style("margin-top", "5px")
-
+    /*
     this.elems.compareDiv = container.append("div")
         .attr("class", "chart-compare");
 
@@ -126,6 +148,7 @@ var LineChart =
 
     this.elems.detailsDiv = container.append("div")
         .attr("class", "chart-details");
+    */
   },
 
   onLineChartJson: function(id, json) {

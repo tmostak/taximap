@@ -121,7 +121,8 @@ button#gridLarge {
 
 div#mapview {
   position: fixed;
-  top: 40px;
+  top: 247px;
+  //top: 40px;
   left: 400px;
   right: 0;
   bottom: 0;
@@ -158,7 +159,7 @@ div#control {
   position: absolute;
   width: 400px;
   height: 100%;
-  top: 40px;
+  top: 247px;
   border-radius: 5px;
   webkit-box-shadow: 3px 0 3px rgba(0,0,0,.25);
   box-shadow: 3px 0 3px rgba(0,0,0,.25);

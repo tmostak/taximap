@@ -1,5 +1,6 @@
 .chart {
   position: relative;
+  top: 40px;
   font: 10px sans-serif;
   border-radius: 5px;
   //border-bottom: 2px;
@@ -59,6 +60,12 @@ rect.pane {
   position: absolute;
 }
 
+.chart-settings {
+  float: left;
+  //width: 150px;
+  margin-top:20px;
+}
+
 .chart-compare { 
   position: relative;
   font-size: 12px;
@@ -76,6 +83,8 @@ rect.pane {
 }
 
 .chart-details {
+  width: 250px;
+  //float: left;
   list-style: none;
   margin-top: 5px;
 }
