@@ -148,7 +148,7 @@ var MapD = {
     var timestart = this.timestart;
     var timeend = this.timeend;
     var user = this.user;
-    var noWhere = false; // don't add where to query
+    var splitQuery = false; // don't split query into two parts 
     console.log("user 1: " + user);
     var queryTerms = this.queryTerms;
     if (options) {
@@ -162,11 +162,11 @@ var MapD = {
         user = options.user;
         console.log("user 2: " + user);
       }
-      if ("nowhere" in options) 
-        noWhere = options.nowhere;
+      if ("splitQuery" in options) 
+        splitQuery = options.splitQuery;
     }
     
-      if (noWhere) {
+      if (splitQuery) {
         var queryArray = new Array(2);
         queryArray[0] = this.getTermsAndUserQuery(queryTerms, user);
         if (queryArray[0])
@@ -392,11 +392,11 @@ var HeatMap = {
 
   getParams: function() {
     //this.params.sql = "select goog_x, goog_y from " + this.mapd.table;
-    this.params.sql = "select goog_x, goog_y "; //from " + this.mapd.table;
-    var queryArray = this.mapd.getWhere({nowhere: true});
+    this.params.sql = "select goog_x, goog_y"; //from " + this.mapd.table;
+    var queryArray = this.mapd.getWhere({splitQuery: true});
     if (queryArray[0])
-      this.params.sql += ", " + queryArray[0];
-    this.params.sql += "from " + this.mapd.table + queryArray[1];
+      this.params.sql += "," + queryArray[0];
+    this.params.sql += " from " + this.mapd.table + queryArray[1];
     console.log("FINAL");
     console.log(this.params.sql);
     return this.params;
@@ -872,8 +872,12 @@ var Chart =
   },
   
   getURL: function(options) {
-    this.params.sql = "select time from " + this.mapd.table;
-    this.params.sql += this.getWhere(options);
+    this.params.sql = "select time ";
+    options.splitQuery = true;
+    var queryArray = this.getWhere(options);
+    if (queryArray[0])
+      this.params.sql += "," + queryArray[0];
+    this.params.sql += " from " + this.mapd.table + queryArray[1];
     this.params.histstart = this.mapd.timestart > this.mapd.datastart? this.mapd.timestart : this.mapd.datastart;
     this.params.histend = this.mapd.timeend < this.mapd.dataend? this.mapd.timeend : this.mapd.dataend;
     if (options && options.time) {
@@ -906,11 +910,21 @@ var Chart =
     }
     this.queryTerms.push(queryTerms);
     var series = [];
-    for (i in json.x) {
-      var time  = json.x[i];
-      time = time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
-      var count = json.count[i];
-      series.push({date: new Date(time * 1000), value: count});
+    if ("y" in json) { // means we have percent
+      for (i in json.x) {
+        var time  = json.x[i];
+        var percent = json.y[i];
+        if (json.count[i] > 0)
+          series.push({date: new Date(time * 1000), value: percent});
+      }
+    }
+    else {
+      for (i in json.x) {
+        var time  = json.x[i];
+        //time = time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
+        var count = json.count[i];
+        series.push({date: new Date(time * 1000), value: count});
+      }
     }
     this.chart.addSeries(this.seriesId, queryTerms, series);
     this.seriesId += 1;

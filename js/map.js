@@ -22,7 +22,7 @@ function init()
   var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
   map.zoomToExtent(extent);
   MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search);
-  pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.2, "displayInLayerSwitcher": false});
+  pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.2, "displayInLayerSwitcher": false, removeBackBufferDelay:0 });
   heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1.2, "displayInLayerSwitcher": false});
   heatLayer.setVisibility(false);
   map.addLayer(heatLayer);

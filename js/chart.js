@@ -154,12 +154,24 @@ var LineChart =
   },
 
   onLineChartJson: function(id, json) {
+    console.log("hi");
     var data = [];
-    for (i in json.x) {
-      var time = json.x[i];
-      time = time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
-      var count = json.count[i];
-      data.push({date: new Date(time * 1000), value: count});
+    if (y in json) { // means we have percent
+        for (i in json.x) {
+          var time = json.x[i];
+          //time = time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
+          var percent = json.percent[i];
+          if (json.count[i] > 0)
+              data.push({date: new Date(time * 1000), value: count});
+        }
+    }
+    else {
+        for (i in json.x) {
+          var time = json.x[i];
+          //time = time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
+          var count = json.count[i];
+          data.push({date: new Date(time * 1000), value: count});
+        }
     }
     this.addSeries(id, id, data);
   },
