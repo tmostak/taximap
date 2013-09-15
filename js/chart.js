@@ -35,26 +35,11 @@ var LineChart =
     this.zoomCallback = zoomCallback;
     this.compareCallback = compareCallback;
   
-    this.elems.settingsDiv = container.append("div").attr("class", "chart-settings");
-
-    this.elems.compareDiv = this.elems.settingsDiv.append("div")
-        .attr("class", "chart-compare");
-
-    var form =  this.elems.compareDiv.append("form")
-        .on("submit", $.proxy(this.compare, this));
-
-    var compareInput = form.append("input")
-        .attr("class", "compare-input")
-        .attr("type", "text")
-        .attr("placeholder", " Compare");
-
-    this.elems.detailsDiv = this.elems.settingsDiv.append("div")
-        .attr("class", "chart-details");
 
     
-    var margin = {top: 25, right: 30, bottom: 25, left: 220},
+    var margin = {top: 25, right: 30, bottom: 25, left: 25},
         //width = 400 - margin.left - margin.right,
-         width = $(window).width() - margin.left - margin.right,
+         width = $(window).width() - 400 - margin.left - margin.right,
         //height = 160 - margin.top - margin.bottom;
          height = 200 - margin.top - margin.bottom;
 
@@ -136,6 +121,22 @@ var LineChart =
 //         .attr("class", "sprites trends")
 //         .attr("title", "trends")
 //        .style("margin-top", "5px")
+    this.elems.settingsDiv = container.append("div").attr("class", "chart-settings");
+
+    this.elems.compareDiv = this.elems.settingsDiv.append("div")
+        .attr("class", "chart-compare");
+
+    var form =  this.elems.compareDiv.append("form")
+        .on("submit", $.proxy(this.compare, this));
+
+    var compareInput = form.append("input")
+        .attr("class", "compare-input")
+        .attr("type", "text")
+        .attr("placeholder", " Compare");
+
+    this.elems.detailsDiv = this.elems.settingsDiv.append("div")
+        .attr("class", "chart-details");
+
     /*
     this.elems.compareDiv = container.append("div")
         .attr("class", "chart-compare");
