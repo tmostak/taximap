@@ -429,8 +429,13 @@ var Tweets =
   mouseOverFeatureControl: null,
   selectFeatureControl: null,
   sortDesc: null,
+  topOffset: null,
+  bottomOffset: null,
+  startRecordSpan:null,
+  startRecord: 0,
+  scrollTop:0,
 
-  init: function(sortDiv, viewDiv) {
+init: function(sortDiv, viewDiv) {
     console.log("SortDiv: " + sortDiv);
     console.log(viewDiv);
     this.sortDiv = sortDiv;
@@ -469,12 +474,67 @@ var Tweets =
 
     this.sortDesc = true;
 
-    $("<div id='sortPref'>Sort by <a href='javascript:void(0)' id='oldSort'>Oldest</a> <a href='javascript:void(0)' id='newSort'>Newest</a></div>").appendTo(this.sortDiv);
+    $("<div id='sortPref'>Showing results <span id='startRecord'></span>-<span id='endRecord'></span> of <span id='resultsCount'></span> - Sort by <a href='javascript:void(0)' id='oldSort'>Oldest</a> <a href='javascript:void(0)' id='newSort'>Newest</a></div>").appendTo(this.sortDiv);
     $('#oldSort').click($.proxy(this.oldSortFunc, this));
     $('#newSort').click($.proxy(this.newSortFunc, this));
-    
+    this.viewDiv.scroll($.proxy(this.onScrollFunc,this));
+    this.startRecordSpan = $("#startRecord");
 
   },
+
+    onScrollFunc: function() {
+        var oldScrollTop = this.scrollTop;
+        this.scrollTop = this.viewDiv.scrollTop();
+        var containers = $('.tweet-container');
+        var numContainers = containers.length;
+        var scrollDown = this.scrollTop >= oldScrollTop ? true : false;
+        //console.log(scrollDown);
+        if (scrollDown) {
+            for (var record = this.startRecord; record < numContainers; record++) {
+                //console.log (record + " " + containers.eq(record).offset().top);
+                if (containers.eq(record).offset().top >= this.topOffset) {
+                    this.startRecord = record; 
+                    break;
+                }
+            }
+        }
+        else {
+            for (var record = this.startRecord; record >= 0 ; record--) {
+                //console.log (record + " " + containers.eq(record).offset().top);
+                var containerOffset = containers.eq(record).offset().top;
+                if (containerOffset <= this.topOffset) {
+                    if (containerOffset < this.topOffset)
+                        this.startRecord = record + 1;
+                    else
+                        this.startRecord = record; 
+                    break;
+                }
+            }
+        }
+
+        this.startRecordSpan.html(this.startRecord+1);
+
+
+
+        /*
+        for (var offset = 0; offset < numContainers; offset++) {
+            if (this.startRecord - offset) 
+
+
+        console.log("Length " + numContainers);
+        for (var i = 0; i < numContainers; i++) {
+            //console.log("i: " + i + " " +  containers.eq(i).offset().top);
+            console.log(this.topOffset);
+            if (containers.eq(i).offset().top > this.topOffset) {
+                this.startRecord = i; 
+                this.startRecordSpan.html(i+1);
+                break;
+            }
+        }
+        */
+    },
+
+
   oldSortFunc: function () { 
     if (this.sortDesc == true) {
         this.sortDesc = false;
@@ -565,6 +625,11 @@ var Tweets =
     map.addLayer(markers);
     markers.setZIndex(Number(vectors.getZIndex()) + 1);
 
+    var n = json.n;
+    $("#resultsCount").html(numberWithCommas(n));
+    this.topOffset = this.viewDiv.offset().top + 1;
+    this.bottomOffset = this.topOffset + this.viewDiv.height(); 
+
     var results = json.results;
     for (i in results)
     {
@@ -573,6 +638,9 @@ var Tweets =
         continue;
       this.add(result, i);
     }
+    this.scrollTop = 0;
+    this.startRecordSpan.html(1);
+
   },
 
   add: function(tweet, index) {
@@ -648,7 +716,7 @@ var Tweets =
 
   // this points to <li> container 
   onMouseEnter: function(container) {
-    console.log(this);
+    //console.log(this);
     var index = $(container).index();
     this.mouseOverFeatureControl.highlight(vectors.features[index]);
     /*
