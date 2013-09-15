@@ -52,7 +52,7 @@ var LineChart =
         .attr("class", "chart-details");
 
     
-    var margin = {top: 25, right: 30, bottom: 25, left: 425},
+    var margin = {top: 25, right: 30, bottom: 25, left: 220},
         //width = 400 - margin.left - margin.right,
          width = $(window).width() - margin.left - margin.right,
         //height = 160 - margin.top - margin.bottom;
