@@ -119,8 +119,13 @@ div#social{
   //box-shadow: 0 0 2px rgba(255,255,255,.25);
 }
 
+* {
+    outline: none;
+}
+
 .settings-button:hover {
-    border: 0px solid '#222';
+    border: 0;
+    outline: none;
 }
 
 button#gridSmall { 
@@ -326,42 +331,42 @@ div#numTokensText {
     border: none!important;
     width: 220px;
     height:29px;
-    background: url('../img/points_button_bw2.png') no-repeat center center;
+    background: url('../img/points_trans_bw.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .pointButtonOnImg {
     width: 220px;
     height:29px;
-    background: url('../img/points_button_color2.png') no-repeat center center;
+    background: url('../img/points_trans_color.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .pointButtonHoverImg {
     width: 220px;
     height:29px;
-    background: url('../img/points_button_color2.png') no-repeat center center;
+    background: url('../img/points_trans_color.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonOffImg {
     width: 220px;
     height: 29px;
-    background: url('../img/heatmap-button-bw.png') no-repeat center center;
+    background: url('../img/heatmap_trans_bw.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonOnImg {
     width: 220px;
     height: 29px;
-    background: url('../img/heatmap-button-full.png') no-repeat center center;
+    background: url('../img/heatmap_trans_color.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonHoverImg {
     width: 220px;
     height:29px;
-    background: url('../img/heatmap-button-full.png') no-repeat center center;
+    background: url('../img/heatmap_trans_color.png') no-repeat center center;
     opacity: 1.0;
 }
 .sprites { 

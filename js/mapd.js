@@ -899,7 +899,7 @@ var Settings = {
     this.heatButton = heatButton;
     this.pointButton.addClass("pointButtonOnImg");
     this.heatButton.addClass("heatButtonOffImg");
-   $(this.pointButton).hover($.proxy(function() {this.pointButton.addClass("pointButtonHoverImg");}, this), $.proxy(function () {this.pointButton.removeClass("pointButtonHoverImg");}, this));
+   //$(this.pointButton).hover($.proxy(function() {this.pointButton.addClass("pointButtonHoverImg");}, this), $.proxy(function () {this.pointButton.removeClass("pointButtonHoverImg");}, this));
    $(this.heatButton).hover($.proxy(function() {this.heatButton.addClass("heatButtonHoverImg");}, this), $.proxy(function () {this.heatButton.removeClass("heatButtonHoverImg");}, this));
 
     $(this.pointButton).click($.proxy(function() {
