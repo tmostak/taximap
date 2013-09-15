@@ -52,10 +52,11 @@ var LineChart =
         .attr("class", "chart-details");
 
     
-    var margin = {top: 25, right: 30, bottom: 25, left: 420},
+    var margin = {top: 25, right: 30, bottom: 25, left: 425},
         //width = 400 - margin.left - margin.right,
-        width = 1980 - margin.left - margin.right,
-        height = 160 - margin.top - margin.bottom;
+         width = $(window).width() - margin.left - margin.right,
+        //height = 160 - margin.top - margin.bottom;
+         height = 200 - margin.top - margin.bottom;
 
     this.x = d3.time.scale().range([0, width]);
     this.y = d3.scale.linear().range([height, 0]);
@@ -79,10 +80,10 @@ var LineChart =
         .attr("class", "chart")
          .append("svg")
        //.attr("width", width + margin.left + margin.right)
-        .attr("width", width )
+        .attr("width", width + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
-       .attr("transform", "translate(" + 50 + "," + margin.top + ")");
+       .attr("transform", "translate(" + 60 + "," + margin.top + ")");
        //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         //.attr("margin-left", margin.left);
     this.elems.svg = svg;
@@ -114,7 +115,8 @@ var LineChart =
 
     this.elems.info = this.elems.container.select("svg").append("g")
         .attr("class", "info")
-        .attr("transform", "translate(" + margin.left + "," + (margin.top - 5) + ")");
+        //.attr("transform", "translate(" + margin.left + "," + (margin.top - 5) + ")");
+        .attr("transform", "translate(" + 60 + "," + (margin.top - 5) + ")");
     
     this.elems.info.append("text")
         .attr("class", "date");

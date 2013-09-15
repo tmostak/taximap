@@ -62,12 +62,16 @@ rect.pane {
 
 .chart-settings {
   float: left;
-  //width: 150px;
-  margin-top:20px;
+  //position:absolute;
+  position:relative;
+  width: 400px;
+  height:100%;
+  //margin-top:0px;
 }
 
 .chart-compare { 
   position: relative;
+  margin-top:10px;
   font-size: 12px;
 }
 
@@ -131,5 +135,6 @@ rect.pane {
   right: 0;
   top: 0;
 }
+
 
 
