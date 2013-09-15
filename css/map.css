@@ -46,6 +46,19 @@ div#topbar button:hover {
   box-shadow: 0 0 2px rgba(255,255,255,.25);
 }
 
+div#animControls {
+    float:left;
+    margin-top:2px;
+    margin-left: 20px;
+    //position: relative;
+    //bottom:5px;
+    //left:20px;
+}
+
+button#pause {
+    margin-left: 10px;
+}
+    
 
 span.iconClear{
   position:absolute;
@@ -71,10 +84,16 @@ div#submit-icon {
   margin: 2px
 }
 
+div#social{
+  float: right;
+  margin-top:2px;
+}
+
 .settings {
   position: relative;
   float: right;
   margin: 0;
+  margin-right: 10px;
   padding: 0;
 }
 
@@ -257,6 +276,49 @@ div#numTokensText {
   width: 92px;
   height:40px;
 }
+
+.anim-input {
+    border: none!important;
+    margin-bottom: 12px;
+    background-size: cover;
+    padding:0px;
+}
+
+.social-button {
+    border: none!important;
+    background-size: cover;
+    padding:0px;
+}
+
+#play-icon {
+    border: none!important;
+    background: url('../img/play.png') no-repeat center center;
+    width:60px;
+    height:30px;
+}
+    
+#pause-icon {
+    border: none!important;
+    background: url('../img/pause.png') no-repeat center center;
+    width:60px;
+    height:30px;
+}
+
+#twitter-icon {
+    border: none!important;
+    background: url('../img/twitter-logo.png') no-repeat center center;
+    width:30px;
+    height:30px;
+}
+
+#facebook-icon {
+    border: none!important;
+    background: url('../img/facebook-logo.png') no-repeat center center;
+    width:30px;
+    height:30px;
+}
+
+
 
 .pointButtonOffImg {
     border: none!important;
