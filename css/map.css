@@ -273,7 +273,7 @@ div#numTokensText {
 }
 
 .logo-image {
-  width: 92px;
+  width: 90px;
   height:40px;
 }
 
@@ -324,42 +324,42 @@ div#numTokensText {
 
 .pointButtonOffImg {
     border: none!important;
-    width: 208px;
+    width: 220px;
     height:29px;
-    background: url('../img/point-button-bw.png') no-repeat center center;
+    background: url('../img/points_button_bw2.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .pointButtonOnImg {
-    width: 208px;
+    width: 220px;
     height:29px;
-    background: url('../img/point-button-full.png') no-repeat center center;
+    background: url('../img/points_button_color2.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .pointButtonHoverImg {
-    width: 208px;
+    width: 220px;
     height:29px;
-    background: url('../img/point-button-full.png') no-repeat center center;
+    background: url('../img/points_button_color2.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonOffImg {
-    width: 208px;
+    width: 220px;
     height: 29px;
     background: url('../img/heatmap-button-bw.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonOnImg {
-    width: 208px;
+    width: 220px;
     height: 29px;
     background: url('../img/heatmap-button-full.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonHoverImg {
-    width: 208px;
+    width: 220px;
     height:29px;
     background: url('../img/heatmap-button-full.png') no-repeat center center;
     opacity: 1.0;

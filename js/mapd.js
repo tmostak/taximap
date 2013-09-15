@@ -506,7 +506,7 @@ init: function(sortDiv, viewDiv) {
             for (var record = this.endRecord; record < numContainers; record++) {
                 //console.log (record + " " + containers.eq(record).offset().top);
                 if (containers.eq(record).offset().top >= this.bottomOffset) {
-                    this.endRecord = record - ; 
+                    this.endRecord = record - 1; 
                     break;
                 }
             }
