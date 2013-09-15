@@ -432,7 +432,9 @@ var Tweets =
   topOffset: null,
   bottomOffset: null,
   startRecordSpan:null,
+  endRecordSpan:null,
   startRecord: 0,
+  endRecord: 1,
   scrollTop:0,
 
 init: function(sortDiv, viewDiv) {
@@ -479,10 +481,14 @@ init: function(sortDiv, viewDiv) {
     $('#newSort').click($.proxy(this.newSortFunc, this));
     this.viewDiv.scroll($.proxy(this.onScrollFunc,this));
     this.startRecordSpan = $("#startRecord");
+    this.endRecordSpan = $("#endRecord");
+
 
   },
 
     onScrollFunc: function() {
+      this.topOffset = this.viewDiv.offset().top + 1;
+      this.bottomOffset = this.topOffset + this.viewDiv.height() - 1; 
         var oldScrollTop = this.scrollTop;
         this.scrollTop = this.viewDiv.scrollTop();
         var containers = $('.tweet-container');
@@ -494,6 +500,13 @@ init: function(sortDiv, viewDiv) {
                 //console.log (record + " " + containers.eq(record).offset().top);
                 if (containers.eq(record).offset().top >= this.topOffset) {
                     this.startRecord = record; 
+                    break;
+                }
+            }
+            for (var record = this.endRecord; record < numContainers; record++) {
+                //console.log (record + " " + containers.eq(record).offset().top);
+                if (containers.eq(record).offset().top >= this.bottomOffset) {
+                    this.endRecord = record - ; 
                     break;
                 }
             }
@@ -510,9 +523,21 @@ init: function(sortDiv, viewDiv) {
                     break;
                 }
             }
+            for (var record = this.endRecord; record >= 0 ; record--) {
+                //console.log (record + " " + containers.eq(record).offset().top);
+                var containerOffset = containers.eq(record).offset().top;
+                if (containerOffset <= this.bottomOffset) {
+                    if (containerOffset < this.bottomOffset)
+                        this.endRecord = record;
+                    else
+                        this.endRecord = record; 
+                    break;
+                }
+            }
         }
 
         this.startRecordSpan.html(this.startRecord+1);
+        this.endRecordSpan.html(this.endRecord+1);
 
 
 
@@ -639,7 +664,11 @@ init: function(sortDiv, viewDiv) {
       this.add(result, i);
     }
     this.scrollTop = 0;
-    this.startRecordSpan.html(1);
+    this.onScrollFunc();
+    /*
+    this.startRecordSpan.html(this.startRecord + 1);
+    this.endRecordSpan.html(this.endRecord + 1);
+    */
 
   },
 
