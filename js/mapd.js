@@ -124,11 +124,31 @@ var MapD = {
     return whereTerms;
   },
 
+  getTermsAndUserQuery: function (queryTerms, user ) {
+    var query = ""; 
+    if (queryTerms.length) {
+      queryTerms = this.parseQueryTerms(queryTerms);
+      query += queryTerms + " and ";
+    }
+    if (user)
+      query += "sender_name ilike '" + user + "' and ";
+    return query;
+  },
+
+  getTimeQuery: function (timestart, timeend) {
+    var query = "";
+    if (timestart)
+      query += "time >= " + timestart + " and ";
+    if (timeend)
+      query += "time <= " + timeend + " and ";
+    return query;
+  },
+
   getWhere: function(options) {
-    var where = "";
     var timestart = this.timestart;
     var timeend = this.timeend;
     var user = this.user;
+    var noWhere = false; // don't add where to query
     console.log("user 1: " + user);
     var queryTerms = this.queryTerms;
     if (options) {
@@ -142,23 +162,32 @@ var MapD = {
         user = options.user;
         console.log("user 2: " + user);
       }
+      if ("nowhere" in options) 
+        noWhere = options.nowhere;
     }
+    
+      if (noWhere) {
+        var queryArray = new Array(2);
+        queryArray[0] = this.getTermsAndUserQuery(queryTerms, user);
+        if (queryArray[0])
+          queryArray[0] = queryArray[0].substr(0, queryArray[0].length-5);
+        queryArray[1] = this.getTimeQuery(timestart, timeend);
+        if (queryArray[1])
+          queryArray[1] = " where " + queryArray[1].substr(0, queryArray[1].length-5);
+        console.log("queryarray");
+        console.log(queryArray);
+        return queryArray;
 
-    if (timestart)
-      where += "time >= " + timestart + " and ";
-    if (timeend)
-      where += "time <= " + timeend + " and ";
-    if (queryTerms.length) {
-      queryTerms = this.parseQueryTerms(queryTerms);
-      where += queryTerms + " and ";
-    }
-    if (user)
-      where += "sender_name ilike '" + user + "' and ";
-    if (where)
-      where = " where " + where.substr(0, where.length-5);
-    console.log(where);
-    return where;
-  },
+      }
+      else {
+        var whereQuery = this.getTimeQuery(timestart, timeend) + this.getTermsAndUserQuery(queryTerms, user);
+        if (whereQuery)
+          whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
+        console.log("whereQuery");
+        console.log(whereQuery);
+        return whereQuery;
+      }
+  }
 };
 
 var GeoTrends = {
@@ -345,6 +374,8 @@ var HeatMap = {
     height: null,
     layers: "heatmap",
     maxval: "auto", 
+    min: 0.2,
+    blur: 26,
     format: "image/png",
     transparent: true
   },
@@ -360,8 +391,14 @@ var HeatMap = {
   },
 
   getParams: function() {
-    this.params.sql = "select goog_x, goog_y from " + this.mapd.table;
-    this.params.sql += this.mapd.getWhere();
+    //this.params.sql = "select goog_x, goog_y from " + this.mapd.table;
+    this.params.sql = "select goog_x, goog_y "; //from " + this.mapd.table;
+    var queryArray = this.mapd.getWhere({nowhere: true});
+    if (queryArray[0])
+      this.params.sql += ", " + queryArray[0];
+    this.params.sql += "from " + this.mapd.table + queryArray[1];
+    console.log("FINAL");
+    console.log(this.params.sql);
     return this.params;
   },
 
