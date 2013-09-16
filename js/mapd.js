@@ -894,23 +894,23 @@ var Animation = {
   heatLayer: null,
   //pointMap: null,
   //heatMap: null,
-  playButton: null,
+  playPauseButton: null,
   stopButton: null,
   playing: false,
-  numFrames: 60.0,
+  numFrames: 20.0,
   animStart: null,
   animEnd: null,
   step: null,
   numLayersLoaded: 0,
 
-  init: function(pointLayer, heatLayer, playButton, stopButton) {
+  init: function(pointLayer, heatLayer, playPauseButton, stopButton) {
     this.pointLayer = pointLayer;
     this.heatLayer = heatLayer;
     this.pointLayer.events.register("loadend", this, this.layerLoadEnd);
     this.heatLayer.events.register("loadend", this, this.layerLoadEnd);
-    this.playButton = playButton;
+    this.playPauseButton = playPauseButton;
     this.stopButton = stopButton;
-    $(this.playButton).click($.proxy(this.playFunc, this));
+    $(this.playPauseButton).click($.proxy(this.playFunc, this));
     $(this.stopButton).click($.proxy(this.stopFunc, this));
   },
 
@@ -946,6 +946,7 @@ var Animation = {
     console.log("play");
     if (this.playing == false) {
       this.playing = true;
+      this.playPauseButton.removeClass("play-icon").addClass("pause-icon");
       if (this.animStart == null) { // won't trigger if paused
         this.animStart = this.mapd.timestart;
         this.animEnd = this.mapd.timeend;
@@ -954,6 +955,11 @@ var Animation = {
         this.frameEnd = this.animStart + this.step;
       }
       this.animFunc();
+
+    }
+    else {
+      this.playing = false;
+      this.playPauseButton.removeClass("pause-icon").addClass("play-icon");
     }
   },
 
@@ -964,6 +970,8 @@ var Animation = {
     this.animStep = null;
     this.numLayersLoaded = 0;
     this.playing = false;
+    this.playPauseButton.removeClass("pause-icon").addClass("play-icon");
+    //this.playPauseButton.attr("id", "play-icon");
     this.mapd.services.pointmap.reload();
     this.mapd.services.heatmap.reload();
   }

@@ -283,12 +283,15 @@ div#numTokensText {
 }
 
 .anim-input {
-    webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
-    box-shadow: 0 0 2px rgba(255,255,255,.25);
+    //webkit-box-shadow: 0 0 2px rgba(50,50,50,.25);
+    //box-shadow: 0 0 2px rgba(100,100,100,.25);
+    position:relative;
     border: none!important;
-    margin-bottom: 12px;
+    margin: 3px 8px 3px 3px;
+    //border-radius: 3px;
+    //-webkit-background-clip: padding;
     background-size: cover;
-    padding:0px;
+    //padding:5px;
 }
 
 .social-button {
@@ -297,16 +300,23 @@ div#numTokensText {
     padding:0px;
 }
 
-#play-icon {
+.play-icon {
+    //border: none!important;
+    background: url('../img/play_green.png') no-repeat center center;
+    width:60px;
+    height:30px;
+}
+
+.pause-icon {
     border: none!important;
-    background: url('../img/play.png') no-repeat center center;
+    background: url('../img/pause_blue.png') no-repeat center center;
     width:60px;
     height:30px;
 }
     
-#pause-icon {
-    border: none!important;
-    background: url('../img/pause.png') no-repeat center center;
+.stop-icon {
+    //border: none!important;
+    background: url('../img/stop_pink.png') no-repeat center center;
     width:60px;
     height:30px;
 }
