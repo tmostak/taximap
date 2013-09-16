@@ -34,10 +34,11 @@ var MapD = {
     topktokens: null, 
     tweets: null,
     graph: null,
-    search: null
+    search: null,
+    settings: null
   },
 
-  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search) {
+  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings) {
     if (window.location.search == "?local")
         this.host = "http://sirubu.velocidy.net:8080";
       
@@ -49,6 +50,7 @@ var MapD = {
     this.services.tweets = tweets;
     this.services.graph = graph;
     this.services.search = search;
+    this.services.settings = settings;
     this.map.events.register('moveend', this, this.reload);
     $(document).on('mapdreload', $.proxy(this.reload, this));
   },
@@ -899,11 +901,12 @@ var Animation = {
   animStart: null,
   animEnd: null,
   step: null,
+  numLayersLoaded: 0,
 
   init: function(pointLayer, heatLayer, playButton, stopButton) {
     this.pointLayer = pointLayer;
     this.heatLayer = heatLayer;
-    //this.pointLayer.events.register("loadend", this, this.layerLoadEnd);
+    this.pointLayer.events.register("loadend", this, this.layerLoadEnd);
     this.heatLayer.events.register("loadend", this, this.layerLoadEnd);
     this.playButton = playButton;
     this.stopButton = stopButton;
@@ -912,36 +915,32 @@ var Animation = {
   },
 
   layerLoadEnd: function () {
-    this.animFunc();
+    if (this.playing == true) {
+      var numLayersVisible = this.mapd.services.settings.getNumLayersVisible();
+      this.numLayersLoaded++;
+      if (this.numLayersLoaded >= numLayersVisible) {
+          this.numLayersLoaded = 0;
+          this.animFunc();
+      }
+    }
   },
 
 
 
   animFunc: function() {
-    if (this.playing == true) {
-       if (this.frameEnd < this.animEnd) {
-          var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}}; 
-        console.log (this.frameStart + "-" + this.frameEnd);
-        this.frameStart += this.step;
-        this.frameEnd += this.step;
-        //this.mapd.services.pointmap.reload(options);
-        this.mapd.services.heatmap.reload(options);
-      }
-      else {
-        this.stopFunc();
-      }
+     if (this.frameEnd < this.animEnd) {
+        var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}}; 
+      console.log (this.frameStart + "-" + this.frameEnd);
+      this.frameStart += this.step;
+      this.frameEnd += this.step;
+      this.mapd.services.pointmap.reload(options);
+      this.mapd.services.heatmap.reload(options);
+    }
+    else {
+      this.stopFunc();
     }
   },
 
-    /*
-    for (var tempEnd = animStart + step; tempEnd < animEnd; tempEnd += step) {
-        var tempStart = tempEnd - step;
-
-        var options = {time: {timestart: Math.floor(tempStart), timeend: Math.floor(tempEnd)}}; 
-        console.log (tempStart + "-" + tempEnd);
-        */
-        //setTimeout(this.pointMap.reload(options), 1000);
-        //this.pointMap.reload(options);
 
   playFunc: function () {
     console.log("play");
@@ -963,6 +962,7 @@ var Animation = {
     this.animStart = null;
     this.animEnd = null;
     this.animStep = null;
+    this.numLayersLoaded = 0;
     this.playing = false;
     this.mapd.services.pointmap.reload();
     this.mapd.services.heatmap.reload();
@@ -998,6 +998,9 @@ var Settings = {
       this.heatOn = !this.heatOn;
       this.heatButton.toggleClass("heatButtonOffImg").toggleClass("heatButtonOnImg");
     }, this));
+  },
+  getNumLayersVisible: function() {
+    return (this.pointOn + this.heatOn);
   }
 }
   /*
