@@ -119,7 +119,7 @@ var MapD = {
   parseQueryTerms: function(queryTerms) { 
     var array = queryTerms.slice(0);
     for (i in array) {
-      array[i] = "'" + array[i] + "'";
+      array[i] = "'" + array[i].replace("'", "''").replace(/["]/g, '').replace("&", "") + "'";
     }
     var whereTerms = array.join(" and tweet_text ilike ");
     whereTerms = "(tweet_text ilike " + whereTerms + ") ";
@@ -415,7 +415,13 @@ var HeatMap = {
 var GetNearestTweet = {
   mapd: MapD,
 */
-    
+/*   
+var TweetClick = 
+{
+  mapd: MapD,
+  pixelTolerance: 5
+*/
+
 
 var Tweets = 
 {
