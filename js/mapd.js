@@ -897,10 +897,11 @@ var Animation = {
   playPauseButton: null,
   stopButton: null,
   playing: false,
-  numFrames: 20.0,
+  numFrames: 60.0,
   animStart: null,
   animEnd: null,
-  step: null,
+  frameStep: null,
+  frameWidth: null,
   numLayersLoaded: 0,
 
   init: function(pointLayer, heatLayer, playPauseButton, stopButton) {
@@ -931,8 +932,8 @@ var Animation = {
      if (this.frameEnd < this.animEnd) {
         var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}}; 
       console.log (this.frameStart + "-" + this.frameEnd);
-      this.frameStart += this.step;
-      this.frameEnd += this.step;
+      this.frameStart += this.frameStep;
+      this.frameEnd += this.frameStep;
       this.mapd.services.pointmap.reload(options);
       this.mapd.services.heatmap.reload(options);
     }
@@ -950,9 +951,10 @@ var Animation = {
       if (this.animStart == null) { // won't trigger if paused
         this.animStart = this.mapd.timestart;
         this.animEnd = this.mapd.timeend;
-        this.step = (this.animEnd - this.animStart) / this.numFrames;
+        this.frameStep = (this.animEnd - this.animStart) / this.numFrames;
+        this.frameWidth = this.frameStep * 4.0;
         this.frameStart = this.animStart;
-        this.frameEnd = this.animStart + this.step;
+        this.frameEnd = this.animStart + this.frameWidth;
       }
       this.animFunc();
 
