@@ -34,6 +34,7 @@ function init()
   HeatMap.init(heatLayer);
   Search.init(map, $('form#search'), $('input#termsInput'), $('input#userInput'), $('input#locationInput'));
   Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
+  Animation.init(pointLayer, heatLayer, $('button#play'), $('button#pause'));
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   MapD.start();

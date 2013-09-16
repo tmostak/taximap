@@ -149,7 +149,6 @@ var MapD = {
     var timeend = this.timeend;
     var user = this.user;
     var splitQuery = false; // don't split query into two parts 
-    console.log("user 1: " + user);
     var queryTerms = this.queryTerms;
     if (options) {
       if (options.time) {
@@ -160,7 +159,6 @@ var MapD = {
         queryTerms = options.queryTerms;
       if ("user" in options) {
         user = options.user;
-        console.log("user 2: " + user);
       }
       if ("splitQuery" in options) 
         splitQuery = options.splitQuery;
@@ -174,8 +172,6 @@ var MapD = {
         queryArray[1] = this.getTimeQuery(timestart, timeend);
         if (queryArray[1])
           queryArray[1] = " where " + queryArray[1].substr(0, queryArray[1].length-5);
-        console.log("queryarray");
-        console.log(queryArray);
         return queryArray;
 
       }
@@ -183,8 +179,6 @@ var MapD = {
         var whereQuery = this.getTimeQuery(timestart, timeend) + this.getTermsAndUserQuery(queryTerms, user);
         if (whereQuery)
           whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
-        console.log("whereQuery");
-        console.log(whereQuery);
         return whereQuery;
       }
   }
@@ -349,17 +343,19 @@ var PointMap = {
   },
 
   setWMSParams: function() {
-    this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
+    console.log("retile");
+    //this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
   },
 
-  getParams: function() {
+  getParams: function(options) {
     this.params.sql = "select goog_x, goog_y, tweet_text from " + this.mapd.table;
-    this.params.sql += this.mapd.getWhere();
+    this.params.sql += this.mapd.getWhere(options);
+    console.log(this.params.sql);
     return this.params;
   },
 
-  reload: function() {
-    this.wms.mergeNewParams(this.getParams());
+  reload: function(options) {
+    this.wms.mergeNewParams(this.getParams(options));
   }
 };
 
@@ -387,13 +383,19 @@ var HeatMap = {
   },
 
   setWMSParams: function() {
-    this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
+    //this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
   },
 
-  getParams: function() {
+  getParams: function(options) {
+    if (options == undefined || options == null) 
+      options = {splitQuery: true};
+    else
+      options.splitQuery = true;
+
     //this.params.sql = "select goog_x, goog_y from " + this.mapd.table;
     this.params.sql = "select goog_x, goog_y"; //from " + this.mapd.table;
-    var queryArray = this.mapd.getWhere({splitQuery: true});
+    //var queryArray = this.mapd.getWhere({splitQuery: true});
+    var queryArray = this.mapd.getWhere(options);
     if (queryArray[0])
       this.params.sql += "," + queryArray[0];
     this.params.sql += " from " + this.mapd.table + queryArray[1];
@@ -402,8 +404,8 @@ var HeatMap = {
     return this.params;
   },
 
-  reload: function() {
-    this.wms.mergeNewParams(this.getParams());
+  reload: function(options) {
+    this.wms.mergeNewParams(this.getParams(options));
   }
 };
 
@@ -884,6 +886,90 @@ var Search = {
   },
 }
 
+var Animation = {
+  mapd: MapD,
+  pointLayer: null,
+  heatLayer: null,
+  //pointMap: null,
+  //heatMap: null,
+  playButton: null,
+  stopButton: null,
+  playing: false,
+  numFrames: 60.0,
+  animStart: null,
+  animEnd: null,
+  step: null,
+
+  init: function(pointLayer, heatLayer, playButton, stopButton) {
+    this.pointLayer = pointLayer;
+    this.heatLayer = heatLayer;
+    //this.pointLayer.events.register("loadend", this, this.layerLoadEnd);
+    this.heatLayer.events.register("loadend", this, this.layerLoadEnd);
+    this.playButton = playButton;
+    this.stopButton = stopButton;
+    $(this.playButton).click($.proxy(this.playFunc, this));
+    $(this.stopButton).click($.proxy(this.stopFunc, this));
+  },
+
+  layerLoadEnd: function () {
+    this.animFunc();
+  },
+
+
+
+  animFunc: function() {
+    if (this.playing == true) {
+       if (this.frameEnd < this.animEnd) {
+          var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}}; 
+        console.log (this.frameStart + "-" + this.frameEnd);
+        this.frameStart += this.step;
+        this.frameEnd += this.step;
+        //this.mapd.services.pointmap.reload(options);
+        this.mapd.services.heatmap.reload(options);
+      }
+      else {
+        this.stopFunc();
+      }
+    }
+  },
+
+    /*
+    for (var tempEnd = animStart + step; tempEnd < animEnd; tempEnd += step) {
+        var tempStart = tempEnd - step;
+
+        var options = {time: {timestart: Math.floor(tempStart), timeend: Math.floor(tempEnd)}}; 
+        console.log (tempStart + "-" + tempEnd);
+        */
+        //setTimeout(this.pointMap.reload(options), 1000);
+        //this.pointMap.reload(options);
+
+  playFunc: function () {
+    console.log("play");
+    if (this.playing == false) {
+      this.playing = true;
+      if (this.animStart == null) { // won't trigger if paused
+        this.animStart = this.mapd.timestart;
+        this.animEnd = this.mapd.timeend;
+        this.step = (this.animEnd - this.animStart) / this.numFrames;
+        this.frameStart = this.animStart;
+        this.frameEnd = this.animStart + this.step;
+      }
+      this.animFunc();
+    }
+  },
+
+  stopFunc: function() {
+    console.log("stop");
+    this.animStart = null;
+    this.animEnd = null;
+    this.animStep = null;
+    this.playing = false;
+    this.mapd.services.pointmap.reload();
+    this.mapd.services.heatmap.reload();
+  }
+
+}
+
 var Settings = {
   pointLayer: null,
   heatLayer: null,
@@ -970,7 +1056,10 @@ var Chart =
   
   getURL: function(options) {
     this.params.sql = "select time ";
-    options.splitQuery = true;
+    if (options == undefined || options == null) 
+      options = {splitQuery: true};
+    else
+      options.splitQuery = true;
     var queryArray = this.getWhere(options);
     if (queryArray[0])
       this.params.sql += "," + queryArray[0];
