@@ -754,13 +754,17 @@ init: function(sortDiv, viewDiv) {
     var profile = $('<a></a>').addClass("tweet-profile").appendTo(header);
     var timeText = $('<div></div>').addClass("tweet-time").appendTo(header);
     timeText.html(time.toLocaleString());
-    content.html(twttr.txt.autoLink(text));
+    content.html(twttr.txt.autoLink(text, {targetBlank: true}));
     profile.html(user);
     profile.attr('href', 'https://twitter.com/' + user);
+    profile.attr('target', '_none');
 
     var urls = twttr.txt.extractUrls(text);
     var hashtags = twttr.txt.extractHashtags(text);
     var users = twttr.txt.extractMentions(text);
+    //console.log(hashtags)
+    //console.log(urls)
+    //console.log(users)
     var selectColor = this.getRandomColor(); 
     container.data({tweet: tweet, urls: urls, hashtags: hashtags, users: users, selectColor: selectColor});
     container.mouseenter($.proxy(this.onMouseEnter,this, container));
