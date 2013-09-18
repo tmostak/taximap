@@ -527,6 +527,7 @@ init: function(sortDiv, viewDiv) {
     'pointRadius': 15 
     });
 
+
     this.selectedPointStyle = new OpenLayers.Style({
       //graphicName: "star",
       pointRadius: 5,
@@ -731,6 +732,13 @@ init: function(sortDiv, viewDiv) {
         continue;
       this.add(result, i);
     }
+    $('.tweet-profile, .username').click( $.proxy(function(e) {
+      var userName = $(e.target).html();
+      //console.log($(this).html());
+      this.mapd.services.search.termsInput.val("");
+      this.mapd.services.search.userInput.val(userName);
+      this.mapd.services.search.form.submit();
+    }, this));
     this.scrollTop = 0;
     this.onScrollFunc();
     /*
