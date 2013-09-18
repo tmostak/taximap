@@ -74,7 +74,7 @@ function init()
   Chart.init($('div#chart'));
   MapD.start();
   //baseLayer.display(false);
-  pointLayer.display(false);
+  pointLayer.display(true);
   heatLayer.display(false);
 
 

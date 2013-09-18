@@ -908,7 +908,7 @@ var Search = {
   io: null,
 
   init: function(map, form, termsInput, userInput, locationInput) {
-    $(document).on('DOMAttrModified propertychange keyup input paste', 'input.search-input', function() {
+    $(document).on('propertychange keyup input paste', 'input.search-input', function() {
       var io = $(this).val().length ? 1: 0;
       $(this).next('.iconClear').stop().fadeTo(300,io);
       }).on('click', '.iconClear', function() {
