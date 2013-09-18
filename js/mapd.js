@@ -278,6 +278,7 @@ var TopKTokens = {
     if (token == event.originalEvent.srcElement.innerHTML) {
       console.log(this.mapd);
       this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
+      $('#termsInput').trigger('input');
       this.mapd.services.search.form.submit();
 
 
@@ -737,6 +738,7 @@ init: function(sortDiv, viewDiv) {
       //console.log($(this).html());
       this.mapd.services.search.termsInput.val("");
       this.mapd.services.search.userInput.val(userName);
+      $('#userInput').trigger('input');
       this.mapd.services.search.form.submit();
     }, this));
     this.scrollTop = 0;
@@ -906,7 +908,7 @@ var Search = {
   io: null,
 
   init: function(map, form, termsInput, userInput, locationInput) {
-    $(document).on('propertychange keyup input paste', 'input.search-input', function() {
+    $(document).on('DOMAttrModified propertychange keyup input paste', 'input.search-input', function() {
       var io = $(this).val().length ? 1: 0;
       $(this).next('.iconClear').stop().fadeTo(300,io);
       }).on('click', '.iconClear', function() {
