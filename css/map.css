@@ -86,7 +86,7 @@ div#submit-icon {
 
 div#social{
   float: right;
-  margin-top:3px;
+  margin-top:5px;
 }
 
 .settings {
@@ -299,6 +299,7 @@ div#numTokensText {
     background-size: cover;
     padding:0px;
 }
+
 
 .play-icon {
     //border: none!important;

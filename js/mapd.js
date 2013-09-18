@@ -415,12 +415,70 @@ var HeatMap = {
 var GetNearestTweet = {
   mapd: MapD,
 */
-/*   
 var TweetClick = 
 {
   mapd: MapD,
-  pixelTolerance: 5
-*/
+  pixelTolerance: 5,
+  params: {
+    request: "GetFeatureInfo",
+    sql: null,
+    bbox: null,
+  },
+  clickControl: null,
+
+  init:function() {
+    /*
+    OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
+      defaultHandlerOptions: {
+        'single': true,
+         'double': false,
+         'pixelTolerance': 0,
+         'stopSingle': false,
+         'stopDouble': false
+        },
+        initialize: function (options) {
+          this.handlerOptions = OpenLayers.Util.extend( {}, this.defaultHandlerOptions
+          );
+          this.handler = new OpenLayers.Handler.Click(
+              this, {
+                  'click': this.trigger
+                }, this.handlerOptions
+            );
+        },
+      trigger: function(e) {
+          console.log('at click');
+          if (mapd.services.settings.pointOn) {
+            $.getJSON(this.getURL()).done($.proxy(this.onTweet,this));
+          }
+        }
+
+
+    });
+    */
+    /*
+    this.clickControl = new OpenLayers.Control.Click();
+    map.addControl(this.clickControl);
+    this.clickControl.activate();
+    */
+    },
+      getParams: function(options) {
+        this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
+        this.params.sql += this.mapd.getWhere(options);
+        var lonlat = map.getLonLatFromPixel(e.xy);
+        //var mapRes = map.resolution * pixelTolerance;
+        //var boundingCircSq = mapRes*mapRes + mapRes*mapRes;
+        this.params.sql += "ORDER BY orddist(point(goog_x,goog_y), point(" + lonlat.lon +"," + lonlat.lat + ")) LIMIT 1";
+        this.params.bbox = this.mapd.map.getExtent().toBBOX();
+        var url = this.mapd.host + '?' + buildURI(this.params);
+        return url;
+      },
+
+      onTweet: function(json) {
+        console.log("ontweet");
+        console.log(json);
+      }
+    }
+
 
 
 var Tweets = 

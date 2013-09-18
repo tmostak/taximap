@@ -7,12 +7,46 @@ var words;
 var pointLayer;
 var heatLayer;
 var baseLayers;
+var clickControl;
 
 function init()
 { 
   map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913"});
 
   baseLayers = new Array(new OpenLayers.Layer.Google("Google Roadmap", {type: google.maps.MapTypeId.ROADMAP}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Topo", {type: google.maps.MapTypeId.TERRAIN}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Hybrid", {type: google.maps.MapTypeId.HYBRID}, {isBaseLayer: true}), new OpenLayers.Layer.OSM("OpenStreeMap"),  new OpenLayers.Layer("Blank",{isBaseLayer: true}));
+
+    OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
+      defaultHandlerOptions: {
+        'single': true,
+         'double': false,
+         'pixelTolerance': 0,
+         'stopSingle': false,
+         'stopDouble': false
+        },
+        initialize: function (options) {
+          this.handlerOptions = OpenLayers.Util.extend( {}, this.defaultHandlerOptions
+          );
+          this.handler = new OpenLayers.Handler.Click(
+              this, {
+                  'click': this.trigger
+                }, this.handlerOptions
+            );
+        },
+      trigger: function(e) {
+           /*
+          console.log('at click');
+          if (mapd.services.settings.pointOn) {
+            $.getJSON(this.getURL()).done($.proxy(this.onTweet,this));
+          }
+        */
+        }
+    });
+
+    clickControl = new OpenLayers.Control.Click();
+    map.addControl(clickControl);
+    //clickControl.activate();
+
+
   map.addLayers(baseLayers);
 
 
@@ -29,6 +63,7 @@ function init()
   map.addLayer(pointLayer);
 
   Tweets.init($('div#sortOrder'), $('div#tweets'));
+  TweetClick.init();
   TopKTokens.init($('div#cloud'));
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
@@ -41,6 +76,10 @@ function init()
   //baseLayer.display(false);
   pointLayer.display(false);
   heatLayer.display(false);
+
+
+
+
 }
 
 function numberWithCommas(n) {
