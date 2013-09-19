@@ -428,6 +428,7 @@ var TweetClick =
     bbox: null,
   },
   clickControl: null,
+  popup: null,
 
   init:function() {
     /*
@@ -503,23 +504,24 @@ var TweetClick =
         //var popupSize = new OpenLayers.Size(50, 50);
         //var popup = new OpenLayers.Popup.Anchored(null, popupLatLon, popupSize, html);
         //var html = "<p>" + tweet.tweet_text + "<\p>";
-        //var container = $('<div></div>').addClass("tweet-popup");
-        var container = $('<div></div>').addClass("tweet-container");
+        var container = $('<div></div>').addClass("tweet-popup");
+        //var container = $('<div></div>').addClass("tweet-container");
         var header = $('<div></div>').addClass("tweet-header").appendTo(container);
         var content = $('<p></p>').addClass("tweet-content").appendTo(container);
-        //var profile = $('<a></a>').addClass("popup-profile").appendTo(header);
-        var profile = $('<a></a>').addClass("tweet-profile").appendTo(header);
+        var profile = $('<a></a>').addClass("popup-profile").appendTo(header);
+        //var profile = $('<a></a>').addClass("tweet-profile").appendTo(header);
         var time = new Date(tweet.time * 1000);
-        var timeText = $('<div></div>').addClass("tweet-time").appendTo(header);
+        var timeText = $('<div></div>').addClass("popup-time").appendTo(header);
         timeText.html(time.toLocaleString());
         content.html(twttr.txt.autoLink(tweet.tweet_text, {targetBlank: true}));
         profile.html(tweet.sender_name);
         profile.attr('href', 'https://twitter.com/' + tweet.sender_name);
         profile.attr('target', '_none');
-        
-        console.log(container.html());
 
-        var popup = new OpenLayers.Popup.FramedCloud("tweet",
+        if (this.popup != null)
+          this.popup.destroy();
+
+        this.popup = new OpenLayers.Popup.FramedCloud("tweet",
          new OpenLayers.LonLat(x, y),
          //new OpenLayers.Size(300,150),
          null,
@@ -527,9 +529,18 @@ var TweetClick =
          null,
          true);
 
-        this.mapd.map.addPopup(popup);
-        popup.updateSize();
-        console.log(popup);
+        this.mapd.map.addPopup(this.popup);
+        this.popup.updateSize();
+
+        $('.popup-profile, .username').click( $.proxy(function(e) {
+          var userName = $(e.target).html();
+          //console.log($(this).html());
+          this.mapd.services.search.termsInput.val("");
+          this.mapd.services.search.userInput.val(userName);
+          $('#userInput').trigger('input');
+          this.mapd.services.search.form.submit();
+        }, this));
+
       }
 
 

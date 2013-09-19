@@ -230,7 +230,7 @@ div#numTokensText {
   position: relative;
   padding: 5px 10px 5px 10px;
   font-size: 13px;
-  width: 400px;
+  //width: 400px;
 }
 
 .popup-profile {
@@ -243,6 +243,8 @@ div#numTokensText {
 .popup-time {
   margin-left: 55%;
   color: #777;
+  white-space:nowrap;
+  overflow:hidden;
 }
 
 .tweet-container {
