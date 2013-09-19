@@ -226,6 +226,25 @@ div#numTokensText {
   color: #777;
 }
 
+.tweet-popup {
+  position: relative;
+  padding: 5px 10px 5px 10px;
+  font-size: 13px;
+  width: 400px;
+}
+
+.popup-profile {
+  float: left;
+  font-weight: bold;
+  font-size: 16px;
+  color: #222;
+}
+
+.popup-time {
+  margin-left: 55%;
+  color: #777;
+}
+
 .tweet-container {
   list-style:none;
   padding: 5px 10px 5px 10px;

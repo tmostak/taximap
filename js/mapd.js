@@ -474,20 +474,66 @@ var TweetClick =
       getURL: function(e) {
         this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
         this.params.sql += this.mapd.getWhere();
-        var lonlat = map.getLonLatFromPixel(e.xy);
+        var lonlat = this.mapd.map.getLonLatFromPixel(e.xy);
         console.log(lonlat);
         this.params.sql += " ORDER BY orddist(point(goog_x,goog_y), point(" + lonlat.lon +"," + lonlat.lat + ")) LIMIT 1";
         console.log(this.params.sql);
-        var pointBuffer = map.resolution * pixelTolerance;
-        this.params.bbox = lonlat.x-pointBuffer + "," lonlat.y-pointBuffer +"," + lonlat.x+pointBuffer +"," lonlat.y+pointBuffer; 
+        var pointBuffer = this.mapd.map.resolution * this.pixelTolerance;
+        console.log("pointbuffer");
+        console.log(pointBuffer);
+
+        this.params.bbox = (lonlat.lon-pointBuffer).toString() + "," + (lonlat.lat-pointBuffer).toString() +"," + (lonlat.lon+pointBuffer).toString() + "," + (lonlat.lat+pointBuffer).toString(); 
         var url = this.mapd.host + '?' + buildURI(this.params);
+        console.log(url);
         return url;
       },
 
       onTweet: function(json) {
         console.log("ontweet");
         console.log(json);
+        if (json != null) {
+            var tweet = json.results[0];
+            this.addPopup(tweet.goog_x, tweet.goog_y, tweet);
+        }
+      },
+
+
+      addPopup: function(x, y, tweet) {
+        //var popupLatLon = new OpenLayers.LonLat(x, y);
+        //var popupSize = new OpenLayers.Size(50, 50);
+        //var popup = new OpenLayers.Popup.Anchored(null, popupLatLon, popupSize, html);
+        //var html = "<p>" + tweet.tweet_text + "<\p>";
+        //var container = $('<div></div>').addClass("tweet-popup");
+        var container = $('<div></div>').addClass("tweet-container");
+        var header = $('<div></div>').addClass("tweet-header").appendTo(container);
+        var content = $('<p></p>').addClass("tweet-content").appendTo(container);
+        //var profile = $('<a></a>').addClass("popup-profile").appendTo(header);
+        var profile = $('<a></a>').addClass("tweet-profile").appendTo(header);
+        var time = new Date(tweet.time * 1000);
+        var timeText = $('<div></div>').addClass("tweet-time").appendTo(header);
+        timeText.html(time.toLocaleString());
+        content.html(twttr.txt.autoLink(tweet.tweet_text, {targetBlank: true}));
+        profile.html(tweet.sender_name);
+        profile.attr('href', 'https://twitter.com/' + tweet.sender_name);
+        profile.attr('target', '_none');
+        
+        console.log(container.html());
+
+        var popup = new OpenLayers.Popup.FramedCloud("tweet",
+         new OpenLayers.LonLat(x, y),
+         //new OpenLayers.Size(300,150),
+         null,
+         container.html(), 
+         null,
+         true);
+
+        this.mapd.map.addPopup(popup);
+        popup.updateSize();
+        console.log(popup);
       }
+
+
+
     }
 
 
