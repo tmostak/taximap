@@ -35,10 +35,11 @@ var MapD = {
     tweets: null,
     graph: null,
     search: null,
-    settings: null
+    settings: null,
+    tweetclick: null
   },
 
-  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings) {
+  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick) {
     if (window.location.search == "?local")
         this.host = "http://sirubu.velocidy.net:8080";
       
@@ -51,6 +52,7 @@ var MapD = {
     this.services.graph = graph;
     this.services.search = search;
     this.services.settings = settings;
+    this.services.tweetclick = tweetclick;
     this.map.events.register('moveend', this, this.reload);
     $(document).on('mapdreload', $.proxy(this.reload, this));
   },
@@ -462,14 +464,22 @@ var TweetClick =
     this.clickControl.activate();
     */
     },
-      getParams: function(options) {
+
+      handleClick: function(e) {
+        console.log("handleclick");
+        $.getJSON(this.getURL(e)).done($.proxy(this.onTweet,this));
+      },
+
+        
+      getURL: function(e) {
         this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
-        this.params.sql += this.mapd.getWhere(options);
+        this.params.sql += this.mapd.getWhere();
         var lonlat = map.getLonLatFromPixel(e.xy);
-        //var mapRes = map.resolution * pixelTolerance;
-        //var boundingCircSq = mapRes*mapRes + mapRes*mapRes;
-        this.params.sql += "ORDER BY orddist(point(goog_x,goog_y), point(" + lonlat.lon +"," + lonlat.lat + ")) LIMIT 1";
-        this.params.bbox = this.mapd.map.getExtent().toBBOX();
+        console.log(lonlat);
+        this.params.sql += " ORDER BY orddist(point(goog_x,goog_y), point(" + lonlat.lon +"," + lonlat.lat + ")) LIMIT 1";
+        console.log(this.params.sql);
+        var pointBuffer = map.resolution * pixelTolerance;
+        this.params.bbox = lonlat.x-pointBuffer + "," lonlat.y-pointBuffer +"," + lonlat.x+pointBuffer +"," lonlat.y+pointBuffer; 
         var url = this.mapd.host + '?' + buildURI(this.params);
         return url;
       },
