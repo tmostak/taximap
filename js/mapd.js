@@ -412,6 +412,12 @@ var HeatMap = {
     if (queryArray[0])
       this.params.sql += "," + queryArray[0];
     this.params.sql += " from " + this.mapd.table + queryArray[1];
+
+    if (options.heatMax != undefined && options.heatMax != null) 
+      this.params.maxval = options.heatMax;
+    else
+      this.params.maxval = "auto"; 
+
     //console.log("FINAL");
     //console.log(this.params.sql);
     return this.params;
@@ -1046,12 +1052,13 @@ var Animation = {
   mapd: MapD,
   pointLayer: null,
   heatLayer: null,
+  heatMax: null,
   //pointMap: null,
   //heatMap: null,
   playPauseButton: null,
   stopButton: null,
   playing: false,
-  numFrames: 60.0,
+  numFrames: 120.0,
   animStart: null,
   animEnd: null,
   frameStep: null,
@@ -1086,7 +1093,7 @@ var Animation = {
 
   animFunc: function() {
      if (this.frameEnd < this.animEnd) {
-        var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}}; 
+        var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
       //console.log (this.frameStart + "-" + this.frameEnd);
       this.frameStart += this.frameStep;
       this.frameEnd += this.frameStep;
@@ -1113,6 +1120,8 @@ var Animation = {
         this.frameWidth = this.mapd.timeend - this.mapd.timestart;
         this.frameStart = this.animStart;
         this.frameEnd = this.animStart + this.frameWidth;
+        this.heatMax = parseFloat($.cookie('max_value')) * 10.0;
+        console.log(this.heatMax);
       }
       this.animFunc();
 
