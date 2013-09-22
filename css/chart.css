@@ -68,6 +68,16 @@ rect.pane {
   stroke-opacity: 0.3;
 }
 
+.brush {
+  stroke: #ec008c;
+  stroke-width: 3px;
+  stroke-linecap="round";
+  //stroke-width: 1px 3px 1px 3px;
+  fill: #faafdb;
+  fill-opacity: .15;
+  shape-rendering: crispEdges;
+}
+
 .chart-options { 
   position: absolute;
 }

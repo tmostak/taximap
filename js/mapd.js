@@ -36,10 +36,11 @@ var MapD = {
     graph: null,
     search: null,
     settings: null,
-    tweetclick: null
+    tweetclick: null,
+    animation: null
   },
 
-  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick) {
+  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation) {
     if (window.location.search == "?local")
         this.host = "http://sirubu.velocidy.net:8080";
       
@@ -53,6 +54,7 @@ var MapD = {
     this.services.search = search;
     this.services.settings = settings;
     this.services.tweetclick = tweetclick;
+    this.services.animation = animation;
     this.map.events.register('moveend', this, this.reload);
     $(document).on('mapdreload', $.proxy(this.reload, this));
   },
@@ -64,13 +66,14 @@ var MapD = {
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
       this.timestart = this.datastart;
-      this.timeend = this.dataend;
+      this.timeend = Math.round((this.dataend-this.datastart)*.2 + this.datastart);
+      // start with first tenth of dataset
       this.reload();
     }
   },
 
   reload: function() {
-    console.log('in reload');
+    //console.log('in reload');
     this.services.geotrends.reload();
     this.services.topktokens.reload();
     this.services.tweets.reload();
@@ -78,18 +81,23 @@ var MapD = {
   },
 
   reloadByGraph: function(start, end) {
-    console.log('in reloadByGraph');
-    var oldStart = this.timestart;
-    var oldEnd = this.timeend;
+    //console.log('in reloadByGraph');
+    //var oldStart = this.timestart;
+    //var oldEnd = this.timeend;
     this.timestart = start;
     this.timeend = end;
-    this.services.geotrends.reload();
-    this.services.topktokens.reload();
-    this.services.tweets.reload();
-    this.services.pointmap.reload();
-    this.services.heatmap.reload();
-    this.timestart = oldStart;
-    this.timeend = oldEnd;
+    if (this.services.animation.isAnimating()) { // only need to refresh point and heatmaps in this case - done by stopFunc
+      this.services.animation.stopFunc();
+    }
+    else {
+      this.services.geotrends.reload();
+      this.services.topktokens.reload();
+      this.services.tweets.reload();
+      this.services.pointmap.reload();
+      this.services.heatmap.reload();
+    }
+    //this.timestart = oldStart;
+    //this.timeend = oldEnd;
   },
 
   setDataStart: function(json) {
@@ -276,16 +284,16 @@ var TopKTokens = {
   },
   addClickedWord: function(event) {
     var token = event.originalEvent.srcElement.innerText;
-    console.log("circle cloud token: " + token);
+    //console.log("circle cloud token: " + token);
     if (token == event.originalEvent.srcElement.innerHTML) {
-      console.log(this.mapd);
+      //console.log(this.mapd);
       this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
       $('#termsInput').trigger('input');
       this.mapd.services.search.form.submit();
 
 
       //to make sure we're actually clicking on word
-      console.log(token);
+      //console.log(token);
     }
   },
 
@@ -303,8 +311,8 @@ var TopKTokens = {
     var numQueryTerms = this.mapd.queryTerms.length;
     var wordArray = new Array(numTokens - numQueryTerms);
     var percentFactor = 100.0 / n;
-    console.log("numqueryterms");
-    console.log(numQueryTerms);
+    //console.log("numqueryterms");
+    //console.log(numQueryTerms);
     var tokenRatio = 1.0 / counts[2 + numQueryTerms];
     $('#numTokensText').text("# Tokens: " + numberWithCommas(n));
     for (var t = numQueryTerms; t < numTokens; t++) {
@@ -313,10 +321,10 @@ var TopKTokens = {
         var textPercent = "%" + percent.toFixed(3);
         wordArray[t - numQueryTerms] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
     }
-    console.log(wordArray);
+    //console.log(wordArray);
     this.cloudDiv.jQCloud(wordArray);
-    console.log("clouddiv");
-    console.log(this.cloudDiv);
+    //console.log("clouddiv");
+    //console.log(this.cloudDiv);
   }
 
 
@@ -348,14 +356,14 @@ var PointMap = {
   },
 
   setWMSParams: function() {
-    console.log("retile");
+    //console.log("retile");
     //this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
   },
 
   getParams: function(options) {
     this.params.sql = "select goog_x, goog_y, tweet_text from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere(options);
-    console.log(this.params.sql);
+    //console.log(this.params.sql);
     return this.params;
   },
 
@@ -404,8 +412,8 @@ var HeatMap = {
     if (queryArray[0])
       this.params.sql += "," + queryArray[0];
     this.params.sql += " from " + this.mapd.table + queryArray[1];
-    console.log("FINAL");
-    console.log(this.params.sql);
+    //console.log("FINAL");
+    //console.log(this.params.sql);
     return this.params;
   },
 
@@ -467,7 +475,7 @@ var TweetClick =
     },
 
       handleClick: function(e) {
-        console.log("handleclick");
+        //console.log("handleclick");
         $.getJSON(this.getURL(e)).done($.proxy(this.onTweet,this));
       },
 
@@ -476,22 +484,22 @@ var TweetClick =
         this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
         this.params.sql += this.mapd.getWhere();
         var lonlat = this.mapd.map.getLonLatFromPixel(e.xy);
-        console.log(lonlat);
+        //console.log(lonlat);
         this.params.sql += " ORDER BY orddist(point(goog_x,goog_y), point(" + lonlat.lon +"," + lonlat.lat + ")) LIMIT 1";
-        console.log(this.params.sql);
+        //console.log(this.params.sql);
         var pointBuffer = this.mapd.map.resolution * this.pixelTolerance;
-        console.log("pointbuffer");
-        console.log(pointBuffer);
+        //console.log("pointbuffer");
+        //console.log(pointBuffer);
 
         this.params.bbox = (lonlat.lon-pointBuffer).toString() + "," + (lonlat.lat-pointBuffer).toString() +"," + (lonlat.lon+pointBuffer).toString() + "," + (lonlat.lat+pointBuffer).toString(); 
         var url = this.mapd.host + '?' + buildURI(this.params);
-        console.log(url);
+        //console.log(url);
         return url;
       },
 
       onTweet: function(json) {
-        console.log("ontweet");
-        console.log(json);
+        //console.log("ontweet");
+        //console.log(json);
         if (json != null) {
             var tweet = json.results[0];
             this.addPopup(tweet.goog_x, tweet.goog_y, tweet);
@@ -507,6 +515,7 @@ var TweetClick =
         var container = $('<div></div>').addClass("tweet-popup");
         //var container = $('<div></div>').addClass("tweet-container");
         var header = $('<div></div>').addClass("tweet-header").appendTo(container);
+        $('<div style="clear: both;"></div>');
         var content = $('<p></p>').addClass("tweet-content").appendTo(container);
         var profile = $('<a></a>').addClass("popup-profile").appendTo(header);
         //var profile = $('<a></a>').addClass("tweet-profile").appendTo(header);
@@ -574,8 +583,8 @@ var Tweets =
   scrollTop:0,
 
 init: function(sortDiv, viewDiv) {
-    console.log("SortDiv: " + sortDiv);
-    console.log(viewDiv);
+    //console.log("SortDiv: " + sortDiv);
+    //console.log(viewDiv);
     this.sortDiv = sortDiv;
     this.viewDiv = viewDiv;
     this.defaultPointStyle = new OpenLayers.Style({
@@ -742,7 +751,7 @@ init: function(sortDiv, viewDiv) {
   // },
    
   onTweets: function(json) {
-    console.log('in onTweets');
+    //console.log('in onTweets');
     this.viewDiv.empty();
     if (this.sortDesc) {
       $("#newSort").addClass("link-visited");
@@ -867,7 +876,7 @@ init: function(sortDiv, viewDiv) {
     var popup = new OpenLayers.Popup.Anchored(null, popupLatLon, popupSize, html);
     this.mapd.map.addPopup(popup);
     popup.updateSize();
-    console.log(popup);
+    //console.log(popup);
   },
 
   addPoint: function(x,y,index, selectColor) {
@@ -940,11 +949,11 @@ var GeoCoder = {
   },
 
   onGeoCoding: function(data, status) {
-    console.log('in onGeoCoding');
+    //console.log('in onGeoCoding');
     this.status = status;
     if (status != google.maps.GeocoderStatus.OK) {
       this.bbox = null;
-      console.log('Geocoding service failed:', status);
+      //console.log('Geocoding service failed:', status);
       return;
     }
     if (data.length != 1)  {
@@ -995,7 +1004,7 @@ var Search = {
   },
  
   onSearch: function() {
-    console.log('in onSearch');
+    //console.log('in onSearch');
     var terms = this.termsInput.val();
     var location = this.locationInput.val();
     this.locationChanged = this.location != location;
@@ -1016,14 +1025,14 @@ var Search = {
   },
 
   onGeoCodeEnd: function(event) {
-    console.log('in onGeoCodeEnd');
+    //console.log('in onGeoCodeEnd');
     var bounds = event.bounds;
     this.map.zoomToExtent(bounds);
   },
 
   onMapMove: function() 
   {
-    console.log('in onMapMove');
+    //console.log('in onMapMove');
     if (this.locationChanged)
       this.locationChanged = false;
     else {
@@ -1071,14 +1080,17 @@ var Animation = {
     }
   },
 
-
+  isAnimating: function() {
+    return (this.animStart != null);
+  },
 
   animFunc: function() {
      if (this.frameEnd < this.animEnd) {
         var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}}; 
-      console.log (this.frameStart + "-" + this.frameEnd);
+      //console.log (this.frameStart + "-" + this.frameEnd);
       this.frameStart += this.frameStep;
       this.frameEnd += this.frameStep;
+      this.mapd.services.graph.chart.setBrushExtent([this.frameStart * 1000, this.frameEnd * 1000]);
       this.mapd.services.pointmap.reload(options);
       this.mapd.services.heatmap.reload(options);
     }
@@ -1089,15 +1101,16 @@ var Animation = {
 
 
   playFunc: function () {
-    console.log("play");
+    //console.log("play");
     if (this.playing == false) {
       this.playing = true;
       this.playPauseButton.removeClass("play-icon").addClass("pause-icon");
       if (this.animStart == null) { // won't trigger if paused
-        this.animStart = this.mapd.timestart;
-        this.animEnd = this.mapd.timeend;
+        this.animStart = this.mapd.datastart;
+        this.animEnd = this.mapd.dataend;
         this.frameStep = (this.animEnd - this.animStart) / this.numFrames;
-        this.frameWidth = this.frameStep * 4.0;
+        //this.frameWidth = this.frameStep * 4.0;
+        this.frameWidth = this.mapd.timeend - this.mapd.timestart;
         this.frameStart = this.animStart;
         this.frameEnd = this.animStart + this.frameWidth;
       }
@@ -1111,16 +1124,19 @@ var Animation = {
   },
 
   stopFunc: function() {
-    console.log("stop");
-    this.animStart = null;
-    this.animEnd = null;
-    this.animStep = null;
-    this.numLayersLoaded = 0;
-    this.playing = false;
-    this.playPauseButton.removeClass("pause-icon").addClass("play-icon");
-    //this.playPauseButton.attr("id", "play-icon");
-    this.mapd.services.pointmap.reload();
-    this.mapd.services.heatmap.reload();
+    //console.log("stop");
+    if (this.animStart != null) { //meaning its stopped or playing
+      this.animStart = null;
+      this.animEnd = null;
+      this.animStep = null;
+      this.numLayersLoaded = 0;
+      this.playing = false;
+      this.playPauseButton.removeClass("pause-icon").addClass("play-icon");
+      //this.playPauseButton.attr("id", "play-icon");
+      this.mapd.services.graph.chart.setBrushExtent([this.mapd.timestart * 1000, this.mapd.timeend * 1000]);
+      this.mapd.services.pointmap.reload();
+      this.mapd.services.heatmap.reload();
+    }
   }
 
 }
@@ -1237,15 +1253,15 @@ var Chart =
     var queryTerms = this.queryTerms.slice(0);
     // for now, time range always corresponds to entire data range
     var options = {queryTerms: this.mapd.queryTerms, user: this.mapd.user, time: {timestart: this.mapd.datastart, timeend: this.mapd.dataend }};
-    $.getJSON(this.getURL(options)).done($.proxy(this.onChart, this, this.mapd.queryTerms, true));
+    $.getJSON(this.getURL(options)).done($.proxy(this.onChart, this, this.mapd.timestart, this.mapd.timeend, this.mapd.queryTerms, true));
   },
 
   drawChart: function() {
-    console.log('in drawChart', this);
+    //console.log('in drawChart', this);
   },
 
-  onChart: function(queryTerms, clear, json) {
-    console.log('in onChart', queryTerms);
+  onChart: function(frameStart, frameEnd, queryTerms, clear, json) {
+    //console.log('in onChart', queryTerms);
     queryTerms = queryTerms.join(" ")
     if (clear) {
       this.seriesId = 0;
@@ -1257,7 +1273,7 @@ var Chart =
     if ("y" in json) { // means we have percent
       for (i in json.x) {
         var time  = json.x[i];
-        var percent = json.y[i];
+        var percent = json.y[i] * 100.0;
         if (json.count[i] > 0)
           series.push({date: new Date(time * 1000), value: percent});
       }
@@ -1270,26 +1286,36 @@ var Chart =
         series.push({date: new Date(time * 1000), value: count});
       }
     }
-    this.chart.addSeries(this.seriesId, queryTerms, series);
+    this.chart.addSeries(this.seriesId, queryTerms, series, frameStart, frameEnd);
     this.seriesId += 1;
   },
 
   onZoom: function() {
+    /*
     console.log('in onZoom');
     var range = this.chart.getXRange();
     var start = (range[0].getTime()/1000).toFixed(0);
     var end = (range[1].getTime()/1000).toFixed(0)
-    start = +start + 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
-    end = +end + 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
-    console.log(range, start, end);
+    */
+    //console.log(this.chart.b0);
+    var start = (this.chart.brush.extent()[0]/ 1000).toFixed(0);
+    var end = (this.chart.brush.extent()[1] / 1000).toFixed(0);
+    //console.log("brush range");
+    //console.log(start + ", " + end);
+
+
+
+    //start = +start + 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
+    //end = +end + 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
+    //console.log(range, start, end);
     this.mapd.reloadByGraph(start, end);
   },
 
   onCompare: function(terms) {
-    console.log('in onCompare');
+    //console.log('in onCompare');
     var queryTerms = terms.trim().split(" ").filter(function(d) {return d});
     // for now, time range always corresponds to entire data range
     var options = {queryTerms: queryTerms, user: this.mapd.user,  time: {timestart: this.mapd.datastart, timeend: this.mapd.dataend }};
-    $.getJSON(this.getURL(options)).done($.proxy(this.onChart, this, queryTerms, false));
+    $.getJSON(this.getURL(options)).done($.proxy(this.onChart, this, this.mapd.timestart, this.mapd.timeend, queryTerms, false));
   }
 }

@@ -227,22 +227,24 @@ div#numTokensText {
 }
 
 .tweet-popup {
-  position: relative;
-  padding: 5px 10px 5px 10px;
-  font-size: 13px;
+  //position: relative;
+  //padding: 5px 10px 5px 10px !important;
+  font-size: 13px !important;
   //width: 400px;
 }
 
 .popup-profile {
   float: left;
-  font-weight: bold;
+  font-weight: bold !important;
   font-size: 16px;
   color: #222;
 }
 
 .popup-time {
-  margin-left: 55%;
+  //margin-left: 55%;
+  //float: right;
   color: #777;
+  margin-left: 50%;
   white-space:nowrap;
   overflow:hidden;
 }
@@ -286,6 +288,7 @@ div#numTokensText {
 
 .tweet-content {
   margin: 0;
+  padding:0;
   color: #555;
 }
 
@@ -293,10 +296,6 @@ div#numTokensText {
   color: #0084b4;
 }
 
-.tweet-popup { 
-  color: #555;
-  font-size: 12px;
-}
 
 .logo-image {
   width: 90px;

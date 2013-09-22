@@ -9,11 +9,20 @@ var LineChart =
 {
   x: null,
   y: null,
+  brushExtent: null,
+  width: null,
+  height: null,
+  margin: null,
   xAxis: null,
   yAxis: null,
   series: [],
   zoom: null,
+  zoomScale: 1.0,
+  zoomXTranslate: 0,
+  prevZoomScale: null,
+  prevZoomXTranslate: null,
   prevXDomain: null,
+  brush: null,
   elems: {
     container: null,
     svg: null,
@@ -37,14 +46,20 @@ var LineChart =
   
 
     
-    var margin = {top: 25, right: 30, bottom: 25, left: 25},
-        //width = 400 - margin.left - margin.right,
-         width = $(window).width() - 400 - margin.left - margin.right,
-        //height = 160 - margin.top - margin.bottom;
-         height = 200 - margin.top - margin.bottom;
+    this.margin = {top: 25, right: 30, bottom: 25, left: 25};
+        //width = 400 - this.margin.left - this.margin.right,
+         this.width = $(window).width() - 400 - this.margin.left - this.margin.right;
+        //height = 160 - this.margin.top - this.margin.bottom;
+         this.height = 200 - this.margin.top - this.margin.bottom;
 
-    this.x = d3.time.scale().range([0, width]);
-    this.y = d3.scale.linear().range([height, 0]);
+    this.x = d3.time.scale().range([0, this.width]);
+    this.y = d3.scale.linear().range([this.height, 0]);
+
+    this.brush =d3.svg.brush()
+      .x(this.x)
+      //.on("brushstart", $.proxy(this.brushdown, this))
+      //.on("brush", $.proxy(this.brushed, this))
+      .on("brushend", $.proxy(this.brushdown, this));
 
     this.xAxis = d3.svg.axis()
         .scale(this.x)
@@ -54,23 +69,23 @@ var LineChart =
     this.yAxis = d3.svg.axis()
         .scale(this.y)
         .orient("left")
-        .tickSize(-width)
+        .tickSize(-this.width)
         .tickPadding(6);
 
     this.zoom = d3.behavior.zoom()
-        .scaleExtent([1, 8])
+        .scaleExtent([1, 16])
         .on("zoom", $.proxy(this.onZoom, this));
 
     var svg = this.elems.container
         .attr("class", "chart")
          .append("svg")
-       //.attr("width", width + margin.left + margin.right)
-        .attr("width", width + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+       //.attr("width", width + this.margin.left + this.margin.right)
+        .attr("width", this.width + this.margin.right)
+        .attr("height", this.height + this.margin.top + this.margin.bottom)
       .append("g")
-       .attr("transform", "translate(" + 60 + "," + margin.top + ")");
-       //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        //.attr("margin-left", margin.left);
+       .attr("transform", "translate(" + 60 + "," + this.margin.top + ")");
+       //.attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+        //.attr("this.margin-left", this.margin.left);
     this.elems.svg = svg;
 
     svg.append("g")
@@ -78,7 +93,7 @@ var LineChart =
 
     svg.append("g")
         .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")");
+        .attr("transform", "translate(0," + this.height + ")");
 
     svg.append("clipPath")
         .attr("id", "clip")
@@ -91,8 +106,8 @@ var LineChart =
     var self = this;
     var pane = svg.append("rect")
         .attr("class", "pane")
-        .attr("width", width)
-        .attr("height", height);
+        .attr("width", this.width)
+        .attr("height", this.height);
 
     pane.on("mousemove", function() { return self.mousemove(self, this) })
         .on("mouseout", function() { return self.mouseout(self, this) })
@@ -100,17 +115,17 @@ var LineChart =
 
     this.elems.info = this.elems.container.select("svg").append("g")
         .attr("class", "info")
-        //.attr("transform", "translate(" + margin.left + "," + (margin.top - 5) + ")");
-        .attr("transform", "translate(" + 60 + "," + (margin.top - 5) + ")");
+        //.attr("transform", "translate(" + this.margin.left + "," + (this.margin.top - 5) + ")");
+        .attr("transform", "translate(" + 60 + "," + (this.margin.top - 5) + ")");
     
     this.elems.info.append("text")
         .attr("class", "date");
 
     this.elems.optionsDiv = container.append("div")
         .attr("class", "chart-options")
-        .attr("height", (margin.top + height))
-       .style("top", margin.top + "px")
-       .style("left", (margin.left + width + 10) + "px")
+        .attr("height", (this.margin.top + this.height))
+       .style("top", this.margin.top + "px")
+       .style("left", (this.margin.left + this.width + 10) + "px")
 
     var resetButton = this.elems.optionsDiv.append("div")
         .attr("class", "sprites reset")
@@ -120,7 +135,7 @@ var LineChart =
 //     var trends = this.elems.optionsDiv.append("div")
 //         .attr("class", "sprites trends")
 //         .attr("title", "trends")
-//        .style("margin-top", "5px")
+//        .style("this.margin-top", "5px")
     this.elems.settingsDiv = container.append("div").attr("class", "chart-settings");
 
     this.elems.compareDiv = this.elems.settingsDiv.append("div")
@@ -154,8 +169,30 @@ var LineChart =
     */
   },
 
+  brushed: function() {
+    //console.log("brushed");
+  },
+
+  brushdown: function() {
+    console.log("brushdown");
+    var brushChanged = (+this.brush.extent()[0] != +this.brushExtent[0] || +this.brush.extent()[1] != +this.brushExtent[1]);
+    if (brushChanged)
+        this.zoomCallback();
+
+    //console.log(this.brush.extent());
+  },
+
+
+  setBrushExtent: function(extent) {
+    //console.log(extent);
+    this.brushExtent = extent;
+    this.brush.extent(this.brushExtent);
+    this.redrawBrush();
+  },
+
+
   onLineChartJson: function(id, json) {
-    console.log("hi");
+    //console.log("hi");
     var data = [];
     if (y in json) { // means we have percent
         for (i in json.x) {
@@ -194,9 +231,10 @@ var LineChart =
     return [this.x.invert(range[0]), this.x.invert(range[1])];
   },
 
-  addSeries: function(id, name, data) {
+  addSeries: function(id, name, data, frameStart, frameEnd) {
     var self = this;
     var xDomain = d3.extent(data, function(d) { return d.date; });
+    //var xDomain = [frameStart*1000, frameEnd*1000]; 
     var yDomain = d3.extent(data, function(d) { return d.value; });
     
     var line = d3.svg.line()
@@ -207,10 +245,51 @@ var LineChart =
     var color = this.color.filter(function(color) { return !(color in self.colorUsed); })[0];
     this.colorUsed[color] = true;
     this.series.push({id: id, name: name, xDomain: xDomain, yDomain: yDomain, data: data, line: line, color: color});
-
+    /*
+    if (this.prevXDomain != null) {
+        this.x.domain(this.prevXDomain);
+    }
+    else {
+        this.x.domain(this.getXDomain());
+    }
+    */
     this.x.domain(this.getXDomain());
     this.y.domain(this.getYDomain());
     this.zoom.x(this.x);   
+    if (this.prevZoomScale != null) {
+        this.zoom.scale(this.prevZoomScale);
+        this.zoom.translate([this.prevZoomXTranslate, 0]);
+    }
+
+        
+
+
+    //var zoomScale = (this.x.domain()[1]-this.x.domain()[0])/(frameEnd*1000-frameStart*1000);
+    //var zoomXTranslate = (this.x.domain()[0] - frameStart*1000) / (this.x.domain()[1]-this.x.domain()[0]) * this.width;
+    //this.zoom.scale(zoomScale);
+    //this.zoom.translate([zoomXTranslate, 0]);
+
+
+    if (this.brushExtent == null) {
+        this.brushExtent = [frameStart*1000, frameEnd*1000];
+      /*
+      this.b0 = this.x.domain()[0];
+      this.b1 = new Date(this.b0.getTime() + 86400 * 3 * 1000);
+      */
+
+
+      this.brush.extent(this.brushExtent);
+      //console.log("brush");
+      //console.log(this.brush.extent());
+
+      this.elems.svg.append("g")
+        .attr("class", "brush")
+        .call(this.brush)
+        .attr("transform", "translate(0,0)")
+        .selectAll("rect")
+        .attr("y", 0)
+        .attr("height",this.height);
+    }
 
     this.elems.svg.insert("path", "rect.pane")
         .attr("class", "line")
@@ -285,7 +364,7 @@ var LineChart =
   },
   
   draw: function() {
-    console.log('in draw', this);
+    //console.log('in draw', this);
     var svg = this.elems.svg;
     svg.select("g.x.axis").call(this.xAxis);
     svg.select("g.y.axis").call(this.yAxis);
@@ -293,10 +372,18 @@ var LineChart =
     this.prevXDomain = this.x.domain().slice(0);
   },
 
+  redrawBrush: function() {
+    this.elems.svg.select(".brush").call(this.brush);
+  },
+
   onZoom: function() {
     var self = this;
+    this.prevZoomScale = this.zoom.scale();
+    this.prevZoomXTranslate = this.zoom.translate()[0];
+    /*
     var viewChanged = (+this.x.domain()[0] != +this.prevXDomain[0] || 
                        +this.x.domain()[1] != +this.prevXDomain[1]);
+    this.brush.extent([this.b0, this.b1]);
     this.draw();
     if (viewChanged) {
       var now = new Date();
@@ -306,6 +393,7 @@ var LineChart =
           self.zoomCallback();
       }, this.zoomDelay);
     }
+    */
   },
 
   resetLegends: function() 
@@ -448,7 +536,7 @@ var gg =
 }
 
 function zoomcb() {
-  console.log('zoom callback');
+  //console.log('zoom callback');
 }
 
 function test() {
