@@ -209,7 +209,7 @@ var GeoTrends = {
     xbins: 16,
     ybins: 16,
     tbins: 2,
-    stoptable: "long_stop"
+    stoptable: "multistop"
   },
   GRIDSIZE_SMALL: 64,
   GRIDSIZE_MEDIUM: 96,
@@ -265,7 +265,7 @@ var TopKTokens = {
     sql: null,
     bbox: null,
     k: 30,
-    stoptable: "long_stop"
+    stoptable: "multistop"
   },
 
   init: function(cloudDiv) {
