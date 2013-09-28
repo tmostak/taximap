@@ -11,7 +11,7 @@ var clickControl;
 
 function init()
 { 
-  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913"});
+  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", maxResolution: 156543.0339, numZoomLevels:20});
 
   baseLayers = new Array(new OpenLayers.Layer.Google("Google Roadmap", {type: google.maps.MapTypeId.ROADMAP}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Topo", {type: google.maps.MapTypeId.TERRAIN}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Hybrid", {type: google.maps.MapTypeId.HYBRID}, {isBaseLayer: true}), new OpenLayers.Layer.OSM("OpenStreeMap"),  new OpenLayers.Layer("Blank",{isBaseLayer: true}));
 

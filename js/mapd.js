@@ -127,12 +127,18 @@ var MapD = {
   },
 
   parseQueryTerms: function(queryTerms) { 
-    var array = queryTerms.slice(0);
-    for (i in array) {
-      array[i] = "'" + array[i].replace("'", "''").replace(/["]/g, '').replace("&", "") + "'";
+    if (queryTerms[0] == "multilanguage") {
+        var query = "tweet_text ilike 'coffee' or tweet_text ilike 'café' or tweet_text ilike 'caffè' or tweet_text ilike 'kaffe' or tweet_text ilike 'kaffe' or tweet_text ilike 'кофе' or tweet_text ilike 'kahve' or tweet_text ilike 'قهوة' or tweet_text ilike '咖啡' or tweet_text ilike '커피' or tweet_text ilike 'コーヒー' or tweet_text ilike 'kopi'";
+	return query;
     }
-    var whereTerms = array.join(" and tweet_text ilike ");
-    whereTerms = "(tweet_text ilike " + whereTerms + ") ";
+    else {
+        var array = queryTerms.slice(0);
+        for (i in array) {
+          array[i] = "'" + array[i].replace("'", "''").replace(/["]/g, '').replace("&", "") + "'";
+        }
+        var whereTerms = array.join(" and tweet_text ilike ");
+        whereTerms = "(tweet_text ilike " + whereTerms + ") ";
+    }
     return whereTerms;
   },
 
@@ -385,6 +391,7 @@ var HeatMap = {
     maxval: "auto", 
     min: 0.2,
     blur: 26,
+    colorramp: "green_red",
     format: "image/png",
     transparent: true
   },
