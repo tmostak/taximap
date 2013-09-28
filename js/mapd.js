@@ -16,9 +16,9 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  //host: "http://192.168.1.90:8080/",
-  host: "http://www.velocidy.net:7000/",
-  table: "tweets",
+  host: "http://127.0.0.1:8080/",
+  //host: "http://www.velocidy.net:7000/",
+  table: "geo_tweets",
 //  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
 //  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
   timestart: null,
@@ -266,6 +266,7 @@ var TopKTokens = {
   mapd: MapD,
   cloudDiv: null, 
   defaultK: 30,
+  mode: "words",
   params: {
     request: "GetTopKTokens",
     sql: null,
@@ -276,8 +277,20 @@ var TopKTokens = {
 
   init: function(cloudDiv) {
     this.cloudDiv = cloudDiv;
-
+    //$(this.cloudDiv).css('cursor', 'pointer');
+    //$("#cloudSource").buttonset();
+    $('input[name="cloudSource"]').change($.proxy(function (event) {
+        this.mode = event.target.value;
+    }, this));
+    /*
+    $('input[name="cloudSource"]').change($.proxy(function (radio) {
+        console.log($(radio).val());
+        //console.log($(this));
+        //console.log($(radio).val());
+    }, this, $('input[name="cloudSource"]')));
+    */
     $(this.cloudDiv).on("click", $.proxy(this.addClickedWord, this)); 
+
   },
 
   getURL: function() {
@@ -290,9 +303,11 @@ var TopKTokens = {
     return url;
   },
   addClickedWord: function(event) {
-    var token = event.originalEvent.srcElement.innerText;
+    console.log(event);
+    //var token = event.originalEvent.srcElement.innerText;
+    var token = event.target.innerHTML;
     //console.log("circle cloud token: " + token);
-    if (token == event.originalEvent.srcElement.innerHTML) {
+    if (token.substring(0,5) != "<span") {
       //console.log(this.mapd);
       this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
       $('#termsInput').trigger('input');
@@ -309,7 +324,7 @@ var TopKTokens = {
     $.getJSON(this.getURL()).done($.proxy(this.onLoad, this));
   },
   onLoad: function(json) {
-    //this.cloudDiv.empty();
+    this.cloudDiv.empty();
 
     var tokens = json.tokens; 
     var counts = json.counts; 
@@ -321,7 +336,7 @@ var TopKTokens = {
     //console.log("numqueryterms");
     //console.log(numQueryTerms);
     var tokenRatio = 1.0 / counts[2 + numQueryTerms];
-    $('#numTokensText').text("# Tokens: " + numberWithCommas(n));
+    $('#numTokensText').text("# Words: " + numberWithCommas(n));
     for (var t = numQueryTerms; t < numTokens; t++) {
       //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
         var percent = counts[t] * percentFactor;

@@ -203,10 +203,25 @@ div#tweets {
   overflow-x: hidden;
 }
 
-div#cloud {
+div#cloudBox{
   margin-top: 0px;
   height: 24%;
 }
+
+div#cloudSource{
+  float: right;
+  padding-right: 10px;
+}
+
+div#cloud {
+  margin-top: 0px;
+  height: 85%;
+}
+
+#cloud span {
+  cursor: pointer;
+}
+
 
 div#sortPref {
   font-size: 12px;
