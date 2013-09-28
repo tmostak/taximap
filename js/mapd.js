@@ -276,6 +276,7 @@ var TopKTokens = {
 
   init: function(cloudDiv) {
     this.cloudDiv = cloudDiv;
+
     $(this.cloudDiv).on("click", $.proxy(this.addClickedWord, this)); 
   },
 
@@ -308,7 +309,7 @@ var TopKTokens = {
     $.getJSON(this.getURL()).done($.proxy(this.onLoad, this));
   },
   onLoad: function(json) {
-    this.cloudDiv.empty();
+    //this.cloudDiv.empty();
 
     var tokens = json.tokens; 
     var counts = json.counts; 

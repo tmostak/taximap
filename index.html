@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/chart.css" />
     <link rel="stylesheet" href="lib/js/jQCloud/jqcloud/jqcloud.css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
     <script src="http://openlayers.org/api/OpenLayers.js"></script>
     <script src="lib/js/javascript.util.js"></script>
@@ -73,9 +74,17 @@
       </div>
       <div id="control">
         <div id="sortOrder"></div>
-        <div id="tweets"></div>
-        <div id="cloud"></div>
-        <div id="numTokensText"></div>
+        <div id="tweets"></div> 
+            <div id="cloudBox">
+                <form>
+                    <div id="cloudSource">
+                        <input type="radio" id="cloudWords" name="radio" /><label for "cloudWords">Words</label>
+                        <input type="radio" id="cloudUsers" name="radio" /><label for "cloudUsers">Users</label>
+                    </div>
+                </form>
+                <div id="cloud"></div>
+                <div id="numTokensText"></div>
+            </div>
       </div>
       <div id="chart"></div>
     </div>
