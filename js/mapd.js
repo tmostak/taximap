@@ -215,7 +215,7 @@ var GeoTrends = {
     xbins: 16,
     ybins: 16,
     tbins: 2,
-    stoptable: "multistop"
+    //stoptable: "multistop"
   },
   GRIDSIZE_SMALL: 64,
   GRIDSIZE_MEDIUM: 96,
@@ -277,10 +277,12 @@ var TopKTokens = {
 
   init: function(cloudDiv) {
     this.cloudDiv = cloudDiv;
+    $('#cloudWords').prop('checked', 'checked');
     //$(this.cloudDiv).css('cursor', 'pointer');
     //$("#cloudSource").buttonset();
     $('input[name="cloudSource"]').change($.proxy(function (event) {
-        this.mode = event.target.value;
+       this.mode = event.target.value;
+       this.reload();
     }, this));
     /*
     $('input[name="cloudSource"]').change($.proxy(function (radio) {
@@ -294,7 +296,10 @@ var TopKTokens = {
   },
 
   getURL: function() {
-    this.params.sql = "select tweet_text from " + this.mapd.table;
+    if (this.mode == "words")
+        this.params.sql = "select tweet_text from " + this.mapd.table;
+    else 
+        this.params.sql = "select sender_name from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere();
     var numQueryTerms = this.mapd.queryTerms.length;
     this.params.k = this.defaultK + numQueryTerms;
@@ -309,8 +314,18 @@ var TopKTokens = {
     //console.log("circle cloud token: " + token);
     if (token.substring(0,5) != "<span") {
       //console.log(this.mapd);
-      this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
-      $('#termsInput').trigger('input');
+      if (this.mode == "words") {
+        this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
+        $('#termsInput').trigger('input');
+      }
+      else {
+        this.mapd.services.search.userInput.val(token);
+        $('#userInput').trigger('input');
+        this.mode = "words";
+        $('#cloudWords').prop('checked', 'checked');
+        $('#cloudUsers').prop('disabled', true);
+        
+      }
       this.mapd.services.search.form.submit();
 
 
@@ -336,7 +351,8 @@ var TopKTokens = {
     //console.log("numqueryterms");
     //console.log(numQueryTerms);
     var tokenRatio = 1.0 / counts[2 + numQueryTerms];
-    $('#numTokensText').text("# Words: " + numberWithCommas(n));
+    var label = (this.mode == "words") ? "# Words: " : "# Users: ";
+    $('#numTokensText').text(label + numberWithCommas(n));
     for (var t = numQueryTerms; t < numTokens; t++) {
       //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
         var percent = counts[t] * percentFactor;
@@ -1015,6 +1031,7 @@ var Search = {
   init: function(map, form, termsInput, userInput, locationInput) {
     $(document).on('propertychange keyup input paste', 'input.search-input', function() {
       var io = $(this).val().length ? 1: 0;
+
       $(this).next('.iconClear').stop().fadeTo(300,io);
       }).on('click', '.iconClear', function() {
         $(this).delay(300).fadeTo(300,0).prev('input').val('');
@@ -1034,6 +1051,8 @@ var Search = {
  
   onSearch: function() {
     //console.log('in onSearch');
+    if ($("#userInput").val().length == 0)
+        $('#cloudUsers').prop('disabled', false);
     var terms = this.termsInput.val();
     var location = this.locationInput.val();
     this.locationChanged = this.location != location;
