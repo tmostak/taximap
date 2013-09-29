@@ -16,9 +16,9 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  host: "http://127.0.0.1:8080/",
-  //host: "http://www.velocidy.net:7000/",
-  table: "geo_tweets",
+  //host: "http://127.0.0.1:8080/",
+  host: "http://www.velocidy.net:7000/",
+  table: "tweets",
 //  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
 //  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
   timestart: null,
@@ -279,7 +279,7 @@ var TopKTokens = {
     this.cloudDiv = cloudDiv;
     $('#cloudWords').prop('checked', 'checked');
     //$(this.cloudDiv).css('cursor', 'pointer');
-    //$("#cloudSource").buttonset();
+    $("#cloudSource").buttonset();
     $('input[name="cloudSource"]').change($.proxy(function (event) {
        this.mode = event.target.value;
        this.reload();
@@ -322,8 +322,13 @@ var TopKTokens = {
         this.mapd.services.search.userInput.val(token);
         $('#userInput').trigger('input');
         this.mode = "words";
+        //$('#cloudWords').button({checked: 'checked'});
+        //$('#cloudUsers').button({disabled: true});
+        /*
         $('#cloudWords').prop('checked', 'checked');
         $('#cloudUsers').prop('disabled', true);
+        $('#cloudSource').buttonset("refresh");
+        */
         
       }
       this.mapd.services.search.form.submit();
@@ -1035,6 +1040,7 @@ var Search = {
       $(this).next('.iconClear').stop().fadeTo(300,io);
       }).on('click', '.iconClear', function() {
         $(this).delay(300).fadeTo(300,0).prev('input').val('');
+
         Search.form.submit();
       });
 
@@ -1051,8 +1057,16 @@ var Search = {
  
   onSearch: function() {
     //console.log('in onSearch');
-    if ($("#userInput").val().length == 0)
-        $('#cloudUsers').prop('disabled', false);
+    if ($("#userInput").val().length == 0) {
+        $('#cloudUsers').attr("disabled", false);
+        $('#cloudSource').buttonset("refresh");
+    }
+    else {
+        $('#cloudWords').prop('checked', 'checked');
+        $('#cloudUsers').prop('disabled', true);
+        $('#cloudSource').buttonset("refresh");
+    }
+
     var terms = this.termsInput.val();
     var location = this.locationInput.val();
     this.locationChanged = this.location != location;

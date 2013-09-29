@@ -46,10 +46,11 @@ var LineChart =
   
 
     
-    this.margin = {top: 25, right: 30, bottom: 25, left: 25};
+    this.margin = {top: 25, right: 25, bottom: 25, left: 25};
         //width = 400 - this.margin.left - this.margin.right,
-         this.width = $(window).width() - 400 - this.margin.left - this.margin.right;
-        //height = 160 - this.margin.top - this.margin.bottom;
+        var cont =  $($(this.elems.container).get(0));
+        this.width = cont.width() - 400 - this.margin.left - this.margin.right;
+        //this.width = cont.width() - cont.offset().left - this.margin.left - this.margin.right;
          this.height = 200 - this.margin.top - this.margin.bottom;
 
     this.x = d3.time.scale().range([0, this.width]);

@@ -211,6 +211,8 @@ div#cloudBox{
 div#cloudSource{
   float: right;
   padding-right: 10px;
+  margin-top: 5px;
+  font-size: 11px;
 }
 
 div#cloud {
