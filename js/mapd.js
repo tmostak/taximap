@@ -264,9 +264,11 @@ var GeoTrends = {
 
 var TopKTokens = {
   mapd: MapD,
-  cloudDiv: null, 
-  defaultK: 30,
-  mode: "words",
+  displayDiv: null, 
+  defaultCloudK: 30,
+  defaultChartK: 15,
+  displayMode: "barchart",
+  dataSource: "words",
   params: {
     request: "GetTopKTokens",
     sql: null,
@@ -275,13 +277,13 @@ var TopKTokens = {
     stoptable: "multistop"
   },
 
-  init: function(cloudDiv) {
-    this.cloudDiv = cloudDiv;
-    $('#cloudWords').prop('checked', 'checked');
+  init: function(displayDiv) {
+    this.displayDiv = displayDiv;
+    $('#dataWords').prop('checked', 'checked');
     //$(this.cloudDiv).css('cursor', 'pointer');
-    $("#cloudSource").buttonset();
-    $('input[name="cloudSource"]').change($.proxy(function (event) {
-       this.mode = event.target.value;
+    $("#dataSource").buttonset();
+    $('input[name="dataSource"]').change($.proxy(function (event) {
+       this.dataSource = event.target.value;
        this.reload();
     }, this));
     /*
@@ -291,18 +293,21 @@ var TopKTokens = {
         //console.log($(radio).val());
     }, this, $('input[name="cloudSource"]')));
     */
-    $(this.cloudDiv).on("click", $.proxy(this.addClickedWord, this)); 
+    $(this.displayDiv).on("click", $.proxy(this.addClickedWord, this)); 
 
   },
 
   getURL: function() {
-    if (this.mode == "words")
+    if (this.dataSource == "words")
         this.params.sql = "select tweet_text from " + this.mapd.table;
     else 
         this.params.sql = "select sender_name from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere();
     var numQueryTerms = this.mapd.queryTerms.length;
-    this.params.k = this.defaultK + numQueryTerms;
+    if (this.displayMode == "cloud")
+        this.params.k = this.defaultCloudK + numQueryTerms;
+    else
+        this.params.k = this.defaultChartK + numQueryTerms;
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
@@ -314,14 +319,14 @@ var TopKTokens = {
     //console.log("circle cloud token: " + token);
     if (token.substring(0,5) != "<span") {
       //console.log(this.mapd);
-      if (this.mode == "words") {
+      if (this.dataSource == "words") {
         this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
         $('#termsInput').trigger('input');
       }
       else {
         this.mapd.services.search.userInput.val(token);
         $('#userInput').trigger('input');
-        this.mode = "words";
+        this.dataSource = "words";
         //$('#cloudWords').button({checked: 'checked'});
         //$('#cloudUsers').button({disabled: true});
         /*
@@ -344,33 +349,37 @@ var TopKTokens = {
     $.getJSON(this.getURL()).done($.proxy(this.onLoad, this));
   },
   onLoad: function(json) {
-    this.cloudDiv.empty();
-
-    var tokens = json.tokens; 
-    var counts = json.counts; 
+    this.displayDiv.empty();
     var n =json.n;
-    var numTokens = tokens.length;
     var numQueryTerms = this.mapd.queryTerms.length;
-    var wordArray = new Array(numTokens - numQueryTerms);
-    var percentFactor = 100.0 / n;
-    //console.log("numqueryterms");
-    //console.log(numQueryTerms);
-    var tokenRatio = 1.0 / counts[2 + numQueryTerms];
-    var label = (this.mode == "words") ? "# Words: " : "# Users: ";
-    $('#numTokensText').text(label + numberWithCommas(n));
-    for (var t = numQueryTerms; t < numTokens; t++) {
-      //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
-        var percent = counts[t] * percentFactor;
-        var textPercent = "%" + percent.toFixed(3);
-        wordArray[t - numQueryTerms] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
+    if (this.displayMode == "cloud") {
+        var tokens = json.tokens; 
+        var counts = json.counts; 
+        var numTokens = tokens.length;
+        var wordArray = new Array(numTokens - numQueryTerms);
+        var percentFactor = 100.0 / n;
+        //console.log("numqueryterms");
+        //console.log(numQueryTerms);
+        var tokenRatio = 1.0 / counts[2 + numQueryTerms];
+        for (var t = numQueryTerms; t < numTokens; t++) {
+          //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
+            var percent = counts[t] * percentFactor;
+            var textPercent = "%" + percent.toFixed(3);
+            wordArray[t - numQueryTerms] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
+        }
+        //console.log(wordArray);
+        this.displayDiv.jQCloud(wordArray);
+        //console.log("clouddiv");
+        //console.log(this.cloudDiv);
     }
-    //console.log(wordArray);
-    this.cloudDiv.jQCloud(wordArray);
-    //console.log("clouddiv");
-    //console.log(this.cloudDiv);
+    else {
+        BarChart.init(this.displayDiv);
+        BarChart.addData(json, numQueryTerms);
+    }
+        var label = (this.dataSource == "words") ? "# Words: " : "# Users: ";
+        $('#numTokensText').text(label + numberWithCommas(n));
+
   }
-
-
 
 };
 
@@ -1058,13 +1067,13 @@ var Search = {
   onSearch: function() {
     //console.log('in onSearch');
     if ($("#userInput").val().length == 0) {
-        $('#cloudUsers').attr("disabled", false);
-        $('#cloudSource').buttonset("refresh");
+        $('#dataUsers').attr("disabled", false);
+        $('#dataSource').buttonset("refresh");
     }
     else {
-        $('#cloudWords').prop('checked', 'checked');
-        $('#cloudUsers').prop('disabled', true);
-        $('#cloudSource').buttonset("refresh");
+        $('#dataWords').prop('checked', 'checked');
+        $('#dataUsers').prop('disabled', true);
+        $('#dataSource').buttonset("refresh");
     }
 
     var terms = this.termsInput.val();

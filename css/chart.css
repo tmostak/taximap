@@ -37,6 +37,14 @@
   stroke: #777;
 }
 
+.y.axis text {
+    font-size: 11px;
+}
+
+.x.axis text {
+    font-size: 13px;
+}
+
 .axis line {
   stroke: #ddd;
 }

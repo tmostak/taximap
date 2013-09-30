@@ -16,13 +16,14 @@ var BarChart =
   },
 
   init: function(container) {
-    this.elems.container = container;
-    this.margin = {top: 25, right: 25, bottom: 85, left: 25};
+    this.elems.container = $(container).get(0);
+    console.log(this.elems.container);
+    this.margin = {top: 10, right: 5, bottom: 90, left: 45};
         //width = 400 - this.margin.left - this.margin.right,
-    var cont =  $($(this.elems.container).get(0));
-    this.width = cont.width() - 400 - this.margin.left - this.margin.right;
+    //var cont =  $($(this.elems.container).get(0));
+    this.width = $(this.elems.container).width() - this.margin.left - this.margin.right;
         //this.width = cont.width() - cont.offset().left - this.margin.left - this.margin.right;
-     this.height = cont.height() - this.margin.top - this.margin.bottom;
+     this.height = $(this.elems.container).height() - this.margin.top - this.margin.bottom;
 
     /*
     this.x = o3.scale.scale().range([0, this.width]);
@@ -70,20 +71,18 @@ var BarChart =
 
   },
 
-  addData: function(dataset, xAxisName) { 
+  addData: function(dataset, numQueryTerms) { 
     var self = this;
     console.log(this.elems.svg);
-    console.log(dataset);
-    console.log(dataset.vals);
     console.log(this.width);
     console.log(this.height);
     var w = this.width;
     var h = this.height;
     var barPadding = 10;
 
-    var zippedData = $.map(dataset.labels, function(e1, idx) {
-        return {"label": e1, "val":dataset.vals[idx]};
-    });
+    var zippedData = $.map(dataset.tokens, function(e1, idx) {
+        return {"label": e1, "val":dataset.counts[idx]};
+    }).slice(numQueryTerms);
     console.log(zippedData);
     /*
     var data = dataset.vals;
@@ -99,7 +98,13 @@ var BarChart =
     .domain([0, d3.max(zippedData, function(d) {return d.val;})])
     .range([h,20]);
 
-    var yAxis = d3.svg.axis().scale(yScale).orient("left");
+    var yAxis = d3.svg.axis().scale(yScale).orient("left")
+    .ticks(7);
+    
+    var abbrFormat = d3.format(".1s");
+    yAxis.tickFormat(abbrFormat);
+
+
     /*
     this.elems.svg.selectAll("rect")
       .data(zippedData)
@@ -127,7 +132,7 @@ var BarChart =
       .attr("height", function(d) {
         return h - yScale(d.val)
        })
-       .attr("fill", "rgb(0,0,200)");
+       .attr("fill", "rgb(51,102,204)");
        
      this.elems.svg.append("g")
         .attr("class", "x axis")
