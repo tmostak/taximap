@@ -9,14 +9,17 @@ var BarChart =
   yAxis: null,
   series: [],
   brush: null,
+  data: null,
+  barCallback: null,
   elems: {
     container: null,
     svg: null,
     info: null,
   },
 
-  init: function(container) {
+  init: function(container, barCallback) {
     this.elems.container = $(container).get(0);
+    this.barCallback = barCallback;
     console.log(this.elems.container);
     this.margin = {top: 10, right: 5, bottom: 90, left: 45};
         //width = 400 - this.margin.left - this.margin.right,
@@ -80,22 +83,22 @@ var BarChart =
     var h = this.height;
     var barPadding = 10;
 
-    var zippedData = $.map(dataset.tokens, function(e1, idx) {
+    this.data = $.map(dataset.tokens, function(e1, idx) {
         return {"label": e1, "val":dataset.counts[idx]};
     }).slice(numQueryTerms);
-    console.log(zippedData);
+    console.log(this.data);
     /*
     var data = dataset.vals;
     var labels = dataset.labels;
     console.log(labels);
     */
     var xScale = d3.scale.ordinal()
-        .domain(zippedData.map(function(d) {return d.label;}))
+        .domain(this.data.map(function(d) {return d.label;}))
         .rangeRoundBands([this.margin.left, w], 0.05);
 
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
     var yScale = d3.scale.linear()
-    .domain([0, d3.max(zippedData, function(d) {return d.val;})])
+    .domain([0, d3.max(this.data, function(d) {return d.val;})])
     .range([h,20]);
 
     var yAxis = d3.svg.axis().scale(yScale).orient("left")
@@ -107,7 +110,7 @@ var BarChart =
 
     /*
     this.elems.svg.selectAll("rect")
-      .data(zippedData)
+      .data(this.data)
       .enter()
       .append("rect")
       .attr({
@@ -119,9 +122,10 @@ var BarChart =
         });
     */
     this.elems.svg.selectAll("rect")
-      .data(zippedData)
+      .data(this.data)
       .enter()
       .append("rect")
+      .attr("class", "bar") 
       .attr("x", function(d, i) {
         return xScale(d.label);
       })
@@ -139,6 +143,7 @@ var BarChart =
         .attr("transform", "translate(0," + h + ")")
         .call(xAxis)
         .selectAll("text")
+            .attr("class", "bar-label")
             .style("text-anchor", "end")
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
@@ -150,6 +155,17 @@ var BarChart =
         .attr("class", "y axis")
         .attr("transform", "translate(" + this.margin.left + ",0)")
         .call(yAxis);
+
+
+    $(".bar-label").click($.proxy(function(e) {
+        var token = e.target.textContent;
+        this.barCallback(token);
+    }, this));
+
+     $(".bar").click($.proxy(function(e) {
+        var token = this.data[$(e.target).index()].label;
+        this.barCallback(token);
+    }, this));
 
         /*
         x: function(d, i) { return i * (w / data.length); },

@@ -45,6 +45,17 @@
     font-size: 13px;
 }
 
+.bar:hover {
+    fill: #88bbee;
+    cursor: pointer;
+}
+
+.bar-label:hover {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+
 .axis line {
   stroke: #ddd;
 }

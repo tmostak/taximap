@@ -287,6 +287,11 @@ var TopKTokens = {
 
     $('input[name="displayMode"]').change($.proxy(function (event) {
        this.displayMode = event.target.value;
+       if (this.displayMode == "cloud")
+            $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
+        else
+            $(this.displayDiv).off('click');
+
        this.reload();
     }, this));
 
@@ -301,7 +306,7 @@ var TopKTokens = {
         //console.log($(radio).val());
     }, this, $('input[name="cloudSource"]')));
     */
-    $(this.displayDiv).on("click", $.proxy(this.addClickedWord, this)); 
+    $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
 
   },
 
@@ -315,11 +320,26 @@ var TopKTokens = {
     if (this.displayMode == "cloud")
         this.params.k = this.defaultCloudK + numQueryTerms;
     else
-        this.params.k = this.defaultChartK + numQueryTerms;
+        this.params.k = this.defaultChartK ;
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
   },
+  barClickCallback: function(token) {
+    
+    if (this.dataSource == "words") {
+      this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
+      $('#termsInput').trigger('input');
+    }
+    else {
+      this.mapd.services.search.userInput.val(token);
+      $('#userInput').trigger('input');
+      this.dataSource = "words";
+    }
+    this.mapd.services.search.form.submit();
+  },
+
+
   addClickedWord: function(event) {
     console.log(event);
     //var token = event.originalEvent.srcElement.innerText;
@@ -363,17 +383,21 @@ var TopKTokens = {
     if (this.displayMode == "cloud") {
         var tokens = json.tokens; 
         var counts = json.counts; 
-        var numTokens = tokens.length;
-        var wordArray = new Array(numTokens - numQueryTerms);
+
+        var numResultsToExclude = 0;
+        if (this.dataSource == "words")
+          numResultsToExclude = numQueryTerms; 
+var numTokens = tokens.length;
+        var wordArray = new Array(numTokens - numResultsToExclude);
         var percentFactor = 100.0 / n;
         //console.log("numqueryterms");
-        //console.log(numQueryTerms);
-        var tokenRatio = 1.0 / counts[2 + numQueryTerms];
-        for (var t = numQueryTerms; t < numTokens; t++) {
+        //console.log(numResultsToExclude);
+        var tokenRatio = 1.0 / counts[2 + numResultsToExclude];
+        for (var t = numResultsToExclude; t < numTokens; t++) {
           //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
             var percent = counts[t] * percentFactor;
             var textPercent = "%" + percent.toFixed(3);
-            wordArray[t - numQueryTerms] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
+            wordArray[t - numResultsToExclude] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
         }
         //console.log(wordArray);
         this.displayDiv.jQCloud(wordArray);
@@ -381,8 +405,11 @@ var TopKTokens = {
         //console.log(this.cloudDiv);
     }
     else {
-        BarChart.init(this.displayDiv);
-        BarChart.addData(json, numQueryTerms);
+        BarChart.init(this.displayDiv, $.proxy(this.barClickCallback, this));
+        var numResultsToExclude = 0;
+        if (this.dataSource == "words")
+          numResultsToExclude = numQueryTerms; 
+        BarChart.addData(json, numResultsToExclude);
     }
         var label = (this.dataSource == "words") ? "# Words: " : "# Users: ";
         $('#numTokensText').text(label + numberWithCommas(n));
@@ -444,7 +471,7 @@ var HeatMap = {
     layers: "heatmap",
     maxval: "auto", 
     min: 0.2,
-    blur: 26,
+    blur: 28,
     colorramp: "green_red",
     format: "image/png",
     transparent: true
