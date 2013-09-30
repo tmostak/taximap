@@ -267,7 +267,7 @@ var TopKTokens = {
   displayDiv: null, 
   defaultCloudK: 30,
   defaultChartK: 15,
-  displayMode: "barchart",
+  displayMode: "cloud",
   dataSource: "words",
   params: {
     request: "GetTopKTokens",
@@ -279,9 +279,17 @@ var TopKTokens = {
 
   init: function(displayDiv) {
     this.displayDiv = displayDiv;
+    $('#cloudDisplay').prop('checked', 'checked');
     $('#dataWords').prop('checked', 'checked');
     //$(this.cloudDiv).css('cursor', 'pointer');
+    $("#displayMode").buttonset();
     $("#dataSource").buttonset();
+
+    $('input[name="displayMode"]').change($.proxy(function (event) {
+       this.displayMode = event.target.value;
+       this.reload();
+    }, this));
+
     $('input[name="dataSource"]').change($.proxy(function (event) {
        this.dataSource = event.target.value;
        this.reload();

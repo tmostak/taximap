@@ -208,6 +208,14 @@ div#cloudBox{
   height: 39%;
 }
 
+div#displayMode {
+  float: left;
+  padding-left: 10px;
+  margin-top: 5px;
+  font-size: 10px;
+}
+
+
 div#dataSource{
   float: right;
   padding-right: 10px;
@@ -217,8 +225,8 @@ div#dataSource{
 
 div#cloud {
   margin-top: 5px;
-  height: 96%;
-  margin-bottom:25px;
+  height: 92%;
+  margin-bottom:20px;
 }
 
 #cloud span {
