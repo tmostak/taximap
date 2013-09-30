@@ -311,10 +311,19 @@ var TopKTokens = {
   },
 
   getURL: function() {
-    if (this.dataSource == "words")
+    if (this.dataSource == "words") {
         this.params.sql = "select tweet_text from " + this.mapd.table;
-    else 
+        this.params.stoptable = "multistop";
+    }
+    else if (this.dataSource == "users") {
         this.params.sql = "select sender_name from " + this.mapd.table;
+        this.params.stoptable = "";
+    }
+    else if (this.dataSource == "geo") {
+        this.params.sql = "select zip from " + this.mapd.table;
+        this.params.stoptable = "";
+    }
+
     this.params.sql += this.mapd.getWhere();
     var numQueryTerms = this.mapd.queryTerms.length;
     if (this.displayMode == "cloud")
@@ -331,7 +340,7 @@ var TopKTokens = {
       this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
       $('#termsInput').trigger('input');
     }
-    else {
+    else if (this.dataSource == "users") {
       this.mapd.services.search.userInput.val(token);
       $('#userInput').trigger('input');
       this.dataSource = "words";
@@ -351,7 +360,7 @@ var TopKTokens = {
         this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
         $('#termsInput').trigger('input');
       }
-      else {
+      else if (this.dataSource == "users") {
         this.mapd.services.search.userInput.val(token);
         $('#userInput').trigger('input');
         this.dataSource = "words";
@@ -373,7 +382,6 @@ var TopKTokens = {
   },
 
   reload: function() {
-    //$.getJSON(this.getURL()).done(function(json) {console.log(json)});
     $.getJSON(this.getURL()).done($.proxy(this.onLoad, this));
   },
   onLoad: function(json) {
@@ -411,7 +419,7 @@ var numTokens = tokens.length;
           numResultsToExclude = numQueryTerms; 
         BarChart.addData(json, numResultsToExclude);
     }
-        var label = (this.dataSource == "words") ? "# Words: " : "# Users: ";
+        var label = (this.dataSource == "words") ? "# Words: " : ((this.dataSource == "users") ? "# Users: " : "# Zips: ");
         $('#numTokensText').text(label + numberWithCommas(n));
 
   }

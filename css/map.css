@@ -198,34 +198,34 @@ div#tweets {
   border-top: 1px solid #888;
   border-bottom: 2px solid #888;
   margin-top: 10px;
-  height: 51%;
+  height: 55%;
   overflow-y: scroll;
   overflow-x: hidden;
 }
 
 div#cloudBox{
   margin-top: 0px;
-  height: 39%;
+  height: 35%;
 }
 
-div#displayMode {
+#displayMode {
   float: left;
-  padding-left: 10px;
-  margin-top: 5px;
+  //padding-left: 10px;
+  margin-top: 0px;
   font-size: 10px;
 }
 
 
-div#dataSource{
+#dataSource{
   float: right;
-  padding-right: 10px;
-  margin-top: 5px;
+  //padding-right: 10px;
+  margin-top: 0px;
   font-size: 10px;
 }
 
 div#cloud {
   margin-top: 5px;
-  height: 92%;
+  height: 87%;
   margin-bottom:20px;
 }
 
@@ -233,6 +233,11 @@ div#cloud {
   cursor: pointer;
 }
 
+#toolbar {
+    padding: 4px;
+    display: inline-block;
+    width:390px;
+}
 
 div#sortPref {
   font-size: 12px;
