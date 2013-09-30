@@ -153,21 +153,6 @@ var LineChart =
     this.elems.detailsDiv = this.elems.settingsDiv.append("div")
         .attr("class", "chart-details");
 
-    /*
-    this.elems.compareDiv = container.append("div")
-        .attr("class", "chart-compare");
-
-    var form =  this.elems.compareDiv.append("form")
-        .on("submit", $.proxy(this.compare, this));
-
-    var compareInput = form.append("input")
-        .attr("class", "compare-input")
-        .attr("type", "text")
-        .attr("placeholder", " Compare");
-
-    this.elems.detailsDiv = container.append("div")
-        .attr("class", "chart-details");
-    */
   },
 
   brushed: function() {
