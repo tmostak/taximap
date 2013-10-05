@@ -16,8 +16,8 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  //host: "http://127.0.0.1:8080/",
-  host: "http://www.velocidy.net:7000/",
+  host: "http://127.0.0.1:8080/",
+  //host: "http://www.velocidy.net:7000/",
   table: "tweets",
 //  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
 //  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
@@ -127,9 +127,23 @@ var MapD = {
   },
 
   parseQueryTerms: function(queryTerms) { 
-    if (queryTerms[0] == "multilanguage") {
+    console.log(queryTerms);
+    if (queryTerms[0] == "multilanguage:") {
         var query = "tweet_text ilike 'coffee' or tweet_text ilike 'café' or tweet_text ilike 'caffè' or tweet_text ilike 'kaffe' or tweet_text ilike 'kaffe' or tweet_text ilike 'кофе' or tweet_text ilike 'kahve' or tweet_text ilike 'قهوة' or tweet_text ilike '咖啡' or tweet_text ilike '커피' or tweet_text ilike 'コーヒー' or tweet_text ilike 'kopi'";
 	return query;
+    }
+    else if (queryTerms[0] == "origin:") {
+        var query = "(origin ilike '" + queryTerms[1] + "')";
+        return query;
+    }
+    else if (queryTerms[0] == "country:") {
+        console.log("country");
+        var term = "";
+        for (var q = 1; q < queryTerms.length; q++) 
+            term += queryTerms[q] + " ";
+        term = term.substr(0, term.length - 1);
+        var query = "(country ilike '" + term + "')";
+        return query;
     }
     else {
         var array = queryTerms.slice(0);
@@ -269,12 +283,16 @@ var TopKTokens = {
   defaultChartK: 15,
   displayMode: "cloud",
   dataSource: "words",
+  locked: false,
+  tokens: [],
   params: {
-    request: "GetTopKTokens",
+    request: "GroupByToken",
     sql: null,
     bbox: null,
     k: 30,
-    stoptable: "multistop"
+    stoptable: "multistop",
+    sort: "true",
+    tokens: []
   },
 
   init: function(displayDiv) {
@@ -282,8 +300,24 @@ var TopKTokens = {
     $('#cloudDisplay').prop('checked', 'checked');
     $('#dataWords').prop('checked', 'checked');
     //$(this.cloudDiv).css('cursor', 'pointer');
+    //
     $("#displayMode").buttonset();
+
+
+    //$("#lockMode").buttonset();
+    //$("#tokensUnlocked").button( {icons: {primary:'ui-icon-unlocked'} });
+    //$("#tokensLocked").button( {icons: {primary:'ui-icon-locked'} });
+
     $("#dataSource").buttonset();
+
+    $("#lock").button({
+        text:false,
+        icons: {
+            primary: "ui-icon-unlocked"
+        }
+    })
+    .click($.proxy(this.lockClickFunction, this));
+
 
     $('input[name="displayMode"]').change($.proxy(function (event) {
        this.displayMode = event.target.value;
@@ -310,7 +344,35 @@ var TopKTokens = {
 
   },
 
-  getURL: function() {
+  lockClickFunction: function (preventReload) {  
+        var options;
+        var lock = $("#lock");
+        if (lock.text() === "unlocked") {
+            options = {
+                label: "locked",
+                icons: {
+                    primary: "ui-icon-locked"
+                }
+            };
+            this.locked = true;
+            //this.params.sort = "false";
+        } 
+        else {
+            options = {
+                label: "unlocked",
+                icons: {
+                    primary: "ui-icon-unlocked"
+                }
+            };
+            this.locked = false;
+            //this.params.sort = "true";
+            if (preventReload != true)
+                this.reload();
+        }
+        $("#lock").button("option",options);
+    },
+
+  getURL: function(options) {
     if (this.dataSource == "words") {
         this.params.sql = "select tweet_text from " + this.mapd.table;
         this.params.stoptable = "multistop";
@@ -320,16 +382,29 @@ var TopKTokens = {
         this.params.stoptable = "";
     }
     else if (this.dataSource == "geo") {
-        this.params.sql = "select zip from " + this.mapd.table;
+        this.params.sql = "select country from " + this.mapd.table;
         this.params.stoptable = "";
     }
-
-    this.params.sql += this.mapd.getWhere();
+    else if (this.dataSource == "origin") {
+        this.params.sql = "select origin from " + this.mapd.table;
+        this.params.stoptable = "";
+    }
+    this.params.sql += this.mapd.getWhere(options);
     var numQueryTerms = this.mapd.queryTerms.length;
     if (this.displayMode == "cloud")
         this.params.k = this.defaultCloudK + numQueryTerms;
     else
         this.params.k = this.defaultChartK ;
+
+    if (this.locked) {
+        this.params.tokens = this.tokens;
+        this.params.sort = "false";
+    }
+    else {
+        this.params.sort = "true";
+        this.params.tokens = [];
+    }
+
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
@@ -345,6 +420,17 @@ var TopKTokens = {
       $('#userInput').trigger('input');
       this.dataSource = "words";
     }
+    else if (this.dataSource == "geo") {
+      this.mapd.services.search.termsInput.val("country : " + token);
+      $('termsInput').trigger('input');
+      this.dataSource = "words";
+    }
+    else if (this.dataSource == "origin") {
+      this.mapd.services.search.termsInput.val("origin : " + token);
+      $('termsInput').trigger('input');
+      this.dataSource = "words";
+    }
+
     this.mapd.services.search.form.submit();
   },
 
@@ -373,6 +459,18 @@ var TopKTokens = {
         */
         
       }
+    else if (this.dataSource == "geo") {
+      this.mapd.services.search.termsInput.val("country : " + token);
+      $('termsInput').trigger('input');
+      this.dataSource = "words";
+    }
+    else if (this.dataSource == "origin") {
+      this.mapd.services.search.termsInput.val("origin : " + token);
+      $('termsInput').trigger('input');
+      this.dataSource = "words";
+    }
+
+
       this.mapd.services.search.form.submit();
 
 
@@ -381,21 +479,22 @@ var TopKTokens = {
     }
   },
 
-  reload: function() {
-    $.getJSON(this.getURL()).done($.proxy(this.onLoad, this));
+  reload: function(options) {
+    $.getJSON(this.getURL(options)).done($.proxy(this.onLoad, this));
   },
   onLoad: function(json) {
     this.displayDiv.empty();
     var n =json.n;
     var numQueryTerms = this.mapd.queryTerms.length;
+    this.tokens = json.tokens;
     if (this.displayMode == "cloud") {
-        var tokens = json.tokens; 
+        //var tokens = json.tokens; 
         var counts = json.counts; 
 
         var numResultsToExclude = 0;
         if (this.dataSource == "words")
           numResultsToExclude = numQueryTerms; 
-var numTokens = tokens.length;
+var numTokens = this.tokens.length;
         var wordArray = new Array(numTokens - numResultsToExclude);
         var percentFactor = 100.0 / n;
         //console.log("numqueryterms");
@@ -405,7 +504,7 @@ var numTokens = tokens.length;
           //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
             var percent = counts[t] * percentFactor;
             var textPercent = "%" + percent.toFixed(3);
-            wordArray[t - numResultsToExclude] = {text: tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
+            wordArray[t - numResultsToExclude] = {text: this.tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
         }
         //console.log(wordArray);
         this.displayDiv.jQCloud(wordArray);
@@ -419,8 +518,11 @@ var numTokens = tokens.length;
           numResultsToExclude = numQueryTerms; 
         BarChart.addData(json, numResultsToExclude);
     }
-        var label = (this.dataSource == "words") ? "# Words: " : ((this.dataSource == "users") ? "# Users: " : "# Zips: ");
+        var label = (this.dataSource == "words") ? "# Words: " : ((this.dataSource == "users") ? "# Tweets: " : "# Tweets: ");
         $('#numTokensText').text(label + numberWithCommas(n));
+        console.log("triggering loadend");
+        //$("#numTokensText").trigger('loadend');
+        $(this).trigger('loadend');
 
   }
 
@@ -1111,15 +1213,30 @@ var Search = {
     //console.log('in onSearch');
     if ($("#userInput").val().length == 0) {
         $('#dataUsers').attr("disabled", false);
-        $('#dataSource').buttonset("refresh");
     }
     else {
         $('#dataWords').prop('checked', 'checked');
         $('#dataUsers').prop('disabled', true);
-        $('#dataSource').buttonset("refresh");
+    }
+    var terms = this.termsInput.val();
+    if (terms.substring(0,9) == "country :") {
+        $('#dataWords').prop('checked', 'checked');
+        $('#dataGeo').attr("disabled", true);
+    }
+    else {
+        $('#dataGeo').attr("disabled", false);
     }
 
-    var terms = this.termsInput.val();
+    if (terms.substring(0,8) == "origin :") {
+        $('#dataWords').prop('checked', 'checked');
+        $('#dataOrigin').attr("disabled", true);
+    }
+    else {
+        $('#dataOrigin').attr("disabled", false);
+    }
+    $('#dataSource').buttonset("refresh");
+
+
     var location = this.locationInput.val();
     this.locationChanged = this.location != location;
     this.terms = terms;
@@ -1160,6 +1277,7 @@ var Animation = {
   mapd: MapD,
   pointLayer: null,
   heatLayer: null,
+  wordGraph: null,
   heatMax: null,
   //pointMap: null,
   //heatMap: null,
@@ -1172,12 +1290,18 @@ var Animation = {
   frameStep: null,
   frameWidth: null,
   numLayersLoaded: 0,
+  formerGraphLockedState: false,
+  formerGraphDisplayMode: "cloud",
 
-  init: function(pointLayer, heatLayer, playPauseButton, stopButton) {
+  init: function(pointLayer, heatLayer, wordGraph, playPauseButton, stopButton) {
     this.pointLayer = pointLayer;
     this.heatLayer = heatLayer;
+    this.wordGraph = wordGraph;
     this.pointLayer.events.register("loadend", this, this.layerLoadEnd);
     this.heatLayer.events.register("loadend", this, this.layerLoadEnd);
+    //$(this.wordGraph).bind('loadend', this, this.layerLoadEnd);
+    //$("#numTokensText").bind('loadend', this, this.layerLoadEnd);
+    $(this.wordGraph).on('loadend', $.proxy(this.layerLoadEnd, this));
     this.playPauseButton = playPauseButton;
     this.stopButton = stopButton;
     $(this.playPauseButton).click($.proxy(this.playFunc, this));
@@ -1185,8 +1309,9 @@ var Animation = {
   },
 
   layerLoadEnd: function () {
+    console.log(this.numLayersLoaded);
     if (this.playing == true) {
-      var numLayersVisible = this.mapd.services.settings.getNumLayersVisible();
+      var numLayersVisible = this.mapd.services.settings.getNumLayersVisible() + 1; //1 is for 
       this.numLayersLoaded++;
       if (this.numLayersLoaded >= numLayersVisible) {
           this.numLayersLoaded = 0;
@@ -1208,6 +1333,8 @@ var Animation = {
       this.mapd.services.graph.chart.setBrushExtent([this.frameStart * 1000, this.frameEnd * 1000]);
       this.mapd.services.pointmap.reload(options);
       this.mapd.services.heatmap.reload(options);
+      console.log("before wordGraphReload")
+      this.wordGraph.reload(options);
     }
     else {
       this.stopFunc();
@@ -1230,6 +1357,20 @@ var Animation = {
         this.frameEnd = this.animStart + this.frameWidth;
         this.heatMax = parseFloat($.cookie('max_value')) * 10.0;
         console.log(this.heatMax);
+        this.formerGraphLockedState = this.wordGraph.locked;
+        this.wordGraph.locked = true;
+        //this.wordGraph.params.sort = "false";
+        this.formerGraphDisplayMode = this.wordGraph.displayMode;
+        this.wordGraph.displayMode = "chart"; 
+        if (this.formerGraphLockedState == false) {
+            this.wordGraph.lockClickFunction();
+            //$("#lock").addClass("ui-selecting").buttonset("refresh");
+        }
+        //$("lock").attr('disabled', true);
+        //$("lock").button("refresh");
+        $("#barDisplay").prop('checked', 'checked');
+        $("#cloudDisplay").attr('disabled', true);
+        $("#displayMode").buttonset("refresh");
       }
       this.animFunc();
 
@@ -1253,9 +1394,21 @@ var Animation = {
       this.mapd.services.graph.chart.setBrushExtent([this.mapd.timestart * 1000, this.mapd.timeend * 1000]);
       this.mapd.services.pointmap.reload();
       this.mapd.services.heatmap.reload();
+      //this.wordGraph.locked = this.formerGraphLockedState;
+      this.wordGraph.displayMode = this.formerGraphDisplayMode;
+      $("#cloudDisplay").attr('disabled', false);
+      //if (this.formerGraphLockedState == false && this.wordGraph.locked == true) {
+      if (this.formerGraphLockedState != this.wordGraph.locked) {
+        this.wordGraph.lockClickFunction(true);
+        //$("#lock").addClass("ui-selecting").buttonset("refresh");
+      }
+      if (this.wordGraph.displayMode == "cloud")
+        $("#cloudDisplay").prop('checked', 'checked');
+      $("#displayMode").buttonset("refresh");
+      //this.wordGraph.params.sort = "true";
+      this.wordGraph.reload();
     }
   }
-
 }
 
 var Settings = {
