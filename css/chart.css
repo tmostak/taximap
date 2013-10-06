@@ -174,9 +174,11 @@ rect.pane {
 }
 
 .sprites.remove {
-  position: absolute;
-  right: 0;
-  top: 0;
+  float: left;
+  margin-left: 5px;
+  //position: absolute;
+  //right: 0;
+  //top: 0;
 }
 
 

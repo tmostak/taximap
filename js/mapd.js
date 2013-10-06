@@ -494,7 +494,7 @@ var TopKTokens = {
         var numResultsToExclude = 0;
         if (this.dataSource == "words")
           numResultsToExclude = numQueryTerms; 
-var numTokens = this.tokens.length;
+        var numTokens = this.tokens.length;
         var wordArray = new Array(numTokens - numResultsToExclude);
         var percentFactor = 100.0 / n;
         //console.log("numqueryterms");
@@ -516,6 +516,7 @@ var numTokens = this.tokens.length;
         var numResultsToExclude = 0;
         if (this.dataSource == "words")
           numResultsToExclude = numQueryTerms; 
+        console.log("num results to exclude: " + numResultsToExclude);
         BarChart.addData(json, numResultsToExclude);
     }
         var label = (this.dataSource == "words") ? "# Words: " : ((this.dataSource == "users") ? "# Tweets: " : "# Tweets: ");

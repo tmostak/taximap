@@ -32,7 +32,7 @@ var LineChart =
     compareDiv: null,
     detailsDiv: null
   },
-  color: ["#3366cc", "#dc3912", "#ff9900", "#109618"],
+  color: ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#3b3eac", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300"],
   colorUsed: {},
   lastZoomTime: 0,
   zoomDelay: 200,
@@ -337,6 +337,8 @@ var LineChart =
         .html("<i>" + name + "</i>");
 
     if (this.series.length != 1) {
+      console.log("series: " + this.series.length);
+       
       detail.append("div")
           .attr("class", "sprites remove zoom75")
           .attr("id", "remove" + id)
