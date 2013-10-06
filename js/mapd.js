@@ -23,10 +23,13 @@ var MapD = {
 //  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
   timestart: null,
   timeend: null,
+  extent:null,
   queryTerms: [],
   user: null,
   datastart: null,
   dataend: null,
+  pointVisible: true,
+  heatVisible: false,
   services: {
     pointmap: null,
     heatmap: null,
@@ -68,8 +71,83 @@ var MapD = {
       this.timestart = this.datastart;
       this.timeend = Math.round((this.dataend-this.datastart)*.2 + this.datastart);
       // start with first tenth of dataset
-      this.reload();
+      this.extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
+      this.pointVisible = true;
+      this. heatVislble = false;
+      var linkRead = this.readLink();
+      this.map.zoomToExtent(this.extent);
+      this.services.search.form.submit();
+      pointLayer.setVisibility(this.pointVisible);
+      heatLayer.setVisibility(this.heatVisible);
+
+
+
+      /*
+      this.reloadByGraph(this.timestart, this.timeend);
+      if (!linkRead)
+        this.reload();
+      */
     }
+  },
+  writeLink: function() {
+    var url = document.URL + "?params&";
+    var mapExtent = this.map.getExtent().toBBOX().split(',');
+    var uriParams = {t0: this.timestart, t1: this.timeend, x0: mapExtent[0], y0: mapExtent[1], x1: mapExtent[2], y1: mapExtent[3]};
+    var what = this.services.search.termsInput.val();
+    if (what != "") 
+      uriParams.what = what;
+    var who = this.services.search.userInput.val();
+    if (who != "") 
+      uriParams.who = who;
+    var uri = buildURI(uriParams);
+    url += uri;
+    console.log(url);
+  },
+
+  readLink: function() {
+    if (window.location.search.substr(0,7) == "?params") {
+      console.log("params");
+      params = this.getURIJson();
+      console.log(params);
+      if ("t0" in params) {
+          console.log ("t0: " + params.t0);
+          this.timestart = params.t0;
+      }
+      if ("t1" in params)
+          this.timeend = params.t1;
+      if ("x0" in params && "x1" in params && "y0" in params && "y1" in params) {
+         this.extent = new OpenLayers.Bounds(params.x0, params.y0, params.x1, params.y1);
+      }
+      if ("what" in params) {
+        this.services.search.termsInput.val(params.what);
+        $('#termsInput').trigger('input');
+      }
+      if ("who" in params) {
+        this.services.search.userInput.val(params.who);
+        $('#userInput').trigger('input');
+      }
+
+
+
+
+      return true;
+    }
+    else
+      return false;
+  },
+
+  getURIJson: function() {
+    var queryString = location.search.substring(1);
+    var obj = {}
+    var pairs = queryString.split('&');
+    for(i in pairs){
+      var split = pairs[i].split('=');
+      obj[decodeURIComponent(split[0])] = decodeURIComponent(split[1]);
+    }
+    return obj;
+
+    /*JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) }):{};
+    return search; */
   },
 
   reload: function() {
@@ -1427,6 +1505,8 @@ var Settings = {
     this.heatButton = heatButton;
     this.pointButton.addClass("pointButtonOnImg");
     this.heatButton.addClass("heatButtonOffImg");
+    this.pointOn = pointLayer.getVisibility();
+    this.heatOn = heatLayer.getVisibility();
    //$(this.pointButton).hover($.proxy(function() {this.pointButton.addClass("pointButtonHoverImg");}, this), $.proxy(function () {this.pointButton.removeClass("pointButtonHoverImg");}, this));
    $(this.heatButton).hover($.proxy(function() {this.heatButton.addClass("heatButtonHoverImg");}, this), $.proxy(function () {this.heatButton.removeClass("heatButtonHoverImg");}, this));
 
@@ -1442,7 +1522,8 @@ var Settings = {
     }, this));
   },
   getNumLayersVisible: function() {
-    return (this.pointOn + this.heatOn);
+    return (pointLayer.getVisibility() + heatLayer.getVisiblity());
+    //return (this.pointOn + this.heatOn);
   }
 }
   /*
