@@ -23,13 +23,13 @@ var MapD = {
 //  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
   timestart: null,
   timeend: null,
-  extent:null,
+  //extent:null,
   queryTerms: [],
   user: null,
   datastart: null,
   dataend: null,
-  pointVisible: true,
-  heatVisible: false,
+  //pointOn: true,
+  //heatOn: false,
   services: {
     pointmap: null,
     heatmap: null,
@@ -71,16 +71,72 @@ var MapD = {
       this.timestart = this.datastart;
       this.timeend = Math.round((this.dataend-this.datastart)*.2 + this.datastart);
       // start with first tenth of dataset
-      this.extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
-      this.pointVisible = true;
-      this. heatVislble = false;
-      var linkRead = this.readLink();
-      this.map.zoomToExtent(this.extent);
+      //var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.datastart, t1: Math.round((this.dataend-this.datastart)*.2 + this.datastart)};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.datastart, t1: Math.round((this.dataend-this.datastart)*.2 + this.datastart)};
+      //this.extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
+      //this.pointOn = true;
+      //this.heatOn = false;
+      mapParams = this.readLink(mapParams);
+      console.log(mapParams);
+      this.timestart = mapParams.t0;
+      this.timeend = mapParams.t1;
+      if ("what" in mapParams) {
+        this.services.search.termsInput.val(params.what);
+        $('#termsInput').trigger('input');
+      }
+      if ("who" in mapParams) {
+        this.services.search.userInput.val(params.who);
+        $('#userInput').trigger('input');
+      }
+
+      this.services.topktokens.displayMode = mapParams.dataMode;
+      if (mapParams.dataMode == "cloud")
+        $("#cloudDisplay").prop('checked', 'checked');
+      else 
+        $("#barDisplay").prop('checked', 'checked');
+      $("#displayMode").buttonset("refresh");
+      console.log(mapParams.dataSource);
+      switch (mapParams.dataSource) {
+        case "words":
+          this.services.topktokens.dataSource = "words";
+          $('#dataWords').prop('checked', 'checked');
+          break;
+        case "users":
+          this.services.topktokens.dataSource = "users";
+          $('#dataUsers').prop('checked', 'checked');
+          break;
+        case "geo":
+          this.services.topktokens.dataSource = "geo";
+          $('#dataGeo').prop('checked', 'checked');
+          break;
+        case "origin":
+          this.services.topktokens.dataSource = "origin";
+          $('#dataOrigin').prop('checked', 'checked');
+      }
+       $('#dataSource').buttonset("refresh");
+
+      /*
+      if (mapParams.dataLocked == 1)
+        this.services.topktokens.lockClickFunction(); 
+      */
+      if ("cx" in mapParams) {
+        this.map.setCenter(new OpenLayers.LonLat(mapParams.cx, mapParams.cy));
+        this.map.zoomTo(mapParams.zoom);
+      }
+      else {
+        this.map.zoomToExtent(mapParams.extent);
+      }
       this.services.search.form.submit();
-      pointLayer.setVisibility(this.pointVisible);
-      heatLayer.setVisibility(this.heatVisible);
+      console.log("Point: " + mapParams.pointOn);
+      console.log("Heat: " + mapParams.heatOn);
+      if (mapParams.pointOn == 1)
+        this.services.settings.pointButtonFunction();
+      if (mapParams.heatOn == 1)
+        this.services.settings.heatButtonFunction();
 
-
+      //pointLayer.setVisibility(mapParams.pointOn);
+      //heatLayer.setVisibility(mapParams.heatOn);
+      //Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
 
       /*
       this.reloadByGraph(this.timestart, this.timeend);
@@ -90,25 +146,40 @@ var MapD = {
     }
   },
   writeLink: function() {
-    var url = document.URL + "?params&";
-    var mapExtent = this.map.getExtent().toBBOX().split(',');
-    var uriParams = {t0: this.timestart, t1: this.timeend, x0: mapExtent[0], y0: mapExtent[1], x1: mapExtent[2], y1: mapExtent[3]};
+    var url = document.URL.split('?')[0] + "?params&";
+    //var mapExtent = this.map.getExtent().toBBOX().split(',');
+    var center = map.getCenter();
+    //var uriParams = {t0: this.timestart, t1: this.timeend, x0: mapExtent[0], y0: mapExtent[1], x1: mapExtent[2], y1: mapExtent[3]};
+    var uriParams = {t0: this.timestart, t1: this.timeend, cx: center.lon, cy: center.lat, zoom: map.getZoom()};
+
     var what = this.services.search.termsInput.val();
     if (what != "") 
       uriParams.what = what;
     var who = this.services.search.userInput.val();
     if (who != "") 
       uriParams.who = who;
+    uriParams.pointOn = pointLayer.getVisibility() == true ? 1 : 0; 
+    uriParams.heatOn = heatLayer.getVisibility() == true ? 1 : 0; 
+    uriParams.dataMode = this.services.topktokens.displayMode;
+    uriParams.dataLocked = this.services.topktokens.locked == true ? 1 : 0;
+    uriParams.dataSource = this.services.topktokens.dataSource;
+
     var uri = buildURI(uriParams);
     url += uri;
     console.log(url);
   },
 
-  readLink: function() {
+  readLink: function(mapParams) {
     if (window.location.search.substr(0,7) == "?params") {
       console.log("params");
       params = this.getURIJson();
       console.log(params);
+      for (var attr in params)
+        mapParams[attr] =  params[attr];
+    }
+    return mapParams;
+  },
+      /*
       if ("t0" in params) {
           console.log ("t0: " + params.t0);
           this.timestart = params.t0;
@@ -116,7 +187,7 @@ var MapD = {
       if ("t1" in params)
           this.timeend = params.t1;
       if ("x0" in params && "x1" in params && "y0" in params && "y1" in params) {
-         this.extent = new OpenLayers.Bounds(params.x0, params.y0, params.x1, params.y1);
+         mapParams.extent = new OpenLayers.Bounds(params.x0, params.y0, params.x1, params.y1);
       }
       if ("what" in params) {
         this.services.search.termsInput.val(params.what);
@@ -126,15 +197,23 @@ var MapD = {
         this.services.search.userInput.val(params.who);
         $('#userInput').trigger('input');
       }
+      if ("pointOn" in params)
+        mapParams.pointOn = params.pointOn;
+        
+        //this.services.settings.pointOn = params.pointOn;
+      if ("heatOn" in params)
+        mapParams.heatOn = params.heatOn;
 
+      if ("dataMode" in params)
+        mapParams.dataMode = params.dataMode;
 
+      if ("dataLocked" in params)
+        mapParams.dataLocked = params.dataLocked;
 
-
-      return true;
+      if ("dataSource" in params)
+        mapParams.dataSource = params.dataSource;
     }
-    else
-      return false;
-  },
+    */
 
   getURIJson: function() {
     var queryString = location.search.substring(1);
@@ -1493,8 +1572,8 @@ var Animation = {
 var Settings = {
   pointLayer: null,
   heatLayer: null,
-  pointOn: true,
-  heatOn: false,
+  pointOn: null,
+  heatOn: null,
   pointButton: null,
   heatButton: null,
 
@@ -1503,13 +1582,26 @@ var Settings = {
     this.heatLayer = heatLayer;
     this.pointButton = pointButton;
     this.heatButton = heatButton;
-    this.pointButton.addClass("pointButtonOnImg");
-    this.heatButton.addClass("heatButtonOffImg");
     this.pointOn = pointLayer.getVisibility();
     this.heatOn = heatLayer.getVisibility();
-   //$(this.pointButton).hover($.proxy(function() {this.pointButton.addClass("pointButtonHoverImg");}, this), $.proxy(function () {this.pointButton.removeClass("pointButtonHoverImg");}, this));
+    console.log("settings point: " + this.pointOn);
+    console.log("settings heat: " + this.heatOn);
+    if (this.pointOn)
+      this.pointButton.addClass("pointButtonOnImg");
+    else
+      this.pointButton.addClass("pointButtonOffImg");
+    if (this.heatOn)
+      this.heatButton.addClass("heatButtonOnImg");
+    else
+      this.heatButton.addClass("heatButtonOffImg");
+
+   $(this.pointButton).hover($.proxy(function() {this.pointButton.addClass("pointButtonHoverImg");}, this), $.proxy(function () {this.pointButton.removeClass("pointButtonHoverImg");}, this));
    $(this.heatButton).hover($.proxy(function() {this.heatButton.addClass("heatButtonHoverImg");}, this), $.proxy(function () {this.heatButton.removeClass("heatButtonHoverImg");}, this));
 
+    $(this.pointButton).click($.proxy(this.pointButtonFunction, this));
+    $(this.heatButton).click($.proxy(this.heatButtonFunction, this));
+    
+    /*
     $(this.pointButton).click($.proxy(function() {
     this.pointLayer.setVisibility(!this.pointOn);
     this.pointOn = !this.pointOn;
@@ -1520,10 +1612,22 @@ var Settings = {
       this.heatOn = !this.heatOn;
       this.heatButton.toggleClass("heatButtonOffImg").toggleClass("heatButtonOnImg");
     }, this));
+    */
   },
+  pointButtonFunction: function() {
+    this.pointLayer.setVisibility(!this.pointOn);
+    this.pointOn = !this.pointOn;
+    this.pointButton.toggleClass("pointButtonOffImg").toggleClass("pointButtonOnImg");
+  },
+  heatButtonFunction: function() {
+    this.heatLayer.setVisibility(!this.heatOn);
+    this.heatOn = !this.heatOn;
+    this.heatButton.toggleClass("heatButtonOffImg").toggleClass("heatButtonOnImg");
+  },
+
   getNumLayersVisible: function() {
-    return (pointLayer.getVisibility() + heatLayer.getVisiblity());
-    //return (this.pointOn + this.heatOn);
+    //return (pointLayer.getVisibility() + heatLayer.getVisiblity());
+    return (this.pointOn + this.heatOn);
   }
 }
   /*
