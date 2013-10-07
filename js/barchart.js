@@ -74,7 +74,7 @@ var BarChart =
 
   },
 
-  addData: function(dataset, numQueryTerms) { 
+  addData: function(dataset, numQueryTerms, dataNums) { 
     var self = this;
     console.log(this.elems.svg);
     console.log(this.width);
@@ -82,10 +82,18 @@ var BarChart =
     var w = this.width;
     var h = this.height;
     var barPadding = 10;
-
-    this.data = $.map(dataset.tokens, function(e1, idx) {
-        return {"label": e1, "val":dataset.counts[idx]};
-    }).slice(numQueryTerms);
+    var abbrFormat = d3.format(".1s");
+    if (dataNums == "percents") {
+      this.data = $.map(dataset.tokens, function(e1, idx) {
+          return {"label": e1, "val":dataset.sums[idx]/(dataset.counts[idx] + 0.01)};
+      }).slice(numQueryTerms);
+      abbrFormat = d3.format(".1%"); 
+    }
+    else {
+      this.data = $.map(dataset.tokens, function(e1, idx) {
+          return {"label": e1, "val":dataset.counts[idx]};
+      }).slice(numQueryTerms);
+    }
     console.log(this.data);
     /*
     var data = dataset.vals;
@@ -104,7 +112,6 @@ var BarChart =
     var yAxis = d3.svg.axis().scale(yScale).orient("left")
     .ticks(7);
     
-    var abbrFormat = d3.format(".1s");
     yAxis.tickFormat(abbrFormat);
 
 

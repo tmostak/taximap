@@ -440,6 +440,7 @@ var TopKTokens = {
   defaultChartK: 15,
   displayMode: "cloud",
   dataSource: "words",
+  dataNums: "counts",
   locked: false,
   tokens: [],
   params: {
@@ -456,6 +457,8 @@ var TopKTokens = {
     this.displayDiv = displayDiv;
     $('#cloudDisplay').prop('checked', 'checked');
     $('#dataWords').prop('checked', 'checked');
+    $('#dataCounts').prop('checked', 'checked');
+    $("#dataPercents").attr('disabled', true);
     //$(this.cloudDiv).css('cursor', 'pointer');
     //
     $("#displayMode").buttonset();
@@ -466,6 +469,7 @@ var TopKTokens = {
     //$("#tokensLocked").button( {icons: {primary:'ui-icon-locked'} });
 
     $("#dataSource").buttonset();
+    $("#dataNums").buttonset();
 
     $("#lock").button({
         text:false,
@@ -488,8 +492,18 @@ var TopKTokens = {
 
     $('input[name="dataSource"]').change($.proxy(function (event) {
        this.dataSource = event.target.value;
+       if (this.locked)
+         this.lockClickFunction(true);
+
        this.reload();
     }, this));
+
+    $('input[name="dataNums"]').change($.proxy(function (event) {
+       this.dataNums = event.target.value;
+       this.reload();
+    }, this));
+
+
     /*
     $('input[name="cloudSource"]').change($.proxy(function (radio) {
         console.log($(radio).val());
@@ -530,24 +544,52 @@ var TopKTokens = {
     },
 
   getURL: function(options) {
+    var numQueryTerms = this.mapd.queryTerms.length;
+    if (numQueryTerms > 0) { // hack - doesnt work for who
+      $("#dataPercents").attr('disabled', false);
+    }
+    else
+      $("#dataPercents").attr('disabled', true);
+    $("#dataNums").buttonset("refresh");
+   
+    if (this.dataNums == "percents") { 
+      if (options == undefined || options == null) 
+        options = {splitQuery: true};
+      else
+        options.splitQuery = true;
+    }
+
+
+    var query = this.mapd.getWhere(options);
+
     if (this.dataSource == "words") {
-        this.params.sql = "select tweet_text from " + this.mapd.table;
+        //this.params.sql = "select tweet_text from " + this.mapd.table;
+        this.params.sql = "select tweet_text";
         this.params.stoptable = "multistop";
     }
     else if (this.dataSource == "users") {
-        this.params.sql = "select sender_name from " + this.mapd.table;
+        //this.params.sql = "select sender_name from " + this.mapd.table;
+        this.params.sql = "select sender_name";
         this.params.stoptable = "";
     }
     else if (this.dataSource == "geo") {
-        this.params.sql = "select country from " + this.mapd.table;
+        //this.params.sql = "select country from " + this.mapd.table;
+        this.params.sql = "select country";
         this.params.stoptable = "";
     }
     else if (this.dataSource == "origin") {
-        this.params.sql = "select origin from " + this.mapd.table;
+        //this.params.sql = "select origin from " + this.mapd.table;
+        this.params.sql = "select origin";
         this.params.stoptable = "";
     }
-    this.params.sql += this.mapd.getWhere(options);
-    var numQueryTerms = this.mapd.queryTerms.length;
+
+    if (this.dataNums == "percents") 
+      this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
+    else
+      this.params.sql += " from " + this.mapd.table + query; 
+
+    //this.params.sql += this.mapd.getWhere(options);
+
     if (this.displayMode == "cloud")
         this.params.k = this.defaultCloudK + numQueryTerms;
     else
@@ -674,7 +716,7 @@ var TopKTokens = {
         if (this.dataSource == "words")
           numResultsToExclude = numQueryTerms; 
         console.log("num results to exclude: " + numResultsToExclude);
-        BarChart.addData(json, numResultsToExclude);
+        BarChart.addData(json, numResultsToExclude, this.dataNums);
     }
         var label = (this.dataSource == "words") ? "# Words: " : ((this.dataSource == "users") ? "# Tweets: " : "# Tweets: ");
         $('#numTokensText').text(label + numberWithCommas(n));
