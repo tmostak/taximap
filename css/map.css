@@ -393,6 +393,12 @@ div#numTokensText {
     height:30px;
 }
 
+
+
+.twitter-share-button {
+  margin-top:5px !important;
+}
+
 #twitter-icon {
     border: none!important;
     background: url('../img/twitter-logo.png') no-repeat center center;
