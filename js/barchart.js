@@ -84,8 +84,11 @@ var BarChart =
     var barPadding = 10;
     var abbrFormat = d3.format(".1s");
     if (dataNums == "percents") {
-      this.data = $.map(dataset.tokens, function(e1, idx) {
+      /*this.data = $.map(dataset.tokens, function(e1, idx) {
           return {"label": e1, "val":dataset.sums[idx]/(dataset.counts[idx] + 0.01)};
+      */
+      this.data = $.map(dataset.tokens, function(e1, idx) {
+          return {"label": e1, "val":dataset.percents[idx]};
       }).slice(numQueryTerms);
       abbrFormat = d3.format(".1%"); 
     }
