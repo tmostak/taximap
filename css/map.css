@@ -48,8 +48,8 @@ div#topbar button:hover {
 
 div#animControls {
     float:left;
-    margin-top:2px;
-    margin-left: 20px;
+    margin-top:3px;
+    margin-left: 6px;
     //position: relative;
     //bottom:5px;
     //left:20px;
@@ -173,9 +173,10 @@ div#social:hover {
 
 .settings {
   position: relative;
-  float: right;
-  margin: 0;
-  margin-right: 10px;
+  float: left;
+  margin-left:10px;
+  margin-top: 5px;
+  margin-right: 2px;
   padding: 0;
 }
 
@@ -189,14 +190,23 @@ div#social:hover {
 }
 
 .settings-button {
-  margin: 12px 0px 0px 0px;
-  padding: 0;
+  margin: 0px 0px 0px 5px;
+  //margin:0px;
+  //padding: 0;
   bottom: 0;
+  border: 0px solid #222;
+  color:white;
+  //color:#8B008B;
+  font-size:17px;
+  text-align: left;
+  padding-left:10px;
+  font-weight:bold;
+  //borderft: 2px solid grey;
+  padding-left:0px;
   //border: none!important;
   //border-radius: 3px;
   //border: 0px solid #232323;
-  border: 0px solid #222;
-  background-image: linear-gradient(#eee, #ccc 75%, #bbb);
+  //background-image: linear-gradient(#eee, #ccc 75%, #bbb);
   //webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
   //box-shadow: 0 0 2px rgba(255,255,255,.25);
 }
@@ -513,6 +523,52 @@ div#widget {
     height:30px;
 }
 
+
+.pointButtonOffImg {
+    border: none!important;
+    width: 110px;
+    height:30px;
+    background: url('../img/buttons/points_110x30_bw.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+.pointButtonOnImg {
+    width: 110px;
+    height:30px;
+    background: url('../img/buttons/points_110x30_color.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+.pointButtonHoverImg {
+    width: 110px;
+    height:30px;
+    background: url('../img/buttons/points_110x30_color.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+.heatButtonOffImg {
+    width: 110px;
+    height: 30px;
+    background: url('../img/buttons/heat_110x30_bw.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+.heatButtonOnImg {
+    width: 110px;
+    height: 30px;
+    background: url('../img/buttons/heat_110x30_color.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+.heatButtonHoverImg {
+    width: 110px;
+    height:30px;
+    background: url('../img/buttons/heat_110x30_color.png') no-repeat center center;
+    opacity: 1.0;
+}
+
+
+/*
 .pointButtonOffImg {
     border: none!important;
     width: 220px;
@@ -555,6 +611,8 @@ div#widget {
     background: url('../img/heatmap_trans_color.png') no-repeat center center;
     opacity: 1.0;
 }
+
+*/
 .sprites { 
   width: 16px;
   height: 16px;
