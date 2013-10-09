@@ -16,7 +16,7 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  host: "http://127.0.0.1:8080/",
+  host: "http://geops.csail.mit.edu:8080/",
   //host: "http://www.velocidy.net:7000/",
   table: "tweets",
 //  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
@@ -30,6 +30,7 @@ var MapD = {
   dataend: null,
   //pointOn: true,
   //heatOn: false,
+  linkButton: null,
   services: {
     pointmap: null,
     heatmap: null,
@@ -43,11 +44,50 @@ var MapD = {
     animation: null
   },
 
+
+
   init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation) {
     if (window.location.search == "?local")
         this.host = "http://sirubu.velocidy.net:8080";
       
     this.map = map;
+
+
+    /*
+    this.linkButton = $("#link-button").button({
+        icons: {
+            primary: "ui-icon-link"
+        },
+    });/*.click($.proxy(function() {
+        var link = this.writeLink();*/
+    /* 
+    $("#clipboard-share").zclip({
+        path:'lib/js/ZeroClipboard.swf',
+        copy:function() {return MapD.writeLink();}
+    });
+    */
+
+
+    
+    $("#clipboard-share").click(function() {
+        var link = MapD.writeLink();
+        console.log(link);
+        $("#link-dialog").html(link).dialog({width: 900});
+    });
+
+    $("#twitter-share").on('click', $.proxy(this.sendTweet, this));
+    $("#facebook-share").on('click', $.proxy(this.facebookShare, this));
+        
+
+
+    /*
+    $("#clipboard-share").click($.proxy(function() {
+        //var link = this.writeLink();
+        //console.log(link);
+    }), this);
+    */
+
+    
     this.services.pointmap = pointmap;
     this.services.heatmap = heatmap;
     this.services.geotrends = geotrends;
@@ -62,17 +102,42 @@ var MapD = {
     $(document).on('mapdreload', $.proxy(this.reload, this));
   },
 
+  facebookShare: function() {
+    var link = this.writeLink();
+    console.log(link);
+    var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
+    var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
+    window.open(
+        'https://www.facebook.com/sharer/sharer.php?u=' + link, 'facebook-share-dialog', 'width=626,height=436');
+    },
+        
+
+  sendTweet: function() {
+    var link = this.writeLink();
+    console.log(link);
+    //link = encodeURI(link);
+    //console.log(link);
+    var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
+    var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
+    window.open("https://twitter.com/share?" +
+        "url=" + link +
+        "&counturl=" + encodeURIComponent(countLinkUrl) +
+        "&text=" + encodeURIComponent(message) +
+        "&hashtags=" + encodeURIComponent('tweetmap,mapD') +
+        "&via=" + encodeURIComponent('datarefined'),
+        "twitter", "width=500,height=300");
+    },
   start: function() {
     $.getJSON(this.services.tweets.getTimeRangeURL()).done($.proxy(this.setDataTimeRange, this));
   },
 
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
-      this.timestart = this.datastart;
-      this.timeend = Math.round((this.dataend-this.datastart)*.2 + this.datastart);
+      this.timestart = Math.round((this.dataend-this.datastart)*.91 + this.datastart);
+      this.timeend = Math.round((this.dataend-this.datastart)*.97 + this.datastart);
       // start with first tenth of dataset
       //var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.datastart, t1: Math.round((this.dataend-this.datastart)*.2 + this.datastart)};
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.datastart, t1: Math.round((this.dataend-this.datastart)*.2 + this.datastart)};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.timestart, t1: this.timeend};
       //this.extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
       //this.pointOn = true;
       //this.heatOn = false;
@@ -146,7 +211,7 @@ var MapD = {
     }
   },
   writeLink: function() {
-    var url = document.URL.split('?')[0] + "?params&";
+    var url = document.URL.split('?')[0] + "?";
     //var mapExtent = this.map.getExtent().toBBOX().split(',');
     var center = map.getCenter();
     //var uriParams = {t0: this.timestart, t1: this.timeend, x0: mapExtent[0], y0: mapExtent[1], x1: mapExtent[2], y1: mapExtent[3]};
@@ -163,14 +228,18 @@ var MapD = {
     uriParams.dataMode = this.services.topktokens.displayMode;
     uriParams.dataLocked = this.services.topktokens.locked == true ? 1 : 0;
     uriParams.dataSource = this.services.topktokens.dataSource;
-
+    
     var uri = buildURI(uriParams);
-    url += uri;
-    console.log(url);
+    url += encodeURIComponent(uri);
+    //url = encodeURI(url);
+
+    //console.log(url);
+    return url;
+
   },
 
   readLink: function(mapParams) {
-    if (window.location.search.substr(0,7) == "?params") {
+    if (window.location.search.substr(0,1) == "?") {
       console.log("params");
       params = this.getURIJson();
       console.log(params);
@@ -551,14 +620,17 @@ var TopKTokens = {
     else
       $("#dataPercents").attr('disabled', true);
     $("#dataNums").buttonset("refresh");
-   
     if (this.dataNums == "percents") { 
       if (options == undefined || options == null) 
         options = {splitQuery: true};
       else
         options.splitQuery = true;
     }
+  //if (options != undefined && options != null) 
+   //     options.splitQuery = false;
 
+    //console.log("datanums " + this.dataNums); 
+    //console.log(options);
 
     var query = this.mapd.getWhere(options);
 
@@ -1484,7 +1556,7 @@ var Animation = {
   playPauseButton: null,
   stopButton: null,
   playing: false,
-  numFrames: 120.0,
+  numFrames: 60.0,
   animStart: null,
   animEnd: null,
   frameStep: null,
@@ -1527,14 +1599,14 @@ var Animation = {
   animFunc: function() {
      if (this.frameEnd < this.animEnd) {
         var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
+       var graphOptions = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
       //console.log (this.frameStart + "-" + this.frameEnd);
       this.frameStart += this.frameStep;
       this.frameEnd += this.frameStep;
       this.mapd.services.graph.chart.setBrushExtent([this.frameStart * 1000, this.frameEnd * 1000]);
       this.mapd.services.pointmap.reload(options);
       this.mapd.services.heatmap.reload(options);
-      console.log("before wordGraphReload")
-      this.wordGraph.reload(options);
+      this.wordGraph.reload(graphOptions);
     }
     else {
       this.stopFunc();

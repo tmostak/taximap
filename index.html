@@ -5,12 +5,14 @@
           type="image/png" 
           href="img/favicons/heat_webtab.png">
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Tweetmap</title>
+    <title>mapD Tweetmap</title>
     <link rel="stylesheet" href="css/map.css" />
     <link rel="stylesheet" href="css/chart.css" />
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
     <!--<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/smoothness/jquery-ui.min.css" />-->
     <link rel="stylesheet" href="lib/js/jQCloud/jqcloud/jqcloud.css" />
+    <link type="text/css" rel="stylesheet" href="lib/css/jquery.dropdown.css" />
+
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <!--<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
@@ -23,6 +25,10 @@
     <script src="lib/js/jsts.js"></script>
     <script type="text/javascript" src="lib/js/jQCloud/jqcloud/jqcloud-1.0.4.min.js"></script>
     <script type="text/javascript" src="lib/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="lib/js/jquery.dropdown.min.js"></script>
+    <!--<script type="text/javascript" src="lib/js/jquery.zclip.min.js"></script>-->
+
+
     <script src="js/olext.js"></script>
     <script src="js/node.js"></script>
     <script src="js/chart.js"></script>
@@ -58,16 +64,22 @@
       <button id="stop" class="anim-input stop-icon" type="button" title="Stop">
 	  <!--<div id="stop-icon"></div>-->
     </div>
-    <div id="social"> 
+    <div id="social" data-dropdown="#share-dropdown"> 
+        <div id="share">Share ▾</div>
+    </div>
+    
+
+      <!--
       <a href="https://twitter.com/share" class="twitter-share-button" data-via="datarefined" data-related="datarefined" data-hashtags="MapD" data-dnt="true">Tweet this map</a>
       <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+      <button id="link-button">Link this view</button>-->
+      <!--<button id="facebook" class="social-button" type="button" title="Facebook">-->
+      <!--<div id="facebook-icon"></div>-->
+
       <!--<a href="https://twitter.com/datarefined" target="_blank"><img id="twitter-icon" src="img/twitter-logo.png"></a>
       <a href="https://facebook.com/datarefined" target="_blank"><img id="facebook-icon" src="img/facebook-logo.png"></a>-->
       <!--<button id="twitter" class="social-button" type="button" title="Twitter">
-      <div id="twitter-icon"></div>
-      <button id="facebook" class="social-button" type="button" title="Facebook">
-      <div id="facebook-icon"></div>-->
-    </div>
+      <div id="twitter-icon"></div>-->
 
     <div id="settings" class="settings">
       <button id="pointButton" class="settings-button" type="button" title="Points">
@@ -110,6 +122,21 @@
             </div>
       </div>
       <div id="chart"></div>
+    </div>
+    <div id="link-dialog" title="Link to this map view"> </div>
+    <div id="share-dropdown" class="dropdown dropdown-anchor-right has-icons">
+        <ul id="share-menu" class="dropdown-menu">
+            <li id="twitter-share"><span>Tweet this Map</span></li>
+            <li id="facebook-share"><span>Share on Facebook</span></li>
+            <li id="clipboard-share"><span>Copy Permalink</span></li>
+                <!--<a href="#">Tweet this Map</li>>
+            <li id="facebook-share">
+                <a href="#">Share on Facebook</li>
+            </li>
+            <li id="clipboard-share">
+                <a href="#">Copy Link</li>
+            </li>-->
+        </ul>
     </div>
   </body>
 </html>

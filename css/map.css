@@ -84,9 +84,90 @@ div#submit-icon {
   margin: 2px
 }
 
+div#share-dropdown {
+    background-color: black;
+}
+
+#share-menu {
+    //background-image:linear-gradient(#4f4f4f, #232323);
+    background-color: #232323;
+    color: white;
+    padding-top: 0;
+    padding-bottom: 0;
+    width:200px;
+}
+
+#share-menu li {
+    border-top: 2px solid grey;
+    padding:10px;
+}
+
+#share-menu li:hover {
+    background-color: #444;
+}
+
+
+
+#share-menu a {
+    color: white;
+    font-weight:bold;
+    //margin-left: 40px;
+    //padding-right:0px;
+}
+
+#share-menu span {
+    color: white;
+    font-weight:bold;
+    font-size: 14px;
+    margin-left: 35px;
+    //margin-left: 40px;
+    //padding-right:0px;
+}
+
+
+#ui-dialog-title {
+    font-size:14px;
+}
+
+#link-dialog {
+    font-size:10px;
+}
+
+//#share-menu a:hover {
+//    background-color:#232323;
+//}
+
+#twitter-share {
+    background: url('../img/twitter-logo.png') no-repeat left center;
+}
+
+#facebook-share {
+    background: url('../img/facebook-logo.png') no-repeat left center;
+}
+
+#clipboard-share {
+    background: url('../img/link-icon-white.png') no-repeat left center;
+}
+
+
+//.share-menu {
+//    background-color: #333 !important;
+//}
+
 div#social{
   float: right;
-  margin-top:5px;
+  //margin-top:5px;
+  height:40px;
+  border-left: 2px solid grey;
+}
+
+
+//ul#social {
+//    list-style-type: none;
+//}
+
+div#social:hover {
+  background-image: linear-gradient(#5f5f5f, #343434);
 }
 
 .settings {
@@ -402,11 +483,20 @@ div#numTokensText {
     height:30px;
 }
 
-
+#link-button {
+    font-size: 10px;
+    margin-bottom: 11px;
+}
 
 .twitter-share-button {
   margin-top:5px !important;
+  width: 80px !important;
 }
+
+div#widget {
+    //margin-right:5px;
+}
+
 
 #twitter-icon {
     border: none!important;
@@ -421,8 +511,6 @@ div#numTokensText {
     width:30px;
     height:30px;
 }
-
-
 
 .pointButtonOffImg {
     border: none!important;
@@ -473,6 +561,17 @@ div#numTokensText {
   opacity: 0.5;
 }
 
+#share {
+    color:white;
+    float: right;
+    font-size: 17px;
+    font-weight:bold;
+    //height:0px;
+    margin-top:10px;
+    margin-right: 5px;
+    margin-left: 5px;
+    //vertical-align: middle;
+}
 .sprites:hover { opacity: 0.8; }
 .zoom75 { zoom: 0.75; }
 .zoom125 { zoom: 1.25; }
