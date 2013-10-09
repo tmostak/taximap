@@ -38,6 +38,15 @@
 </head>
 
   <body>
+    <div id="fb-root"></div>
+   <script>(function(d, s, id) {
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) return;
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));</script>
+
     <div id="topbar">
         <div id="promo"><a href="http://www.map-d.com" target="_blank"><img src="img/mapd_logo.png" class="logo-image"></a></div>
       <form id="search" class="search">
@@ -71,12 +80,12 @@
       <button id="stop" class="anim-input stop-icon" type="button" title="Stop">
 	  <!--<div id="stop-icon"></div>-->
     </div>
-
-    <div id="social" data-dropdown="#share-dropdown"> 
+    <div id="social">
+     <div id="social-share" data-dropdown="#share-dropdown"> 
         <div id="share">Share ▾</div>
-    </div>
-    
-
+     </div>
+      <div class="fb-like" data-href="https://www.facebook.com/datarefined" data-width="120" data-height="30" data-colorscheme="dark" data-layout="button_count" data-action="like" data-show-faces="true" data-send="false"></div>
+   </div>
       <!--
       <a href="https://twitter.com/share" class="twitter-share-button" data-via="datarefined" data-related="datarefined" data-hashtags="MapD" data-dnt="true">Tweet this map</a>
       <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
@@ -89,7 +98,6 @@
       <!--<button id="twitter" class="social-button" type="button" title="Twitter">
       <div id="twitter-icon"></div>-->
 
-    </div>
     <div id="main">
       <div id="mapview">
         <div id="map"></div>
