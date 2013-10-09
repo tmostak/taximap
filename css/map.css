@@ -212,11 +212,16 @@ div#social-share:hover {
   bottom: 0;
   border: 0px solid #222;
   color:white;
-  //color:#8B008B;
+  //background-image: linear-gradient(#ef8f8f, #f86868);
   font-size:17px;
   text-align: left;
   padding-left:10px;
   font-weight:bold;
+  border-radius: 3px;
+  webkit-box-shadow: 2px rgba(255,255,255,.25);
+  box-shadow: 2px rgba(255,255,255,.25);
+
+
   //borderft: 2px solid grey;
   padding-left:0px;
   //border: none!important;
@@ -471,12 +476,12 @@ div#numTokensText {
 }
 
 .anim-input {
-    //webkit-box-shadow: 0 0 2px rgba(50,50,50,.25);
-    //box-shadow: 0 0 2px rgba(100,100,100,.25);
+    webkit-box-shadow: 0 0 2px rgba(50,50,50,.25);
+    box-shadow: 0 0 2px rgba(100,100,100,.25);
     position:relative;
     border: none!important;
     margin: 3px 8px 3px 3px;
-    //border-radius: 3px;
+    border-radius: 3px;
     //-webkit-background-clip: padding;
     background-size: cover;
     //padding:5px;
@@ -583,52 +588,6 @@ div#widget {
     opacity: 1.0;
 }
 
-
-/*
-.pointButtonOffImg {
-    border: none!important;
-    width: 220px;
-    height:29px;
-    background: url('../img/points_trans_bw.png') no-repeat center center;
-    opacity: 1.0;
-}
-
-.pointButtonOnImg {
-    width: 220px;
-    height:29px;
-    background: url('../img/points_trans_color.png') no-repeat center center;
-    opacity: 1.0;
-}
-
-.pointButtonHoverImg {
-    width: 220px;
-    height:29px;
-    background: url('../img/points_trans_color.png') no-repeat center center;
-    opacity: 1.0;
-}
-
-.heatButtonOffImg {
-    width: 220px;
-    height: 29px;
-    background: url('../img/heatmap_trans_bw.png') no-repeat center center;
-    opacity: 1.0;
-}
-
-.heatButtonOnImg {
-    width: 220px;
-    height: 29px;
-    background: url('../img/heatmap_trans_color.png') no-repeat center center;
-    opacity: 1.0;
-}
-
-.heatButtonHoverImg {
-    width: 220px;
-    height:29px;
-    background: url('../img/heatmap_trans_color.png') no-repeat center center;
-    opacity: 1.0;
-}
-
-*/
 .sprites { 
   width: 16px;
   height: 16px;
