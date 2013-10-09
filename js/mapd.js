@@ -70,7 +70,7 @@ var MapD = {
 
     
     $("#clipboard-share").click(function() {
-        var link = MapD.writeLink();
+        var link = MapD.writeLink(false);
         console.log(link);
         $("#link-dialog").html(link).dialog({width: 900});
     });
@@ -103,7 +103,7 @@ var MapD = {
   },
 
   facebookShare: function() {
-    var link = this.writeLink();
+    var link = this.writeLink(true);
     console.log(link);
     var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
     var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
@@ -113,7 +113,7 @@ var MapD = {
         
 
   sendTweet: function() {
-    var link = this.writeLink();
+    var link = this.writeLink(true);
     console.log(link);
     //link = encodeURI(link);
     //console.log(link);
@@ -210,7 +210,7 @@ var MapD = {
       */
     }
   },
-  writeLink: function() {
+  writeLink: function(fullEncode) {
     var url = document.URL.split('?')[0] + "?";
     //var mapExtent = this.map.getExtent().toBBOX().split(',');
     var center = map.getCenter();
@@ -228,9 +228,12 @@ var MapD = {
     uriParams.dataMode = this.services.topktokens.displayMode;
     uriParams.dataLocked = this.services.topktokens.locked == true ? 1 : 0;
     uriParams.dataSource = this.services.topktokens.dataSource;
-    
+   
     var uri = buildURI(uriParams);
-    url += encodeURIComponent(uri);
+    if (fullEncode)
+        url += encodeURIComponent(uri);
+    else 
+        url += uri;
     //url = encodeURI(url);
 
     //console.log(url);
