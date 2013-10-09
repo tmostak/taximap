@@ -158,6 +158,12 @@ div#social {
   float: right;
 }
 
+.twitter-follow-button {
+  float-right;
+  margin-top: 10px;
+  margin-right:10px;
+}
+
 .fb-like {
   float: right;
   margin-top: 10px;
@@ -314,7 +320,7 @@ div#cloudBox{
   float: left;
   //padding-left: 10px;
   margin-top: 0px;
-  font-size: 9px;
+  font-size: 8px;
 }
 
 
@@ -324,14 +330,14 @@ div#cloudBox{
   //position: absolute;
   margin-left: 5px;
   margin-top: 0px;
-  font-size: 9px;
+  font-size: 8px;
 }
 
 #dataNums{
   //position: absolute;
   margin-left: 0px;
   margin-top: 0px;
-  font-size: 9px;
+  font-size: 8px;
 }
 
 
