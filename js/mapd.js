@@ -101,6 +101,7 @@ var MapD = {
     this.map.events.register('moveend', this, this.reload);
 
     //$(".ui-widget-header").css("background-image", "linear-gradient(#4F4F4F, #232323)");
+    $(".olControlZoomPanel").css("top",17);
 
     
     $(document).on('mapdreload', $.proxy(this.reload, this));
