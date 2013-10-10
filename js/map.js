@@ -40,9 +40,9 @@ function init()
   HeatMap.init(heatLayer);
   Search.init(map, $('form#search'), $('input#termsInput'), $('input#userInput'), $('input#locationInput'));
   Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
-  Animation.init(pointLayer, heatLayer, TopKTokens, $('button#play-pause'), $('button#stop'));
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
+  Animation.init(pointLayer, heatLayer, TopKTokens, $('button#play-pause'), $('button#stop'));
   MapD.start();
   //baseLayer.display(false);
   //pointLayer.display(true);

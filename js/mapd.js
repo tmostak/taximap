@@ -99,6 +99,10 @@ var MapD = {
     this.services.tweetclick = tweetclick;
     this.services.animation = animation;
     this.map.events.register('moveend', this, this.reload);
+
+    //$(".ui-widget-header").css("background-image", "linear-gradient(#4F4F4F, #232323)");
+
+    
     $(document).on('mapdreload', $.proxy(this.reload, this));
   },
 
@@ -133,8 +137,12 @@ var MapD = {
 
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
-      this.timestart = Math.round((this.dataend-this.datastart)*.91 + this.datastart);
-      this.timeend = Math.round((this.dataend-this.datastart)*.97 + this.datastart);
+      this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
+      this.timestart = Math.max(this.dataend - 43200,  Math.round((this.dataend-this.datastart)*.5 + this.datastart));
+
+      //this.timestart = Math.round((this.dataend-this.datastart)*.93 + this.datastart);
+      
+
       // start with first tenth of dataset
       //var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.datastart, t1: Math.round((this.dataend-this.datastart)*.2 + this.datastart)};
       var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.timestart, t1: this.timeend};
@@ -618,7 +626,7 @@ var TopKTokens = {
   getURL: function(options) {
     var numQueryTerms = this.mapd.queryTerms.length;
     if (numQueryTerms > 0) { // hack - doesnt work for who
-      $("#dataPercents").attr('disabled', false);
+      //$("#dataPercents").attr('disabled', false);
     }
     else
       $("#dataPercents").attr('disabled', true);

@@ -14,8 +14,9 @@
   left: 400px;
   font: 10px sans-serif;
   background-color: white;
+  //background-image: linear-gradient(#4f4f4f, #232323);
   border-radius: 5px;
-  //border-bottom: 2px;
+  border-left: 2px solid gray;
   webkit-box-shadow: 3px 0 3px rgba(0,0,0,.25);
   box-shadow: 3px 0 3px rgba(0,0,0,.25);
 }
@@ -103,6 +104,11 @@ rect.pane {
 
 .chart-settings {
   float: left;
+  width:100%;
+  background-image: linear-gradient(#4f4f4f, #232323);
+  border-radius: 3px;
+  webkit-box-shadow: 2px rgba(255,255,255,.25);
+  box-shadow: 2px rgba(255,255,255,.25);
   //position:absolute;
   //position:relative;
   //width:100%;
@@ -110,12 +116,22 @@ rect.pane {
   //margin-top:0px;
 }
 
+
+div#animControls {
+  float:left;
+  margin-top:10px;
+  padding:0px;
+  margin-left: 10px;
+}
+
 .chart-compare { 
-  //position: relative;
+  position: relative;
   float:left;
   margin-top:10px;
   font-size: 12px;
 }
+
+
 
 .compare-input {
   float:left;
@@ -164,6 +180,7 @@ rect.pane {
 
 .detail-text { 
   float: left;
+  color:white;
   max-width: 300px;
   white-space: nowrap;
   overflow: hidden;

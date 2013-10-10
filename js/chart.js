@@ -28,6 +28,7 @@ var LineChart =
     svg: null,
     info: null,
     settingsDiv: null,
+    animDiv: null,
     optionsDiv: null,
     compareDiv: null,
     detailsDiv: null
@@ -53,7 +54,7 @@ var LineChart =
         //this.width = cont.width() - cont.offset().left - this.margin.left - this.margin.right;
          this.height = 200 - this.margin.top - this.margin.bottom;
 
-    this.x = d3.time.scale().range([0, this.width]);
+    this.x = d3.time.scale().range([0, this.width - 39]);
     this.y = d3.scale.linear().range([this.height, 0]);
 
     this.brush =d3.svg.brush()
@@ -138,7 +139,9 @@ var LineChart =
 //         .attr("title", "trends")
 //        .style("this.margin-top", "5px")
     this.elems.settingsDiv = container.append("div").attr("class", "chart-settings");
-
+    this.elems.animDiv = this.elems.settingsDiv.append("div").attr("id", "animControls");
+    //$("#animControls").css("margin-left", this.margin.left + 34);
+    this.elems.animDiv.html("<button id='play-pause' class='anim-input play-icon' type='button' title='Play/Pause'></button><button id='stop' class='anim-input stop-icon' type='button' title='Stop'></button>");
     this.elems.compareDiv = this.elems.settingsDiv.append("div")
         .attr("class", "chart-compare");
 
