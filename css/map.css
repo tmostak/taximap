@@ -82,6 +82,16 @@ div#share-dropdown {
     background-color: black;
 }
 
+.data-dropdown {
+    background-color: #232323;
+    color: white;
+}
+
+
+//div#data-display-dropdown {
+//  background: black;
+//}
+
 #share-menu {
     //background-image:linear-gradient(#4f4f4f, #232323);
     background-color: #232323;
@@ -374,11 +384,45 @@ div#cloud {
   cursor: pointer;
 }
 
+div#toolbar {
+  height:30px;
+  z-index:1000;
+  background-color: #232323;
+  background-image: linear-gradient(#4f4f4f, #232323);
+  webkit-box-shadow: 2px 0 3px rgba(0,0,0,.25);
+  box-shadow: 2px 0 3px rgba(0,0,0,.25);
+}
+
+.data-menu {
+  color:white;
+  float:left;
+  position:relative;
+  //vertical-align: center;
+  height: 30px;
+  font-size: 14px;
+  font-weight:bold;
+  border-right: 2px solid grey;
+  padding-left:10px;
+  padding-right:10px;
+
+}
+
+.data-menu span {
+  position:relative;
+  top: 5px;
+}
+
+span .data-menu-category {
+  font-size:14px;
+  font-weight:bold;
+ }
+/*
 #toolbar {
     padding: 4px;
     display: inline-block;
     width:390px;
 }
+*/
 
 div#sortPref {
   font-size: 12px;

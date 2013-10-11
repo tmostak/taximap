@@ -81,7 +81,7 @@
     </div>-->
     <div id="social">
      <div id="social-share" data-dropdown="#share-dropdown"> 
-        <div id="share">Post this map ▾</div>
+        <div id="share">Share this map ▾</div>
      </div>
       <div class="fb-like" data-href="https://www.facebook.com/datarefined" data-width="120" data-height="30" data-colorscheme="dark" data-layout="button_count" data-action="like" data-show-faces="false" data-send="false"></div>
 
@@ -111,16 +111,19 @@
         <div id="sortOrder"></div>
         <div id="tweets"></div> 
             <div id="cloudBox">
-                <div id="toolbar" class="ui-widget-header ui-corner-all">
-                        <span id="displayMode">
+                <div id="toolbar">
+                  <div class="data-menu" id="data-display" data-dropdown="#data-display-dropdown"><span>Cloud ▾</span></div>
+                  <div class="data-menu" id="data-source" data-dropdown="#data-source-dropdown"><span>Words ▾</span></div>
+                  <div class="data-menu" id="data-nums" data-dropdown="#data-nums-dropdown"><span>Counts ▾</span> </div>
+                  <button id="lock">unlocked</button>
+                </div>
+
+
+                        <!--<span id="displayMode">
+
                             <input type="radio" id="cloudDisplay" value="cloud" name="displayMode" /><label for="cloudDisplay">Cloud</label>
                             <input type="radio" id="barDisplay" value="chart" name="displayMode"  /><label for="barDisplay">Graph</label>
                         </span>
-                        <!--<span id="lockMode">
-                            <input type="radio" id="tokensUnlocked" value="unlocked" name="lockMode" /><label for="tokensUnlocked"></label>
-
-                            <input type="radio" id="tokensLocked" value="locked" name="lockMode" /><label for="tokensLocked"></label>j
-                        </span>-->
                         <span id="dataSource">
                           <input type="radio" id="dataWords" value="words" name="dataSource" /><label for="dataWords">Words</label>
                           <input type="radio" id="dataUsers" value="users" name="dataSource"  /><label for="dataUsers">Users</label>
@@ -132,7 +135,7 @@
                           <input type="radio" id="dataPercents" value="percents" name="dataNums"  /><label for="dataPercents">%</label>
                         </span>
                         <button id="lock">unlocked</button>
-                </div>
+                      </div>-->
                 <div id="cloud"></div>
                 <div id="numTokensText"></div>
             </div>
@@ -147,5 +150,14 @@
             <li id="clipboard-share"><span>Permalink</span></li>
         </ul>
     </div>
+    <div id="data-display-dropdown" class="dropdown dropdown-anchor-left has-icons">
+        <ul id="data-display-dropdown" class="data-dropdown">
+            <li id="data-cloud"><span>Cloud</span></li>
+            <li id="data-barchart"><span>Barchart</span></li>
+        </ul>
+    </div>
+
+
+
   </body>
 </html>

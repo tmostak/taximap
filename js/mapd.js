@@ -16,7 +16,7 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  host: "http://geops.csail.mit.edu:8080/",
+  host: "http://mapd.csail.mit.edu:8080/",
   //host: "http://www.velocidy.net:7000/",
   table: "tweets",
 //  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),

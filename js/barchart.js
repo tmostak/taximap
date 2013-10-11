@@ -76,9 +76,6 @@ var BarChart =
 
   addData: function(dataset, numQueryTerms, dataNums) { 
     var self = this;
-    console.log(this.elems.svg);
-    console.log(this.width);
-    console.log(this.height);
     var w = this.width;
     var h = this.height;
     var barPadding = 10;
