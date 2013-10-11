@@ -78,54 +78,46 @@ div#submit-icon {
   margin: 2px
 }
 
-div#share-dropdown {
-    background-color: black;
-}
 
-.data-dropdown {
+/*.data-dropdown {
     background-color: #232323;
     color: white;
-}
+}*/
 
 
 //div#data-display-dropdown {
 //  background: black;
 //}
 
-#share-menu {
-    //background-image:linear-gradient(#4f4f4f, #232323);
-    background-color: #232323;
-    color: white;
-    padding-top: 0;
-    padding-bottom: 0;
-    width:220px;
-}
-
-#share-menu li {
-    border-top: 2px solid grey;
-    padding:10px;
-}
-
-#share-menu li:hover {
-    background-color: #444;
-}
-
-
-
-#share-menu a {
-    color: white;
-    font-weight:bold;
-    //margin-left: 40px;
-    //padding-right:0px;
-}
-
-#share-menu span {
-    color: white;
-    font-weight:bold;
-    font-size: 14px;
+#shareMenu span{
     margin-left: 35px;
-    //margin-left: 40px;
-    //padding-right:0px;
+}
+
+
+
+.drop-menu {
+    background-color: #232323 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+
+
+.drop-menu li {
+    border-top: 2px solid grey !important;
+    padding:10px !important;
+}
+
+.drop-menu li:hover {
+    background-color: #444 !important;
+    cursor: pointer !important;
+}
+
+
+.drop-menu span {
+    color: white !important;
+    font-weight:bold !important;
+    font-size: 14px !important;
 }
 
 
@@ -137,9 +129,6 @@ div#share-dropdown {
     font-size:10px;
 }
 
-//#share-menu a:hover {
-//    background-color:#232323;
-//}
 
 #twitter-share {
     background: url('../img/twitter-logo.png') no-repeat left center;
@@ -153,10 +142,10 @@ div#share-dropdown {
     background: url('../img/link-icon-white.png') no-repeat left center;
 }
 
-
-//.share-menu {
-//    background-color: #333 !important;
-//}
+.checkmark {
+    float: right;
+    visibility:hidden;
+}
 
 div#social {
   float: right;
@@ -181,6 +170,7 @@ div#social-share{
   border-left: 2px solid grey;
 }
 
+.checkmark-img
 
 //ul#social {
 //    list-style-type: none;
@@ -329,14 +319,13 @@ div#cloudBox{
   margin-top: 0px;
   height: 35%;
 }
-
+/*
 #displayMode {
   float: left;
   //padding-left: 10px;
   margin-top: 0px;
   font-size: 8px;
 }
-
 
 #dataSource{
   float: left;
@@ -354,6 +343,7 @@ div#cloudBox{
   margin-top: 0px;
   font-size: 8px;
 }
+*/
 
 
 #lock {
@@ -397,13 +387,13 @@ div#toolbar {
   color:white;
   float:left;
   position:relative;
-  //vertical-align: center;
   height: 30px;
   font-size: 14px;
   font-weight:bold;
   border-right: 2px solid grey;
   padding-left:10px;
-  padding-right:10px;
+  width:100px;
+  //padding-right:10px;
 
 }
 
@@ -412,10 +402,24 @@ div#toolbar {
   top: 5px;
 }
 
+.data-menu:hover {
+  background-image: linear-gradient(#5f5f5f, #343434);
+  cursor: pointer;
+}
+
+.drop-triangle {
+    float: right;
+    margin-right:5px;
+}
+
+/*
 span .data-menu-category {
   font-size:14px;
   font-weight:bold;
  }
+*/
+
+
 /*
 #toolbar {
     padding: 4px;

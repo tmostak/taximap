@@ -112,9 +112,9 @@
         <div id="tweets"></div> 
             <div id="cloudBox">
                 <div id="toolbar">
-                  <div class="data-menu" id="data-display" data-dropdown="#data-display-dropdown"><span>Cloud ▾</span></div>
-                  <div class="data-menu" id="data-source" data-dropdown="#data-source-dropdown"><span>Words ▾</span></div>
-                  <div class="data-menu" id="data-nums" data-dropdown="#data-nums-dropdown"><span>Counts ▾</span> </div>
+                  <div class="data-menu" id="dataDisplay" data-dropdown="#dataDisplayDropdown"><span class="menu-text">Cloud</span><span class="drop-triangle">▾</span></div>
+                  <div class="data-menu" id="dataSource" data-dropdown="#dataSourceDropdown"><span class="menu-text">Words</span><span class="drop-triangle">▾</span></div>
+                  <div class="data-menu" id="dataNums" data-dropdown="#dataNumsDropdown"><span class="menu-text">Counts</span><span class="drop-triangle">▾</span></div>
                   <button id="lock">unlocked</button>
                 </div>
 
@@ -144,20 +144,33 @@
     </div>
     <div id="link-dialog" title="Link to this map view"> </div>
     <div id="share-dropdown" class="dropdown dropdown-anchor-right has-icons">
-        <ul id="share-menu" class="dropdown-menu">
+        <ul id="shareMenu" class="dropdown-menu drop-menu">
             <li id="twitter-share"><span>On Twitter</span></li>
             <li id="facebook-share"><span>On Facebook</span></li>
             <li id="clipboard-share"><span>Permalink</span></li>
         </ul>
     </div>
-    <div id="data-display-dropdown" class="dropdown dropdown-anchor-left has-icons">
-        <ul id="data-display-dropdown" class="data-dropdown">
-            <li id="data-cloud"><span>Cloud</span></li>
-            <li id="data-barchart"><span>Barchart</span></li>
+    <div id="dataDisplayDropdown" class="dropdown dropdown-anchor-left ">
+        <ul id="dataDisplayMenu" class="dropdown-menu drop-menu display-menu">
+            <li id="dataDisplayCloud"><span>Cloud</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataDisplayBarchart"><span>Barchart</span><span class="checkmark">&#x2713</span></li>
         </ul>
     </div>
 
-
-
+    <div id="dataSourceDropdown" class="dropdown dropdown-anchor-left ">
+        <ul id="dataSourceMenu" class="dropdown-menu drop-menu source-menu">
+            <li id="dataSourceWords"><span>Words</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceUsers"><span>Users</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceCountries"><span>Countries</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceOS-App"><span>OS-App</span><span class="checkmark">&#x2713</span></li>
+        </ul>
+    </div>
+    
+    <div id="dataNumsDropdown" class="dropdown dropdown-anchor-left ">
+        <ul id="dataNumsMenu" class="dropdown-menu drop-menu nums-menu">
+            <li id="dataNumsCounts"><span>Counts</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataNumsPercents"><span>Percents</span><span class="checkmark">&#x2713</span></li>
+        </ul>
+    </div>
   </body>
 </html>

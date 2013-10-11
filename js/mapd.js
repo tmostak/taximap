@@ -47,6 +47,8 @@ var MapD = {
 
 
   init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation) {
+  
+    //$("#dataDisplayBarchart").click(function() {console.log($(this).attr("id"));});  
     if (window.location.search == "?local")
         this.host = "http://sirubu.velocidy.net:8080";
       
@@ -164,12 +166,15 @@ var MapD = {
       }
 
       this.services.topktokens.displayMode = mapParams.dataMode;
+      /*
       if (mapParams.dataMode == "cloud")
         $("#cloudDisplay").prop('checked', 'checked');
       else 
         $("#barDisplay").prop('checked', 'checked');
       $("#displayMode").buttonset("refresh");
+      */
       console.log(mapParams.dataSource);
+      /*
       switch (mapParams.dataSource) {
         case "words":
           this.services.topktokens.dataSource = "words";
@@ -188,6 +193,7 @@ var MapD = {
           $('#dataOrigin').prop('checked', 'checked');
       }
        $('#dataSource').buttonset("refresh");
+       */
 
       /*
       if (mapParams.dataLocked == 1)
@@ -536,21 +542,50 @@ var TopKTokens = {
 
   init: function(displayDiv) {
     this.displayDiv = displayDiv;
-    $('#cloudDisplay').prop('checked', 'checked');
-    $('#dataWords').prop('checked', 'checked');
-    $('#dataCounts').prop('checked', 'checked');
-    $("#dataPercents").attr('disabled', true);
+    //$('#cloudDisplay').prop('checked', 'checked');
+    //$('#dataWords').prop('checked', 'checked');
+    //$('#dataCounts').prop('checked', 'checked');
+    //$("#dataPercents").attr('disabled', true);
     //$(this.cloudDiv).css('cursor', 'pointer');
     //
-    $("#displayMode").buttonset();
+    //$("#displayMode").buttonset();
+    //$("#dataDisplayBarchart").click(function() {console.log($(this).attr("id"));});  
 
+    $(".drop-menu").click($.proxy(function(e) {
+        var menu;
+        var choice = this.getMenuItemClicked(e.target);
+        if ($(e.currentTarget).hasClass("display-menu")) {
+          //$("#dataDisplay span.menu-text").text(this.getMenuItem(e.target));
+          menu="Display";
+        }
+        else if ($(e.currentTarget).hasClass("source-menu")) {
+            //$("#dataSource span.menu-text").text(this.getMenuItem(e.target));
+            menu="Source";
+        }
+        else if ($(e.currentTarget).hasClass("nums-menu")) {
+            //$("#dataNums span.menu-text").text(this.getMenuItem(e.target))
+            menu="Nums";
+        }
+
+        console.log(menu);
+        console.log(choice);
+        this.setMenuItem(menu, choice);
+        /* 
+        console.log(e);
+        console.log(e.target);
+        var menu = e.target.parentElement.id;
+        console.log(menu);
+        */
+        //console.log($(this).attr("id")); console.log(e);
+    }
+    , this));  
 
     //$("#lockMode").buttonset();
     //$("#tokensUnlocked").button( {icons: {primary:'ui-icon-unlocked'} });
     //$("#tokensLocked").button( {icons: {primary:'ui-icon-locked'} });
 
-    $("#dataSource").buttonset();
-    $("#dataNums").buttonset();
+    //$("#dataSource").buttonset();
+    //$("#dataNums").buttonset();
 
     $("#lock").button({
         text:false,
@@ -594,6 +629,29 @@ var TopKTokens = {
     */
     $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
 
+  },
+  
+  getMenuItemClicked: function(target) {
+    if (target.localName != "span")
+        innerText = target.firstChild.innerText;
+    else {
+        if (target.className == "checkmark")
+            innerText = target.parentElement.firstChild.innerText;
+        else
+            innerText = target.innerText;
+            
+    }
+    return innerText;
+  },
+
+  setMenuItem: function(menu, choice) {   
+    var menuDiv = "#data" + menu;
+    var choiceDiv = menuDiv + choice;
+    console.log(menuDiv);
+    console.log(choiceDiv);
+    $(menuDiv + "Dropdown span.checkmark").css("visibility", "hidden");
+    $(choiceDiv + " .checkmark").css("visibility","visible");
+    $(menuDiv + " span.menu-text").text(choice);
   },
 
   lockClickFunction: function (preventReload) {  
@@ -1495,6 +1553,7 @@ var Search = {
  
   onSearch: function() {
     //console.log('in onSearch');
+    /*
     if ($("#userInput").val().length == 0) {
         $('#dataUsers').attr("disabled", false);
     }
@@ -1519,6 +1578,7 @@ var Search = {
         $('#dataOrigin').attr("disabled", false);
     }
     $('#dataSource').buttonset("refresh");
+    */
 
 
     var location = this.locationInput.val();
@@ -1648,13 +1708,12 @@ var Animation = {
         this.wordGraph.displayMode = "chart"; 
         if (this.formerGraphLockedState == false) {
             this.wordGraph.lockClickFunction();
-            //$("#lock").addClass("ui-selecting").buttonset("refresh");
         }
-        //$("lock").attr('disabled', true);
-        //$("lock").button("refresh");
+        /*****
         $("#barDisplay").prop('checked', 'checked');
         $("#cloudDisplay").attr('disabled', true);
         $("#displayMode").buttonset("refresh");
+        ******/
       }
       this.animFunc();
 
