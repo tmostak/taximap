@@ -1459,7 +1459,7 @@ var Search = {
 
     var terms = this.termsInput.val();
     if ($("#userInput").val().length > 0) {
-      mapd.services.topktokens.setMenuItem("Source", "Users", false);
+      mapd.services.topktokens.setMenuItem("Source", "Words", false);
     }
     if (terms.substring(0,9) == "country:") {
       mapd.services.topktokens.setMenuItem("Source", "Words", false);
