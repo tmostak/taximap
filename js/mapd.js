@@ -19,17 +19,12 @@ var MapD = {
   host: "http://mapd.csail.mit.edu:8080/",
   //host: "http://www.velocidy.net:7000/",
   table: "tweets",
-//  timestart: (new Date('4/15/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
-//  timeend: (new Date('4/16/2013 12:00:00 AM GMT-0400').getTime()/1000).toFixed(0),
   timestart: null,
   timeend: null,
-  //extent:null,
   queryTerms: [],
   user: null,
   datastart: null,
   dataend: null,
-  //pointOn: true,
-  //heatOn: false,
   linkButton: null,
   services: {
     pointmap: null,
@@ -53,23 +48,6 @@ var MapD = {
         this.host = "http://sirubu.velocidy.net:8080";
       
     this.map = map;
-
-
-    /*
-    this.linkButton = $("#link-button").button({
-        icons: {
-            primary: "ui-icon-link"
-        },
-    });/*.click($.proxy(function() {
-        var link = this.writeLink();*/
-    /* 
-    $("#clipboard-share").zclip({
-        path:'lib/js/ZeroClipboard.swf',
-        copy:function() {return MapD.writeLink();}
-    });
-    */
-
-
     
     $("#clipboard-share").click(function() {
         var link = MapD.writeLink(false);
@@ -80,16 +58,6 @@ var MapD = {
     $("#twitter-share").on('click', $.proxy(this.sendTweet, this));
     $("#facebook-share").on('click', $.proxy(this.facebookShare, this));
         
-
-
-    /*
-    $("#clipboard-share").click($.proxy(function() {
-        //var link = this.writeLink();
-        //console.log(link);
-    }), this);
-    */
-
-    
     this.services.pointmap = pointmap;
     this.services.heatmap = heatmap;
     this.services.geotrends = geotrends;
@@ -102,7 +70,6 @@ var MapD = {
     this.services.animation = animation;
     this.map.events.register('moveend', this, this.reload);
 
-    //$(".ui-widget-header").css("background-image", "linear-gradient(#4F4F4F, #232323)");
     $(".olControlZoomPanel").css("top",17);
 
     
@@ -122,8 +89,6 @@ var MapD = {
   sendTweet: function() {
     var link = this.writeLink(true);
     console.log(link);
-    //link = encodeURI(link);
-    //console.log(link);
     var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
     var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
     window.open("https://twitter.com/share?" +
@@ -143,15 +108,9 @@ var MapD = {
       this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
       this.timestart = Math.max(this.dataend - 43200,  Math.round((this.dataend-this.datastart)*.5 + this.datastart));
 
-      //this.timestart = Math.round((this.dataend-this.datastart)*.93 + this.datastart);
       
 
-      // start with first tenth of dataset
-      //var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.datastart, t1: Math.round((this.dataend-this.datastart)*.2 + this.datastart)};
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataMode: "cloud", dataSource: "words",  dataLocked: 0, t0: this.timestart, t1: this.timeend};
-      //this.extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
-      //this.pointOn = true;
-      //this.heatOn = false;
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Words", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
@@ -159,13 +118,15 @@ var MapD = {
       if ("what" in mapParams) {
         this.services.search.termsInput.val(params.what);
         $('#termsInput').trigger('input');
-      }
-      if ("who" in mapParams) {
+      } if ("who" in mapParams) {
         this.services.search.userInput.val(params.who);
         $('#userInput').trigger('input');
       }
+      this.services.topktokens.setMenuItem("Display", mapParams.dataDisplay, false);
+      this.services.topktokens.setMenuItem("Source", mapParams.dataSource, false);
+      this.services.topktokens.setMenuItem("Mode", mapParams.dataMode, false);
 
-      this.services.topktokens.displayMode = mapParams.dataMode;
+      //this.services.topktokens.displayMode = mapParams.dataMode;
       /*
       if (mapParams.dataMode == "cloud")
         $("#cloudDisplay").prop('checked', 'checked');
@@ -173,7 +134,6 @@ var MapD = {
         $("#barDisplay").prop('checked', 'checked');
       $("#displayMode").buttonset("refresh");
       */
-      console.log(mapParams.dataSource);
       /*
       switch (mapParams.dataSource) {
         case "words":
@@ -240,9 +200,10 @@ var MapD = {
       uriParams.who = who;
     uriParams.pointOn = pointLayer.getVisibility() == true ? 1 : 0; 
     uriParams.heatOn = heatLayer.getVisibility() == true ? 1 : 0; 
-    uriParams.dataMode = this.services.topktokens.displayMode;
+    uriParams.dataDisplay = this.services.topktokens.displaySetting;
+    uriParams.dataSource = this.services.topktokens.sourceSetting;
+    uriParams.dataMode = this.services.topktokens.modeSetting;
     uriParams.dataLocked = this.services.topktokens.locked == true ? 1 : 0;
-    uriParams.dataSource = this.services.topktokens.dataSource;
    
     var uri = buildURI(uriParams);
     if (fullEncode)
@@ -266,41 +227,6 @@ var MapD = {
     }
     return mapParams;
   },
-      /*
-      if ("t0" in params) {
-          console.log ("t0: " + params.t0);
-          this.timestart = params.t0;
-      }
-      if ("t1" in params)
-          this.timeend = params.t1;
-      if ("x0" in params && "x1" in params && "y0" in params && "y1" in params) {
-         mapParams.extent = new OpenLayers.Bounds(params.x0, params.y0, params.x1, params.y1);
-      }
-      if ("what" in params) {
-        this.services.search.termsInput.val(params.what);
-        $('#termsInput').trigger('input');
-      }
-      if ("who" in params) {
-        this.services.search.userInput.val(params.who);
-        $('#userInput').trigger('input');
-      }
-      if ("pointOn" in params)
-        mapParams.pointOn = params.pointOn;
-        
-        //this.services.settings.pointOn = params.pointOn;
-      if ("heatOn" in params)
-        mapParams.heatOn = params.heatOn;
-
-      if ("dataMode" in params)
-        mapParams.dataMode = params.dataMode;
-
-      if ("dataLocked" in params)
-        mapParams.dataLocked = params.dataLocked;
-
-      if ("dataSource" in params)
-        mapParams.dataSource = params.dataSource;
-    }
-    */
 
   getURIJson: function() {
     var queryString = location.search.substring(1);
@@ -525,9 +451,10 @@ var TopKTokens = {
   displayDiv: null, 
   defaultCloudK: 30,
   defaultChartK: 15,
-  displayMode: "cloud",
-  dataSource: "words",
-  dataNums: "counts",
+  displaySetting: null,
+  sourceSetting: null,
+  modeSetting: null,
+  settingDict: {Display: 'displaySetting', Source: 'sourceSetting', Mode: 'modeSetting'},
   locked: false,
   tokens: [],
   params: {
@@ -542,50 +469,21 @@ var TopKTokens = {
 
   init: function(displayDiv) {
     this.displayDiv = displayDiv;
-    //$('#cloudDisplay').prop('checked', 'checked');
-    //$('#dataWords').prop('checked', 'checked');
-    //$('#dataCounts').prop('checked', 'checked');
-    //$("#dataPercents").attr('disabled', true);
-    //$(this.cloudDiv).css('cursor', 'pointer');
-    //
-    //$("#displayMode").buttonset();
-    //$("#dataDisplayBarchart").click(function() {console.log($(this).attr("id"));});  
-
     $(".drop-menu").click($.proxy(function(e) {
-        var menu;
-        var choice = this.getMenuItemClicked(e.target);
-        if ($(e.currentTarget).hasClass("display-menu")) {
-          //$("#dataDisplay span.menu-text").text(this.getMenuItem(e.target));
-          menu="Display";
-        }
-        else if ($(e.currentTarget).hasClass("source-menu")) {
-            //$("#dataSource span.menu-text").text(this.getMenuItem(e.target));
-            menu="Source";
-        }
-        else if ($(e.currentTarget).hasClass("nums-menu")) {
-            //$("#dataNums span.menu-text").text(this.getMenuItem(e.target))
-            menu="Nums";
-        }
-
-        console.log(menu);
-        console.log(choice);
-        this.setMenuItem(menu, choice);
-        /* 
-        console.log(e);
-        console.log(e.target);
-        var menu = e.target.parentElement.id;
-        console.log(menu);
-        */
-        //console.log($(this).attr("id")); console.log(e);
+      var menu;
+      var choice = this.getMenuItemClicked(e.target);
+      if ($(e.currentTarget).hasClass("display-menu")) {
+        menu="Display";
+      }
+      else if ($(e.currentTarget).hasClass("source-menu")) {
+        menu="Source";
+      }
+      else if ($(e.currentTarget).hasClass("mode-menu")) {
+        menu="Mode";
+      }
+      this.setMenuItem(menu, choice, true);
     }
     , this));  
-
-    //$("#lockMode").buttonset();
-    //$("#tokensUnlocked").button( {icons: {primary:'ui-icon-unlocked'} });
-    //$("#tokensLocked").button( {icons: {primary:'ui-icon-locked'} });
-
-    //$("#dataSource").buttonset();
-    //$("#dataNums").buttonset();
 
     $("#lock").button({
         text:false,
@@ -594,8 +492,9 @@ var TopKTokens = {
         }
     })
     .click($.proxy(this.lockClickFunction, this));
-
-
+    
+    /*
+     
     $('input[name="displayMode"]').change($.proxy(function (event) {
        this.displayMode = event.target.value;
        if (this.displayMode == "cloud")
@@ -620,14 +519,13 @@ var TopKTokens = {
     }, this));
 
 
-    /*
     $('input[name="cloudSource"]').change($.proxy(function (radio) {
         console.log($(radio).val());
         //console.log($(this));
         //console.log($(radio).val());
     }, this, $('input[name="cloudSource"]')));
     */
-    $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
+    //$(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
 
   },
   
@@ -644,14 +542,26 @@ var TopKTokens = {
     return innerText;
   },
 
-  setMenuItem: function(menu, choice) {   
+  setMenuItem: function(menu, choice, reload) {   
     var menuDiv = "#data" + menu;
+    var dropdownDiv = menuDiv + "Dropdown";
     var choiceDiv = menuDiv + choice;
     console.log(menuDiv);
     console.log(choiceDiv);
-    $(menuDiv + "Dropdown span.checkmark").css("visibility", "hidden");
+    $(dropdownDiv + " span.checkmark").css("visibility", "hidden");
     $(choiceDiv + " .checkmark").css("visibility","visible");
     $(menuDiv + " span.menu-text").text(choice);
+    this[this.settingDict[menu]] = choice;
+    console.log ("aaaaa " + this[this.settingDict[menu]]);
+    console.log($(dropdownDiv));
+    $(dropdownDiv).removeClass('dropdown-open');
+    if (choice == "Cloud")
+      $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
+    else if (choice == "Barchart")
+      $(this.displayDiv).off('click');
+
+    if (reload)
+      this.reload();
   },
 
   lockClickFunction: function (preventReload) {  
@@ -684,55 +594,49 @@ var TopKTokens = {
 
   getURL: function(options) {
     var numQueryTerms = this.mapd.queryTerms.length;
+    /*
     if (numQueryTerms > 0) { // hack - doesnt work for who
       //$("#dataPercents").attr('disabled', false);
     }
     else
       $("#dataPercents").attr('disabled', true);
-    $("#dataNums").buttonset("refresh");
+    */
+    //$("#dataNums").buttonset("refresh");
+    /*
     if (this.dataNums == "percents") { 
       if (options == undefined || options == null) 
         options = {splitQuery: true};
       else
         options.splitQuery = true;
     }
-  //if (options != undefined && options != null) 
-   //     options.splitQuery = false;
-
-    //console.log("datanums " + this.dataNums); 
-    //console.log(options);
+    */
 
     var query = this.mapd.getWhere(options);
+    console.log("query: " + query);
 
-    if (this.dataSource == "words") {
-        //this.params.sql = "select tweet_text from " + this.mapd.table;
+    this.params.stoptable = "";
+    console.log(this.sourceSetting);
+    if (this.sourceSetting == "Words") {
         this.params.sql = "select tweet_text";
         this.params.stoptable = "multistop";
     }
-    else if (this.dataSource == "users") {
-        //this.params.sql = "select sender_name from " + this.mapd.table;
+    else if (this.sourceSetting == "Users") {
         this.params.sql = "select sender_name";
-        this.params.stoptable = "";
     }
-    else if (this.dataSource == "geo") {
-        //this.params.sql = "select country from " + this.mapd.table;
+    else if (this.sourceSetting == "Countries") {
         this.params.sql = "select country";
-        this.params.stoptable = "";
     }
-    else if (this.dataSource == "origin") {
-        //this.params.sql = "select origin from " + this.mapd.table;
+    else if (this.sourceSetting == "OS-App") {
         this.params.sql = "select origin";
-        this.params.stoptable = "";
     }
+   
 
-    if (this.dataNums == "percents") 
-      this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
-    else
+    //if (this.dataNums == "percents") 
+    //  this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
+    //else
       this.params.sql += " from " + this.mapd.table + query; 
 
-    //this.params.sql += this.mapd.getWhere(options);
-
-    if (this.displayMode == "cloud")
+    if (this.displaySetting == "Cloud")
         this.params.k = this.defaultCloudK + numQueryTerms;
     else
         this.params.k = this.defaultChartK ;
@@ -745,31 +649,31 @@ var TopKTokens = {
         this.params.sort = "true";
         this.params.tokens = [];
     }
-
+    console.log("Sql: " + this.params.sql);
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
   },
   barClickCallback: function(token) {
     
-    if (this.dataSource == "words") {
+    if (this.sourceSetting == "Words") {
       this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
       $('#termsInput').trigger('input');
     }
-    else if (this.dataSource == "users") {
+    else if (this.sourceSetting == "Users") {
       this.mapd.services.search.userInput.val(token);
       $('#userInput').trigger('input');
-      this.dataSource = "words";
+      this.setMenuItem("Source", "Words", false);
     }
-    else if (this.dataSource == "geo") {
-      this.mapd.services.search.termsInput.val("country : " + token);
+    else if (this.sourceSetting == "Countries") {
+      this.mapd.services.search.termsInput.val("country: " + token);
       $('termsInput').trigger('input');
-      this.dataSource = "words";
+      this.setMenuItem("Source", "Words", false);
     }
-    else if (this.dataSource == "origin") {
-      this.mapd.services.search.termsInput.val("origin : " + token);
+    else if (this.sourceSetting == "OS-App") {
+      this.mapd.services.search.termsInput.val("origin: " + token);
       $('termsInput').trigger('input');
-      this.dataSource = "words";
+      this.setMenuItem("Source", "Words", false);
     }
 
     this.mapd.services.search.form.submit();
@@ -783,40 +687,27 @@ var TopKTokens = {
     //console.log("circle cloud token: " + token);
     if (token.substring(0,5) != "<span") {
       //console.log(this.mapd);
-      if (this.dataSource == "words") {
+      if (this.sourceSetting == "Words") {
         this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
         $('#termsInput').trigger('input');
       }
-      else if (this.dataSource == "users") {
+      else if (this.sourceSetting == "Users") {
         this.mapd.services.search.userInput.val(token);
         $('#userInput').trigger('input');
-        this.dataSource = "words";
-        //$('#cloudWords').button({checked: 'checked'});
-        //$('#cloudUsers').button({disabled: true});
-        /*
-        $('#cloudWords').prop('checked', 'checked');
-        $('#cloudUsers').prop('disabled', true);
-        $('#cloudSource').buttonset("refresh");
-        */
-        
+        this.setMenuItem("Source", "Words", false);
       }
-    else if (this.dataSource == "geo") {
-      this.mapd.services.search.termsInput.val("country : " + token);
+    else if (this.sourceSetting == "Country") {
+      this.mapd.services.search.termsInput.val("country: " + token);
       $('termsInput').trigger('input');
-      this.dataSource = "words";
+      this.setMenuItem("Source", "Words", false);
     }
-    else if (this.dataSource == "origin") {
-      this.mapd.services.search.termsInput.val("origin : " + token);
+    else if (this.dataSource == "OS-App") {
+      this.mapd.services.search.termsInput.val("origin: " + token);
       $('termsInput').trigger('input');
-      this.dataSource = "words";
+      this.setMenuItem("Source", "Words", false);
     }
+    this.mapd.services.search.form.submit();
 
-
-      this.mapd.services.search.form.submit();
-
-
-      //to make sure we're actually clicking on word
-      //console.log(token);
     }
   },
 
@@ -828,12 +719,12 @@ var TopKTokens = {
     var n =json.n;
     var numQueryTerms = this.mapd.queryTerms.length;
     this.tokens = json.tokens;
-    if (this.displayMode == "cloud") {
+    if (this.displaySetting == "Cloud") {
         //var tokens = json.tokens; 
         var counts = json.counts; 
 
         var numResultsToExclude = 0;
-        if (this.dataSource == "words")
+        if (this.sourceSetting == "Words")
           numResultsToExclude = numQueryTerms; 
         var numTokens = this.tokens.length;
         var wordArray = new Array(numTokens - numResultsToExclude);
@@ -855,15 +746,14 @@ var TopKTokens = {
     else {
         BarChart.init(this.displayDiv, $.proxy(this.barClickCallback, this));
         var numResultsToExclude = 0;
-        if (this.dataSource == "words")
+        if (this.sourceSetting == "Words")
           numResultsToExclude = numQueryTerms; 
         console.log("num results to exclude: " + numResultsToExclude);
         BarChart.addData(json, numResultsToExclude, this.dataNums);
     }
-        var label = (this.dataSource == "words") ? "# Words: " : ((this.dataSource == "users") ? "# Tweets: " : "# Tweets: ");
+        var label = (this.sourceSetting == "Words") ? "# Words: " : ((this.sourceSetting == "Users") ? "# Tweets: " : "# Tweets: ");
         $('#numTokensText').text(label + numberWithCommas(n));
         console.log("triggering loadend");
-        //$("#numTokensText").trigger('loadend');
         $(this).trigger('loadend');
 
   }
@@ -1552,34 +1442,18 @@ var Search = {
   },
  
   onSearch: function() {
-    //console.log('in onSearch');
-    /*
-    if ($("#userInput").val().length == 0) {
-        $('#dataUsers').attr("disabled", false);
-    }
-    else {
-        $('#dataWords').prop('checked', 'checked');
-        $('#dataUsers').prop('disabled', true);
-    }
+
     var terms = this.termsInput.val();
-    if (terms.substring(0,9) == "country :") {
-        $('#dataWords').prop('checked', 'checked');
-        $('#dataGeo').attr("disabled", true);
+    if ($("#userInput").val().length > 0) {
+      mapd.services.topktokens.setMenuItem("Source", "Users", false);
     }
-    else {
-        $('#dataGeo').attr("disabled", false);
+    if (terms.substring(0,9) == "country:") {
+      mapd.services.topktokens.setMenuItem("Source", "Words", false);
     }
 
-    if (terms.substring(0,8) == "origin :") {
-        $('#dataWords').prop('checked', 'checked');
-        $('#dataOrigin').attr("disabled", true);
+    if (terms.substring(0,8) == "origin:") { 
+      mapd.services.topktokens.setMenuItem("Source", "Words", false);
     }
-    else {
-        $('#dataOrigin').attr("disabled", false);
-    }
-    $('#dataSource').buttonset("refresh");
-    */
-
 
     var location = this.locationInput.val();
     this.locationChanged = this.location != location;
@@ -1704,8 +1578,9 @@ var Animation = {
         this.formerGraphLockedState = this.wordGraph.locked;
         this.wordGraph.locked = true;
         //this.wordGraph.params.sort = "false";
-        this.formerGraphDisplayMode = this.wordGraph.displayMode;
-        this.wordGraph.displayMode = "chart"; 
+        this.formerGraphDisplayMode = this.wordGraph.displaySetting;
+
+        this.wordGraph.setMenuItem("Display", "Chart", false);
         if (this.formerGraphLockedState == false) {
             this.wordGraph.lockClickFunction();
         }
@@ -1738,17 +1613,10 @@ var Animation = {
       this.mapd.services.pointmap.reload();
       this.mapd.services.heatmap.reload();
       //this.wordGraph.locked = this.formerGraphLockedState;
-      this.wordGraph.displayMode = this.formerGraphDisplayMode;
-      $("#cloudDisplay").attr('disabled', false);
-      //if (this.formerGraphLockedState == false && this.wordGraph.locked == true) {
+      this.wordGraph.setMenuItem("Display", this.formerGraphDisplayMode, false);
       if (this.formerGraphLockedState != this.wordGraph.locked) {
         this.wordGraph.lockClickFunction(true);
-        //$("#lock").addClass("ui-selecting").buttonset("refresh");
       }
-      if (this.wordGraph.displayMode == "cloud")
-        $("#cloudDisplay").prop('checked', 'checked');
-      $("#displayMode").buttonset("refresh");
-      //this.wordGraph.params.sort = "true";
       this.wordGraph.reload();
     }
   }
@@ -1932,28 +1800,12 @@ var Chart =
   },
 
   onZoom: function() {
-    /*
-    console.log('in onZoom');
-    var range = this.chart.getXRange();
-    var start = (range[0].getTime()/1000).toFixed(0);
-    var end = (range[1].getTime()/1000).toFixed(0)
-    */
-    //console.log(this.chart.b0);
     var start = (this.chart.brush.extent()[0]/ 1000).toFixed(0);
     var end = (this.chart.brush.extent()[1] / 1000).toFixed(0);
-    //console.log("brush range");
-    //console.log(start + ", " + end);
-
-
-
-    //start = +start + 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
-    //end = +end + 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
-    //console.log(range, start, end);
     this.mapd.reloadByGraph(start, end);
   },
 
   onCompare: function(terms) {
-    //console.log('in onCompare');
     var queryTerms = terms.trim().split(" ").filter(function(d) {return d});
     // for now, time range always corresponds to entire data range
     var options = {queryTerms: queryTerms, user: this.mapd.user,  time: {timestart: this.mapd.datastart, timeend: this.mapd.dataend }};
