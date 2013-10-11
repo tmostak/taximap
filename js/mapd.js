@@ -222,6 +222,20 @@ var MapD = {
       console.log("params");
       params = this.getURIJson();
       console.log(params);
+
+      // next two are to provide backward compatibility
+      if ("dataSource" in params)
+        params.dataSource = (params.dataSource.charAt(0).toUpperCase() + params.dataSource.slice(1));
+     
+      if ("dataMode" in params && params.dataMode.charAt(0).toLowerCase()) {
+        if (params.dataDisplay == "cloud")
+            params.dataDisplay = "Cloud";
+        else
+            params.dataDisplay = "Barchart";
+
+        params.dataMode = "Counts";
+      }
+
       for (var attr in params)
         mapParams[attr] =  params[attr];
     }
