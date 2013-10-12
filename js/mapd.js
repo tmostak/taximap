@@ -110,7 +110,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Words", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
@@ -320,13 +320,12 @@ var MapD = {
         var query = "(origin ilike '" + queryTerms[1] + "')";
         return query;
     }
-    else if (queryTerms[0] == "country:") {
-        console.log("country");
+    else if (queryTerms[0] == "country:" || queryTerms[0] == "state:" || queryTerms[0] == "county:" || queryTerms[0] == "zip:") {
         var term = "";
         for (var q = 1; q < queryTerms.length; q++) 
             term += queryTerms[q] + " ";
         term = term.substr(0, term.length - 1);
-        var query = "(country ilike '" + term + "')";
+        var query = "(" + queryTerms[0].substring(0,queryTerms[0].length - 1) + " ilike '" + term + "')";
         return query;
     }
     else {
@@ -557,6 +556,7 @@ var TopKTokens = {
   },
 
   setMenuItem: function(menu, choice, reload) {   
+    console.log("menu: " + menu);
     var menuDiv = "#data" + menu;
     var dropdownDiv = menuDiv + "Dropdown";
     var choiceDiv = menuDiv + choice;
@@ -564,10 +564,8 @@ var TopKTokens = {
     console.log(choiceDiv);
     $(dropdownDiv + " span.checkmark").css("visibility", "hidden");
     $(choiceDiv + " .checkmark").css("visibility","visible");
-    $(menuDiv + " span.menu-text").text(choice);
+    $(menuDiv + " span.choice-text").text(choice);
     this[this.settingDict[menu]] = choice;
-    console.log ("aaaaa " + this[this.settingDict[menu]]);
-    console.log($(dropdownDiv));
     $(dropdownDiv).removeClass('dropdown-open');
     if (choice == "Cloud")
       $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
@@ -630,15 +628,24 @@ var TopKTokens = {
 
     this.params.stoptable = "";
     console.log(this.sourceSetting);
-    if (this.sourceSetting == "Words") {
+    if (this.sourceSetting == "Word") {
         this.params.sql = "select tweet_text";
         this.params.stoptable = "multistop";
     }
-    else if (this.sourceSetting == "Users") {
+    else if (this.sourceSetting == "User") {
         this.params.sql = "select sender_name";
     }
-    else if (this.sourceSetting == "Countries") {
+    else if (this.sourceSetting == "Country") {
         this.params.sql = "select country";
+    }
+    else if (this.sourceSetting == "State") {
+        this.params.sql = "select state";
+    }
+    else if (this.sourceSetting == "County") {
+        this.params.sql = "select county";
+    }
+    else if (this.sourceSetting == "Zip") {
+        this.params.sql = "select zip";
     }
     else if (this.sourceSetting == "OS-App") {
         this.params.sql = "select origin";
@@ -670,24 +677,39 @@ var TopKTokens = {
   },
   barClickCallback: function(token) {
     
-    if (this.sourceSetting == "Words") {
+    if (this.sourceSetting == "Word") {
       this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
       $('#termsInput').trigger('input');
     }
-    else if (this.sourceSetting == "Users") {
+    else if (this.sourceSetting == "User") {
       this.mapd.services.search.userInput.val(token);
       $('#userInput').trigger('input');
-      this.setMenuItem("Source", "Words", false);
+      //this.setMenuItem("Source", "Words", false);
     }
-    else if (this.sourceSetting == "Countries") {
+    else if (this.sourceSetting == "Country") {
       this.mapd.services.search.termsInput.val("country: " + token);
-      $('termsInput').trigger('input');
-      this.setMenuItem("Source", "Words", false);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
+    }
+    else if (this.sourceSetting == "State") {
+      this.mapd.services.search.termsInput.val("state: " + token);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
+    }
+    else if (this.sourceSetting == "County") {
+      this.mapd.services.search.termsInput.val("county: " + token);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
+    }
+    else if (this.sourceSetting == "Zip") {
+      this.mapd.services.search.termsInput.val("zip: " + token);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "OS-App") {
       this.mapd.services.search.termsInput.val("origin: " + token);
-      $('termsInput').trigger('input');
-      this.setMenuItem("Source", "Words", false);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
     }
 
     this.mapd.services.search.form.submit();
@@ -701,24 +723,40 @@ var TopKTokens = {
     //console.log("circle cloud token: " + token);
     if (token.substring(0,5) != "<span") {
       //console.log(this.mapd);
-      if (this.sourceSetting == "Words") {
+      console.log(this.sourceSetting);
+      if (this.sourceSetting == "Word") {
         this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
         $('#termsInput').trigger('input');
       }
-      else if (this.sourceSetting == "Users") {
+      else if (this.sourceSetting == "User") {
         this.mapd.services.search.userInput.val(token);
         $('#userInput').trigger('input');
-        this.setMenuItem("Source", "Words", false);
+        //this.setMenuItem("Source", "Words", false);
       }
     else if (this.sourceSetting == "Country") {
       this.mapd.services.search.termsInput.val("country: " + token);
-      $('termsInput').trigger('input');
-      this.setMenuItem("Source", "Words", false);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
     }
-    else if (this.dataSource == "OS-App") {
+    else if (this.sourceSetting == "State") {
+      this.mapd.services.search.termsInput.val("state: " + token);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
+    }
+    else if (this.sourceSetting == "County") {
+      this.mapd.services.search.termsInput.val("county: " + token);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
+    }
+    else if (this.sourceSetting == "Zip") {
+      this.mapd.services.search.termsInput.val("zip: " + token);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
+    }
+    else if (this.sourceSetting == "OS-App") {
       this.mapd.services.search.termsInput.val("origin: " + token);
-      $('termsInput').trigger('input');
-      this.setMenuItem("Source", "Words", false);
+      $('#termsInput').trigger('input');
+      //this.setMenuItem("Source", "Words", false);
     }
     this.mapd.services.search.form.submit();
 
@@ -738,7 +776,7 @@ var TopKTokens = {
         var counts = json.counts; 
 
         var numResultsToExclude = 0;
-        if (this.sourceSetting == "Words")
+        if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
         var numTokens = this.tokens.length;
         var wordArray = new Array(numTokens - numResultsToExclude);
@@ -760,12 +798,12 @@ var TopKTokens = {
     else {
         BarChart.init(this.displayDiv, $.proxy(this.barClickCallback, this));
         var numResultsToExclude = 0;
-        if (this.sourceSetting == "Words")
+        if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
         console.log("num results to exclude: " + numResultsToExclude);
         BarChart.addData(json, numResultsToExclude, this.dataNums);
     }
-        var label = (this.sourceSetting == "Words") ? "# Words: " : ((this.sourceSetting == "Users") ? "# Tweets: " : "# Tweets: ");
+        var label = (this.sourceSetting == "Word") ? "# Words: " : ((this.sourceSetting == "User") ? "# Tweets: " : "# Tweets: ");
         $('#numTokensText').text(label + numberWithCommas(n));
         console.log("triggering loadend");
         $(this).trigger('loadend');
@@ -1459,15 +1497,29 @@ var Search = {
 
     var terms = this.termsInput.val();
     if ($("#userInput").val().length > 0) {
-      mapd.services.topktokens.setMenuItem("Source", "Words", false);
+      this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
-    if (terms.substring(0,9) == "country:") {
-      mapd.services.topktokens.setMenuItem("Source", "Words", false);
+    else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" ||          terms.substring(0,4) == "zip:" || terms.substring(0,7) == "origin:") {
+        console.log("hii");
+        var colonPosition = terms.indexOf(":");
+        console.log(colonPosition);
+        if (terms.substring(1,colonPosition) == this.mapd.services.topktokens.sourceSetting.substring(1))
+          this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
-
-    if (terms.substring(0,8) == "origin:") { 
-      mapd.services.topktokens.setMenuItem("Source", "Words", false);
+    /*
+    else if (terms.substring(0,6) == "state:") {
+      this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
+    else if (terms.substring(0,7) == "county:") {
+      this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
+    }
+    else if (terms.substring(0,4) == "zip:") {
+      this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
+    }
+    else if (terms.substring(0,7) == "origin:") { 
+      this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
+    }
+    */
 
     var location = this.locationInput.val();
     this.locationChanged = this.location != location;
@@ -1475,12 +1527,13 @@ var Search = {
     this.user = this.userInput.val();
     this.mapd.setQueryTerms(this.terms);
     this.mapd.setUser(this.user);
-
+    console.log ("user: " + this.user);
     if (this.locationChanged) {
       this.location = location;
       this.geocoder.geocode(this.location);
       return false;
     }
+    console.log("After this location changed");
     $(document).trigger({type: 'mapdreload'});
     $(document).trigger({type: 'pointmapreload'});
     $(document).trigger({type: 'heatmapreload'});
