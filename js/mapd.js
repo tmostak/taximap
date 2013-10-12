@@ -224,9 +224,15 @@ var MapD = {
       console.log(params);
 
       // next two are to provide backward compatibility
-      if ("dataSource" in params)
-        params.dataSource = (params.dataSource.charAt(0).toUpperCase() + params.dataSource.slice(1));
-     
+      if ("dataSource" in params) {
+        //params.dataSource = (params.dataSource.charAt(0).toUpperCase() + params.dataSource.slice(1));
+        if (params.dataSource == "words")
+            params.dataSource = "Word";
+        else if (params.dataSource == "users")
+            params.dataSource = "User";
+        else if (params.dataSource == "countries")
+            params.dataSource = "Country";
+      }
       if ("dataMode" in params && params.dataMode.charAt(0).toLowerCase()) {
         if (params.dataDisplay == "cloud")
             params.dataDisplay = "Cloud";
@@ -1497,12 +1503,15 @@ var Search = {
     if ($("#userInput").val().length > 0) {
       this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
-    else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" ||          terms.substring(0,4) == "zip:" || terms.substring(0,7) == "origin:") {
+    else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" ||          terms.substring(0,4) == "zip:") {
         console.log("hii");
         var colonPosition = terms.indexOf(":");
         console.log(colonPosition);
         if (terms.substring(1,colonPosition) == this.mapd.services.topktokens.sourceSetting.substring(1))
           this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
+    }
+    else if (terms.substring(0,7) == "origin:") { 
+      this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
     /*
     else if (terms.substring(0,6) == "state:") {
