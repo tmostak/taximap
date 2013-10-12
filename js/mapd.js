@@ -16,8 +16,8 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  host: "http://mapd.csail.mit.edu:8080/",
-  //host: "http://www.velocidy.net:7000/",
+  //host: "http://mapd.csail.mit.edu:8080/",
+  host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -614,14 +614,12 @@ var TopKTokens = {
       $("#dataPercents").attr('disabled', true);
     */
     //$("#dataNums").buttonset("refresh");
-    /*
-    if (this.dataNums == "percents") { 
+    if (this.modeSetting == "Percents") { 
       if (options == undefined || options == null) 
         options = {splitQuery: true};
       else
         options.splitQuery = true;
     }
-    */
 
     var query = this.mapd.getWhere(options);
     console.log("query: " + query);
@@ -652,9 +650,9 @@ var TopKTokens = {
     }
    
 
-    //if (this.dataNums == "percents") 
-    //  this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
-    //else
+    if (this.modeSetting == "Percents") 
+      this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
+    else
       this.params.sql += " from " + this.mapd.table + query; 
 
     if (this.displaySetting == "Cloud")
@@ -801,7 +799,7 @@ var TopKTokens = {
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
         console.log("num results to exclude: " + numResultsToExclude);
-        BarChart.addData(json, numResultsToExclude, this.dataNums);
+        BarChart.addData(json, numResultsToExclude, this.modeSetting);
     }
         var label = (this.sourceSetting == "Word") ? "# Words: " : ((this.sourceSetting == "User") ? "# Tweets: " : "# Tweets: ");
         $('#numTokensText').text(label + numberWithCommas(n));
