@@ -85,13 +85,15 @@ var BarChart =
           return {"label": e1, "val":dataset.sums[idx]/(dataset.counts[idx] + 0.01)};
       */
       this.data = $.map(dataset.tokens, function(e1, idx) {
-          return {"label": e1, "val":dataset.percents[idx]};
+          if (e1 != "") 
+              return {"label": e1, "val":dataset.percents[idx]};
       }).slice(numQueryTerms);
       abbrFormat = d3.format(".1%"); 
     }
     else {
       this.data = $.map(dataset.tokens, function(e1, idx) {
-          return {"label": e1, "val":dataset.counts[idx]};
+          if (e1 != "") 
+              return {"label": e1, "val":dataset.counts[idx]};
       }).slice(numQueryTerms);
     }
     console.log(this.data);
