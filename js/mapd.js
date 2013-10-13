@@ -239,7 +239,7 @@ var MapD = {
         else
             params.dataDisplay = "Barchart";
 
-        params.dataMode = "Counts";
+        //params.dataMode = "Counts";
       }
 
       for (var attr in params)
@@ -373,6 +373,7 @@ var MapD = {
     var queryTerms = this.queryTerms;
     if (options) {
       if (options.time) {
+        console.log("time " + options.time.timestart);
         timestart = options.time.timestart;
         timeend = options.time.timeend;
       }
@@ -777,27 +778,33 @@ var TopKTokens = {
     this.tokens = json.tokens;
     if (this.displaySetting == "Cloud") {
         //var tokens = json.tokens; 
-        var counts = json.counts; 
 
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
         var numTokens = this.tokens.length;
         var wordArray = new Array(numTokens - numResultsToExclude);
-        var percentFactor = 100.0 / n;
-        //console.log("numqueryterms");
-        //console.log(numResultsToExclude);
-        var tokenRatio = 1.0 / counts[2 + numResultsToExclude];
-        for (var t = numResultsToExclude; t < numTokens; t++) {
-          //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
-            var percent = counts[t] * percentFactor;
-            var textPercent = "%" + percent.toFixed(3);
-            wordArray[t - numResultsToExclude] = {text: this.tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
+
+        if (this.modeSetting == "Counts") {
+            var percentFactor = 100.0 / n;
+            var counts = json.counts; 
+            var tokenRatio = 1.0 / counts[2 + numResultsToExclude];
+            for (var t = numResultsToExclude; t < numTokens; t++) {
+              //$('<li>' + tokens[i] + '</li>').appendTo(cloud);
+                var percent = counts[t] * percentFactor;
+                var textPercent = "%" + percent.toFixed(3);
+                wordArray[t - numResultsToExclude] = {text: this.tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
+            }
         }
-        //console.log(wordArray);
+        else {
+            var percents = json.percents; 
+            var tokenRatio = 1.0 / percents[2 + numResultsToExclude];
+            for (var t = numResultsToExclude; t < numTokens; t++) {
+                var textPercent = "%" + percents[t].toFixed(3);
+                wordArray[t - numResultsToExclude] = {text: this.tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(percents[t]* tokenRatio * 30.0)), 4)};
+            }
+        }
         this.displayDiv.jQCloud(wordArray);
-        //console.log("clouddiv");
-        //console.log(this.cloudDiv);
     }
     else {
         BarChart.init(this.displayDiv, $.proxy(this.barClickCallback, this));
@@ -1073,6 +1080,7 @@ var Tweets =
   startRecord: 0,
   endRecord: 1,
   scrollTop:0,
+  numResults: null,
 
 init: function(sortDiv, viewDiv) {
     //console.log("SortDiv: " + sortDiv);
@@ -1174,8 +1182,8 @@ init: function(sortDiv, viewDiv) {
             }
         }
 
-        this.startRecordSpan.html(this.startRecord+1);
-        this.endRecordSpan.html(this.endRecord+1);
+        this.startRecordSpan.html(Math.min(this.startRecord+1, this.numTweets));
+        this.endRecordSpan.html(Math.min(this.endRecord+1, this.numTweets));
 
 
 
@@ -1288,8 +1296,8 @@ init: function(sortDiv, viewDiv) {
     map.addLayer(markers);
     markers.setZIndex(Number(vectors.getZIndex()) + 1);
 
-    var n = json.n;
-    $("#resultsCount").html(numberWithCommas(n));
+    this.numTweets = json.n;
+    $("#resultsCount").html(numberWithCommas(this.numTweets));
     this.topOffset = this.viewDiv.offset().top + 1;
     this.bottomOffset = this.topOffset + this.viewDiv.height(); 
 
@@ -1500,11 +1508,10 @@ var Search = {
   onSearch: function() {
 
     var terms = this.termsInput.val();
-    if ($("#userInput").val().length > 0) {
+    if (this.userInput.val().length > 0) {
       this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
     else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" ||          terms.substring(0,4) == "zip:") {
-        console.log("hii");
         var colonPosition = terms.indexOf(":");
         console.log(colonPosition);
         if (terms.substring(1,colonPosition) == this.mapd.services.topktokens.sourceSetting.substring(1))
@@ -1513,6 +1520,19 @@ var Search = {
     else if (terms.substring(0,7) == "origin:") { 
       this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
+
+    if (terms == "" && this.userInput.val() == "") {
+      //$("#dataModePercents").prop('disabled',true);
+      //$("#dataModePercents").children().prop('disabled',true);
+      $("#dataModePercents").hide();
+      this.mapd.services.topktokens.setMenuItem("Mode", "Counts", false);
+    }
+    else {
+      //$("#dataModePercents").prop('disabled',false);
+      $("#dataModePercents").show();
+      //this.mapd.services.topktokens.setMenuItem("Mode", "Percents", false);
+    }
+
     /*
     else if (terms.substring(0,6) == "state:") {
       this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
@@ -1650,11 +1670,23 @@ var Animation = {
         this.heatMax = parseFloat($.cookie('max_value')) * 10.0;
         console.log(this.heatMax);
         this.formerGraphLockedState = this.wordGraph.locked;
-        this.wordGraph.locked = true;
         //this.wordGraph.params.sort = "false";
         this.formerGraphDisplayMode = this.wordGraph.displaySetting;
 
         this.wordGraph.setMenuItem("Display", "Chart", false);
+        console.log("changing to sync"); 
+        $.ajaxSetup({
+            async: false
+        });
+       
+        this.wordGraph.reload({time: {timestart: this.mapd.datastart, timeend: this.mapd.dataend}});
+
+        $.ajaxSetup({
+            async: true
+        });
+        console.log("changing to async"); 
+
+        //this.wordGraph.locked = true;
         if (this.formerGraphLockedState == false) {
             this.wordGraph.lockClickFunction();
         }

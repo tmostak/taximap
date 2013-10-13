@@ -80,7 +80,7 @@ var BarChart =
     var h = this.height;
     var barPadding = 10;
     var abbrFormat = d3.format(".1s");
-    if (dataNums == "percents") {
+    if (dataNums == "Percents") {
       /*this.data = $.map(dataset.tokens, function(e1, idx) {
           return {"label": e1, "val":dataset.sums[idx]/(dataset.counts[idx] + 0.01)};
       */
