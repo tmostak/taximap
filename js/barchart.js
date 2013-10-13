@@ -88,7 +88,7 @@ var BarChart =
           if (e1 != "") 
               return {"label": e1, "val":dataset.percents[idx]};
       }).slice(numQueryTerms);
-      abbrFormat = d3.format(".1%"); 
+      abbrFormat = d3.format(".2%"); 
     }
     else {
       this.data = $.map(dataset.tokens, function(e1, idx) {

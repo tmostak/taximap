@@ -621,6 +621,9 @@ var TopKTokens = {
       $("#dataPercents").attr('disabled', true);
     */
     //$("#dataNums").buttonset("refresh");
+    //if (this.modeSetting == "Percents" && this.sourceSetting == "Word")
+    //    this.setMenuItem("Mode", "Counts", false);
+
     if (this.modeSetting == "Percents") { 
       if (options == undefined || options == null) 
         options = {splitQuery: true};
@@ -1508,10 +1511,22 @@ var Search = {
   onSearch: function() {
 
     var terms = this.termsInput.val();
+    if (terms == "" && this.userInput.val() == "") {
+      //$("#dataModePercents").prop('disabled',true);
+      //$("#dataModePercents").children().prop('disabled',true);
+      $("#dataModePercents").hide();
+      this.mapd.services.topktokens.setMenuItem("Mode", "Counts", false);
+    }
+    else {
+      //$("#dataModePercents").prop('disabled',false);
+      $("#dataModePercents").show();
+      //this.mapd.services.topktokens.setMenuItem("Mode", "Percents", false);
+    }
+
     if (this.userInput.val().length > 0) {
       this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
-    else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" ||          terms.substring(0,4) == "zip:") {
+    else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" || terms.substring(0,4) == "zip:") {
         var colonPosition = terms.indexOf(":");
         console.log(colonPosition);
         if (terms.substring(1,colonPosition) == this.mapd.services.topktokens.sourceSetting.substring(1))
@@ -1521,17 +1536,6 @@ var Search = {
       this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
 
-    if (terms == "" && this.userInput.val() == "") {
-      //$("#dataModePercents").prop('disabled',true);
-      //$("#dataModePercents").children().prop('disabled',true);
-      $("#dataModePercents").hide();
-      this.mapd.services.topktokens.setMenuItem("Mode", "Counts", false);
-    }
-    else {
-      //$("#dataModePercents").prop('disabled',false);
-      //$("#dataModePercents").show();
-      //this.mapd.services.topktokens.setMenuItem("Mode", "Percents", false);
-    }
 
     /*
     else if (terms.substring(0,6) == "state:") {
