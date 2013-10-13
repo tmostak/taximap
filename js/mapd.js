@@ -16,8 +16,8 @@ function buildURI(params) {
 
 var MapD = {
   map: null,
-  //host: "http://mapd.csail.mit.edu:8080/",
-  host: "http://www.velocidy.net:7000/",
+  host: "http://mapd.csail.mit.edu:8080/",
+  //host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -1529,7 +1529,7 @@ var Search = {
     }
     else {
       //$("#dataModePercents").prop('disabled',false);
-      $("#dataModePercents").show();
+      //$("#dataModePercents").show();
       //this.mapd.services.topktokens.setMenuItem("Mode", "Percents", false);
     }
 
