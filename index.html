@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/dark-hive/jquery-ui.css" />
     <!--<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/smoothness/jquery-ui.min.css" />-->
     <link rel="stylesheet" href="lib/js/jQCloud/jqcloud/jqcloud.css" />
+    <link rel="stylesheet" href="lib/js/jquery-minicolors/jquery.minicolors.css" />
     <link type="text/css" rel="stylesheet" href="lib/css/jquery.dropdown.css" />
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
@@ -27,15 +28,13 @@
     <script type="text/javascript" src="lib/js/jQCloud/jqcloud/jqcloud-1.0.4.min.js"></script>
     <script type="text/javascript" src="lib/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="lib/js/jquery.dropdown.js"></script>
-    <!--<script type="text/javascript" src="lib/js/jquery.zclip.min.js"></script>-->
-
-
     <script src="js/olext.js"></script>
     <script src="js/node.js"></script>
     <script src="js/chart.js"></script>
     <script src="js/barchart.js"></script>
     <script src="js/mapd.js"></script>
     <script src="js/map.js"></script>
+    <script src="lib/js/jquery-minicolors/jquery.minicolors.js">
 </head>
 
   <body>
@@ -166,6 +165,11 @@
             <div id='pointColorUser' class="color-by-cat">User</div>
             <div id='pointColorOS'class="color-by-cat">OS/App</div>
             <div style="clear: both;"></div>
+        </li>
+        <li id="pointStaticColor">
+            <span style="float:left; margin-right:10px;">Color</span>
+            <input type="hidden" name="pointColor" id="pointColorPicker" class="color-picker" data-inline="true" size="2" autocomplete="on" value="#00F" />
+              <div style="clear: both;"></div>
         </li>
       </ul>
     </div>

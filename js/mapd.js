@@ -489,7 +489,7 @@ var TopKTokens = {
 
   init: function(displayDiv) {
     this.displayDiv = displayDiv;
-    $(".drop-menu").click($.proxy(function(e) {
+    $(".data-dropdown").click($.proxy(function(e) {
       var menu;
       var choice = this.getMenuItemClicked(e.target);
       if ($(e.currentTarget).hasClass("display-menu")) {
@@ -851,6 +851,30 @@ var PointMap = {
     $(document).on('pointmapreload', $.proxy(this.reload, this));
     $(".circle").eq(this.params.radius - 1).addClass("circle-selected");
     $("#pointColorNone").addClass("color-by-cat-selected");
+    $("span.minicolors-swatch-color").click(function () {
+        console.log("click!");
+        return false;
+    });
+    $("#pointStaticColor").click(function() {
+        console.log("click!");
+        return false;
+    });
+
+    $("#pointColorPicker").minicolors({ 
+        changeDelay:50,
+        change: $.proxy (function (hex) {
+            console.log(hex);
+            var rgb = $("#pointColorPicker").minicolors('rgbObject');
+            this.params.r = rgb.r;
+            this.params.g = rgb.g;
+            this.params.b = rgb.b;
+            $(".circle").css('background-color', hex);
+            this.reload();
+        }, this)
+        
+    }); 
+    
+    //click(function() {return false;});
     $(".circle").click($.proxy(function(e) { 
       this.params.radius = $(e.target).index() + 1;
       $(".circle").removeClass("circle-selected");
@@ -864,12 +888,15 @@ var PointMap = {
       switch (selectedId) {
         case "pointColorNone":
           this.colorBy = "none";
+          $("#pointStaticColor").show();
           break;
         case "pointColorUser":
           this.colorBy = "sender_name";
+          $("#pointStaticColor").hide();
           break;
         case "pointColorOS":
           this.colorBy = "origin";
+          $("#pointStaticColor").hide();
           break;
       }
       $('.color-by-cat').removeClass('color-by-cat-selected');
