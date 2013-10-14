@@ -106,7 +106,7 @@ var MapD = {
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
       this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
-      this.timestart = Math.max(this.dataend - 43200,  Math.round((this.dataend-this.datastart)*.5 + this.datastart));
+     this.timestart = Math.max(this.dataend - 432000,  Math.round((this.dataend-this.datastart)*.4 + this.datastart));
 
       
 
@@ -838,7 +838,7 @@ var PointMap = {
     layers: "point",
     r: 0,
     g: 0,
-    b: 100,
+    b: 255,
     radius: 1,
     format: "image/png",
     transparent: true
@@ -848,6 +848,15 @@ var PointMap = {
     this.wms = wms;
     this.wms.events.register('retile', this, this.setWMSParams);
     $(document).on('pointmapreload', $.proxy(this.reload, this));
+    $(".circle").eq(this.params.radius - 1).addClass("circle-selected");
+
+    $(".circle").click($.proxy(function(e) { 
+      this.params.radius = $(e.target).index() + 1;
+      $(".circle").removeClass("circle-selected");
+      $(e.target).addClass("circle-selected");
+      this.reload();
+      return false;
+    }, this));
   },
 
   setWMSParams: function() {
@@ -863,6 +872,7 @@ var PointMap = {
   },
 
   reload: function(options) {
+    console.log("reload");
     this.wms.mergeNewParams(this.getParams(options));
   }
 };
@@ -1669,6 +1679,8 @@ var Animation = {
         this.frameStep = (this.animEnd - this.animStart) / this.numFrames;
         //this.frameWidth = this.frameStep * 4.0;
         this.frameWidth = this.mapd.timeend - this.mapd.timestart;
+        if (this.frameWidth > (this.animStart-this.animEnd)*0.5)
+          this.frameWidth = 21600;
         this.frameStart = this.animStart;
         this.frameEnd = this.animStart + this.frameWidth;
         this.heatMax = parseFloat($.cookie('max_value')) * 10.0;
@@ -1749,6 +1761,8 @@ var Settings = {
     this.heatOn = heatLayer.getVisibility();
     console.log("settings point: " + this.pointOn);
     console.log("settings heat: " + this.heatOn);
+    //$("#pointButton").button().next().button().parent().buttonset().next().hide().menu();
+
     if (this.pointOn)
       this.pointButton.addClass("pointButtonOnImg");
     else
