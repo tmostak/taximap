@@ -701,6 +701,24 @@ div#widget {
   border: 1px solid #EE1785;
 }
 
+.color-by-cat {
+  float: left;
+  //color: #00F;
+  color: #EE1785;
+  margin-left:4px;
+  font-size:11px;
+}
+
+.color-by-cat:hover {
+  border: 1px solid #FFFF00;
+}
+
+.color-by-cat-selected {
+  text-decoration: underline;
+  //border: 1px solid #EE1785;
+}
+
+
 
 #share {
     color:white;

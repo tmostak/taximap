@@ -829,6 +829,7 @@ var TopKTokens = {
 var PointMap = {
   mapd: MapD,
   wms: null,
+  colorBy: "none",
   params: {
     request: "GetMap",
     sql: null,
@@ -841,7 +842,7 @@ var PointMap = {
     b: 255,
     radius: 1,
     format: "image/png",
-    transparent: true
+    transparent: true,
   },
 
   init: function(wms) {
@@ -849,7 +850,7 @@ var PointMap = {
     this.wms.events.register('retile', this, this.setWMSParams);
     $(document).on('pointmapreload', $.proxy(this.reload, this));
     $(".circle").eq(this.params.radius - 1).addClass("circle-selected");
-
+    $("#pointColorNone").addClass("color-by-cat-selected");
     $(".circle").click($.proxy(function(e) { 
       this.params.radius = $(e.target).index() + 1;
       $(".circle").removeClass("circle-selected");
@@ -857,6 +858,26 @@ var PointMap = {
       this.reload();
       return false;
     }, this));
+
+    $('.color-by-cat').click($.proxy(function(e) {
+      var selectedId = $(e.target).attr("id");
+      switch (selectedId) {
+        case "pointColorNone":
+          this.colorBy = "none";
+          break;
+        case "pointColorUser":
+          this.colorBy = "sender_name";
+          break;
+        case "pointColorOS":
+          this.colorBy = "origin";
+          break;
+      }
+      $('.color-by-cat').removeClass('color-by-cat-selected');
+      $(e.target).addClass('color-by-cat-selected');
+      this.reload();
+      return false;
+    }, this));
+    
   },
 
   setWMSParams: function() {
@@ -865,9 +886,12 @@ var PointMap = {
   },
 
   getParams: function(options) {
-    this.params.sql = "select goog_x, goog_y, tweet_text from " + this.mapd.table;
+    this.params.sql = "select goog_x, goog_y";
+    if (this.colorBy != "none")
+      this.params.sql += ", " + this.colorBy;
+    this.params.sql += " from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere(options);
-    //console.log(this.params.sql);
+    console.log(this.params.sql);
     return this.params;
   },
 
