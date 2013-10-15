@@ -14,6 +14,11 @@ function buildURI(params) {
   return encodeURI(uri.substring(0, uri.length - 1));
 };
 
+function toHex(num) {
+    var str = Number(num).toString(16);
+    return str.length == 1? "0" + str : str;
+}
+
 var MapD = {
   map: null,
   host: "http://mapd.csail.mit.edu:8080/",
@@ -110,7 +115,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:0, pointG:0, pointB:255, pointRadius:1, pointColorBy: "none"};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
@@ -167,8 +172,14 @@ var MapD = {
         this.map.zoomToExtent(mapParams.extent);
       }
       this.services.search.form.submit();
-      console.log("Point: " + mapParams.pointOn);
-      console.log("Heat: " + mapParams.heatOn);
+      this.services.pointmap.colorBy = mapParams.pointColorBy;
+      if (mapParams.pointColorBy == "sender_name" || mapParams.pointColorBy == "origin") 
+          $("#pointStaticColor").hide();
+      var radius = parseInt(mapParams.pointRadius);
+      $(".circle").eq(radius - 1).addClass("circle-selected");
+      this.services.pointmap.params.radius = parseInt(radius);
+      var hexColor = '#' + toHex(parseInt(mapParams.pointR)) + toHex(parseInt(mapParams.pointG)) +  toHex(parseInt(mapParams.pointB));
+      $("#pointColorPicker").minicolors('value', hexColor);
       if (mapParams.pointOn == 1)
         this.services.settings.pointButtonFunction();
       if (mapParams.heatOn == 1)
@@ -204,7 +215,11 @@ var MapD = {
     uriParams.dataSource = this.services.topktokens.sourceSetting;
     uriParams.dataMode = this.services.topktokens.modeSetting;
     uriParams.dataLocked = this.services.topktokens.locked == true ? 1 : 0;
-   
+    uriParams.pointR = this.services.pointmap.params.r;
+    uriParams.pointG = this.services.pointmap.params.g;
+    uriParams.pointB = this.services.pointmap.params.b;
+    uriParams.pointRadius = this.services.pointmap.params.radius;
+    uriParams.pointColorBy = this.services.pointmap.colorBy;
     var uri = buildURI(uriParams);
     if (fullEncode)
         url += encodeURIComponent(uri);
@@ -849,14 +864,9 @@ var PointMap = {
     this.wms = wms;
     this.wms.events.register('retile', this, this.setWMSParams);
     $(document).on('pointmapreload', $.proxy(this.reload, this));
-    $(".circle").eq(this.params.radius - 1).addClass("circle-selected");
+    //$(".circle").eq(this.params.radius - 1).addClass("circle-selected");
     $("#pointColorNone").addClass("color-by-cat-selected");
-    $("span.minicolors-swatch-color").click(function () {
-        console.log("click!");
-        return false;
-    });
     $("#pointStaticColor").click(function() {
-        console.log("click!");
         return false;
     });
 

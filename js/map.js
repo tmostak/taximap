@@ -37,7 +37,7 @@ function init()
   map.zoomToExtent(extent);
   MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation);
   pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.1, "displayInLayerSwitcher": false, removeBackBufferDelay:0 });
-  heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, ratio: 1.1, "displayInLayerSwitcher": false});
+  heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, opacity: 0.55, ratio: 1.1, "displayInLayerSwitcher": false});
   pointLayer.setVisibility(false);
   heatLayer.setVisibility(false);
   map.addLayer(heatLayer);
