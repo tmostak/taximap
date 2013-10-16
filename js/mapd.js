@@ -176,7 +176,8 @@ var MapD = {
       if (mapParams.pointColorBy == "sender_name" || mapParams.pointColorBy == "origin") 
           $("#pointStaticColor").hide();
       var radius = parseInt(mapParams.pointRadius);
-      $(".circle").eq(radius - 1).addClass("circle-selected");
+      //$(".circle").eq(radius - 1).addClass("circle-selected");
+      $(".circle").eq(radius).addClass("circle-selected");
       this.services.pointmap.params.radius = parseInt(radius);
       var hexColor = '#' + toHex(parseInt(mapParams.pointR)) + toHex(parseInt(mapParams.pointG)) +  toHex(parseInt(mapParams.pointB));
       $("#pointColorPicker").minicolors('value', hexColor);
@@ -886,7 +887,8 @@ var PointMap = {
     
     //click(function() {return false;});
     $(".circle").click($.proxy(function(e) { 
-      this.params.radius = $(e.target).index() + 1;
+      //this.params.radius = $(e.target).index() + 1;
+      this.params.radius = $(e.target).index();
       $(".circle").removeClass("circle-selected");
       $(e.target).addClass("circle-selected");
       this.reload();
