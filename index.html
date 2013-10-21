@@ -74,7 +74,7 @@
       <button id="pointSelect" class="settings-drop-button" data-dropdown="#pointDropdown">▾</button>
         <!--<div id="pointButtonImg"></div>-->
       <button id="heatButton" class="settings-button" title="Heatmap">Heatmap</button>
-      <button id="heatSelect" class="settings-drop-button">▾</button>
+      <button id="heatSelect" class="settings-drop-button" data-dropdown="#heatDropdown">▾</button>
     </div>
     
     <!--<div id="animControls">
@@ -174,6 +174,15 @@
       </ul>
     </div>
 
+    <div id="heatDropdown" class="dropdown dropdown-anchor-right">
+      <ul id="heatMenu" class="dropdown-menu drop-menu">
+        <li id="heatBlurOpt">
+          <span style="float:left">Blur</span>
+          <div id="blurSlider"></div>
+          <div style="clear: both;"></div>
+        </li>
+      </ul>
+    </div>
     <div id="share-dropdown" class="dropdown dropdown-anchor-right has-icons">
         <ul id="shareMenu" class="dropdown-menu drop-menu">
             <li id="twitter-share"><span>On Twitter</span></li>

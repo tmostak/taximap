@@ -952,7 +952,7 @@ var HeatMap = {
     layers: "heatmap",
     maxval: "auto", 
     min: 0.2,
-    blur: 28,
+    blur: 25,
     colorramp: "green_red",
     format: "image/png",
     transparent: true
@@ -962,6 +962,15 @@ var HeatMap = {
     this.wms = wms;
     this.wms.events.register('retile', this, this.setWMSParams);
     $(document).on('heatmapreload', $.proxy(this.reload, this));
+    $("#blurSlider").slider({
+      min:0,
+      max:37,
+      value:25,
+      stop: $.proxy(function(e, ui) {
+        this.params.blur = ui.value;
+        this.reload();
+      }, this)
+    })
   },
 
   setWMSParams: function() {

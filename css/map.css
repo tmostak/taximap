@@ -276,6 +276,12 @@ span.minicolors-swatch {
   margin-left:60px;
 }
 
+#blurSlider {
+  float: left;
+  margin-left:10px;
+  width:72%;
+}
+
 button#gridSmall { 
   height: 20px;
   width: 20px;
