@@ -115,7 +115,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:0, pointG:0, pointB:255, pointRadius:1, pointColorBy: "none"};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:0, pointColorBy: "none"};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
