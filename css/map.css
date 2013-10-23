@@ -56,7 +56,16 @@ div#topbar button:hover {
 button#pause {
     margin-left: 10px;
 }
-    
+
+.color-ramp {
+  margin-left:10px;
+  padding: 1px;
+  border: 1px solid transparent;
+}
+
+.color-ramp:hover {
+  border: 1px solid #FFFF00;
+}
 
 span.iconClear{
   position:absolute;
@@ -711,8 +720,18 @@ div#widget {
 }
  
 
+
 .circle-selected {
   border: 1px solid #EE1785;
+}
+
+.ramp-selected {
+  border: 1px solid #EE1785;
+}
+
+
+#heatMenu {
+  width: 215px;
 }
 
 .color-by-cat {

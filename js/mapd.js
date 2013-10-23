@@ -21,8 +21,8 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  host: "http://mapd.csail.mit.edu:8080/",
-  //host: "http://www.velocidy.net:7000/",
+  //host: "http://mapd.csail.mit.edu:8080/",
+  host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -953,6 +953,7 @@ var HeatMap = {
     maxval: "auto", 
     min: 0.2,
     blur: 25,
+    level: 50,
     colorramp: "green_red",
     format: "image/png",
     transparent: true
@@ -962,6 +963,17 @@ var HeatMap = {
     this.wms = wms;
     this.wms.events.register('retile', this, this.setWMSParams);
     $(document).on('heatmapreload', $.proxy(this.reload, this));
+    $.ajaxSetup({
+        async: false
+    });
+    $.getJSON(this.mapd.host + '?' + 'REQUEST=GetColorRamps').done($.proxy(this.processColorRamps,this));
+    
+    $.ajaxSetup({
+        async: true
+    });
+
+
+
     $("#blurSlider").slider({
       min:0,
       max:37,
@@ -970,9 +982,77 @@ var HeatMap = {
         this.params.blur = ui.value;
         this.reload();
       }, this)
+    });
+    
+    /*
+    var ramp2 = $("#green_red_ramp2").get(0);
+    var ctx2 = ramp2.getContext("2d");
+    var grd2 = ctx2.createLinearGradient(0, 0, 100, 0);
+    grd2.addColorStop(0, "green");
+    grd2.addColorStop(1, "red");
+    ctx2.fillStyle=grd2;
+    ctx2.fillRect(20,20,100,50);
+    */
+    /*
+    $("#levelSlider").slider({
+      min:0,
+      max:100,
+      value:50,
+      stop: $.proxy(function(e, ui) {
+        this.params.level = ui.value;
+        this.reload();
+      }, this)
     })
+    */
   },
 
+  processColorRamps: function(json) {
+    console.log(json);
+    var rampsCont = $("#colorRamps");
+    var x = 80;
+    var y = 20;
+    for (var i = 0; i < json.length; ++i) {
+      console.log(json[i]);
+      var canvas = $('<canvas></canvas>').attr("id", json[i].name).attr("class", "color-ramp").prop("width", x).prop("height",y).appendTo(rampsCont).click($.proxy(this.changeRamp,this)).get(0);
+      console.log(canvas);
+      var context = canvas.getContext("2d");
+      context.rect(0,0,x-2,y-2);
+      var gradient = context.createLinearGradient(0, 0, x, 0);
+      var colors = json[i].colors;
+      for (var c = 0; c != colors.length; ++c) {
+        console.log(json[i].name + " - " + colors[c].stop + " (" + colors[c].r + "," + colors[c].g + "," + colors[c].b + ")");
+        gradient.addColorStop(colors[c].stop, "rgb(" + colors[c].r +"," + colors[c].g +"," + colors[c].b+")");
+      }
+      context.fillStyle=gradient;
+      context.fill();
+
+    }
+    $("#green_red").addClass("ramp-selected");
+
+
+
+    //rampsCont.append("<div style='clear: both;'></div>");
+    /*
+    var canvas = $("#green_red_ramp").get(0);
+    var context = canvas.getContext("2d");
+    context.rect(0,0,x,50);
+    var gradient = context.createLinearGradient(0, 0, x, 0);
+    gradient.addColorStop(0, "green");
+    gradient.addColorStop(0.5, "orange");
+    gradient.addColorStop(1, "red");
+    context.fillStyle=gradient;
+    context.fill();
+    */
+
+
+  },
+ 
+  changeRamp: function(e) {
+    this.params.colorramp = e.target.id;
+    $(".color-ramp").removeClass("ramp-selected");
+    $(e.target).addClass("ramp-selected");
+    this.reload();
+  },
   setWMSParams: function() {
     //this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
   },
