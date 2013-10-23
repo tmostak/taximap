@@ -1069,9 +1069,9 @@ var HeatMap = {
     this.params.colorramp = rampName;
     $(".color-ramp").removeClass("ramp-selected");
     $("#" + rampName).addClass("ramp-selected");
-    this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
-    if (reload)
-      this.reload();
+    //this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
+    //if (reload)
+    this.reload();
   },
 
   setWMSParams: function() {
