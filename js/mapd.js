@@ -54,14 +54,17 @@ var MapD = {
       
     this.map = map;
     
-    $("#clipboard-share").click(function() {
-        var link = MapD.writeLink(false);
-        console.log(link);
-        $("#link-dialog").html(link).dialog({width: 900});
-    });
+    //$("#clipboard-share").click($.proxy(function() {
+    $("#clipboard-share").click($.proxy(this.genLink,
+    this, false, this.displayLink));
+        //var link = this.writeLink(false);
+        //console.log("long link: " + link);
+        //this.getShortURL(link);
+        //console.log(link);
+        //$("#link-dialog").html(link).dialog({width: 900});
 
-    $("#twitter-share").on('click', $.proxy(this.sendTweet, this));
-    $("#facebook-share").on('click', $.proxy(this.facebookShare, this));
+    $("#twitter-share").on('click', $.proxy(this.genLink, this, true, this.sendTweet));
+    $("#facebook-share").on('click', $.proxy(this.genLink, this, true, this.facebookShare));
         
     this.services.pointmap = pointmap;
     this.services.heatmap = heatmap;
@@ -81,8 +84,31 @@ var MapD = {
     $(document).on('mapdreload', $.proxy(this.reload, this));
   },
 
-  facebookShare: function() {
-    var link = this.writeLink(true);
+  displayLink: function(response) {
+    console.log(response.data.url);
+    $("#link-dialog").html(response.data.url).dialog({width: 200, height: 70});
+  },
+    
+  getShortURL: function(longUrl, callback) {
+    $.getJSON(
+      "http://api.bitly.com/v3/shorten?callback=?",
+      {
+        "format": "json",
+        "apiKey": "R_1abf41c5437c575da82e28c25052c8c4",
+        "login": "mapd",
+        "longUrl": longUrl
+      }).done($.proxy(callback,this))
+  },
+
+  genLink: function(fullEncode, callback) {
+    var link = this.writeLink(fullEncode);
+    console.log ("long link: " + link);
+    this.getShortURL(link, callback);
+  },
+  
+  facebookShare: function(response) {
+    //var link = this.writeLink(true);
+    var link = response.data.url; 
     console.log(link);
     var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
     var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
@@ -91,9 +117,10 @@ var MapD = {
     },
         
 
-  sendTweet: function() {
-    var link = this.writeLink(true);
-    console.log(link);
+  sendTweet: function(response) {
+    //var link = this.writeLink(true);
+    var link = response.data.url; 
+    console.log("tweet link");
     var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
     var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
     window.open("https://twitter.com/share?" +

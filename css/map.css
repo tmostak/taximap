@@ -140,8 +140,8 @@ div#submit-icon {
 }
 */
 
-#ui-dialog-title {
-    font-size:14px;
+.ui-dialog-title {
+    font-size:10px;
 }
 
 #link-dialog {
