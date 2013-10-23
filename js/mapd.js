@@ -21,8 +21,8 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  //host: "http://mapd.csail.mit.edu:8080/",
-  host: "http://www.velocidy.net:7000/",
+  host: "http://mapd.csail.mit.edu:8080/",
+  //host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -115,7 +115,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:0, pointColorBy: "none"};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:0, pointColorBy: "none", heatRamp: "green_red"};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
@@ -181,6 +181,14 @@ var MapD = {
       this.services.pointmap.params.radius = parseInt(radius);
       var hexColor = '#' + toHex(parseInt(mapParams.pointR)) + toHex(parseInt(mapParams.pointG)) +  toHex(parseInt(mapParams.pointB));
       $("#pointColorPicker").minicolors('value', hexColor);
+      console.log("lao;ksdfasdflk;j");
+      console.log(mapParams.heatRamp);
+      this.services.heatmap.setRamp(mapParams.heatRamp, false);
+      /*
+      this.services.heatmap.params.colorramp = mapParams.heatRamp;
+      $(".color-ramp").removeClass("ramp-selected");
+      $("#" + mapParams.colorRamp).addClass("ramp-selected");
+      */
       if (mapParams.pointOn == 1)
         this.services.settings.pointButtonFunction();
       if (mapParams.heatOn == 1)
@@ -221,6 +229,7 @@ var MapD = {
     uriParams.pointB = this.services.pointmap.params.b;
     uriParams.pointRadius = this.services.pointmap.params.radius;
     uriParams.pointColorBy = this.services.pointmap.colorBy;
+    uriParams.heatRamp = this.services.heatmap.params.colorramp;
     var uri = buildURI(uriParams);
     if (fullEncode)
         url += encodeURIComponent(uri);
@@ -1048,11 +1057,23 @@ var HeatMap = {
   },
  
   changeRamp: function(e) {
+    this.setRamp(e.target.id, true);
+    /*
     this.params.colorramp = e.target.id;
     $(".color-ramp").removeClass("ramp-selected");
     $(e.target).addClass("ramp-selected");
     this.reload();
+    */
   },
+  setRamp: function(rampName, reload) {
+    this.params.colorramp = rampName;
+    $(".color-ramp").removeClass("ramp-selected");
+    $("#" + rampName).addClass("ramp-selected");
+    this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
+    if (reload)
+      this.reload();
+  },
+
   setWMSParams: function() {
     //this.wms.params = OpenLayers.Util.extend(this.wms.params, this.getParams());
   },
