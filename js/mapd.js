@@ -532,6 +532,8 @@ var TopKTokens = {
   params: {
     request: "GroupByToken",
     sql: null,
+    sql1: null, // only for trending
+    sql2: null, // only for trending
     bbox: null,
     k: 30,
     stoptable: "multistop",
@@ -714,8 +716,10 @@ var TopKTokens = {
 
     if (this.modeSetting == "Percents") 
       this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
-    else
+    else if (this.modeSetting == "Counts")
       this.params.sql += " from " + this.mapd.table + query; 
+    else 
+      this.params.sql += " from " + this.mapd.table; 
 
     if (this.displaySetting == "Cloud")
         this.params.k = this.defaultCloudK + numQueryTerms;
@@ -730,7 +734,31 @@ var TopKTokens = {
         this.params.sort = "true";
         this.params.tokens = [];
     }
-    console.log("Sql: " + this.params.sql);
+
+    if (this.modeSetting == "Trends") {
+        var timestart = this.mapd.timestart;
+        var timeend = this.mapd.timeend;
+        var midTime = Math.round ((timestart + timeend) / 2);
+        if (options == undefined || options == null)  
+            options = {};
+            options.time = {};
+        var options1 = options;
+        var options2 = options;
+        options1.time.timestart = timestart;
+        options1.time.timeend = midTime;
+        options2.time.timestart = midTime;
+        options2.time.timeend = timeend;
+        this.params.sql1 = this.params.sql + this.mapd.getWhere(options1);
+        this.params.sql2 = this.params.sql + this.mapd.getWhere(options2);
+        this.params.request = "CompareTopKTokens";
+        this.params.sort = "false";
+        this.params.stoptable = "";
+    }
+    else {
+        this.params.request = "GroupByToken";
+    }
+
+
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
