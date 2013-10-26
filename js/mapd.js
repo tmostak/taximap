@@ -21,8 +21,8 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  host: "http://mapd.csail.mit.edu:8080/",
-  //host: "http://www.velocidy.net:7000/",
+  //host: "http://mapd.csail.mit.edu:8080/",
+  host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -142,7 +142,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:0, pointColorBy: "none", heatRamp: "green_red"};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red"};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
@@ -203,8 +203,9 @@ var MapD = {
       if (mapParams.pointColorBy == "sender_name" || mapParams.pointColorBy == "origin") 
           $("#pointStaticColor").hide();
       var radius = parseInt(mapParams.pointRadius);
+      console.log("radius: " + radius);
       //$(".circle").eq(radius - 1).addClass("circle-selected");
-      $(".circle").eq(radius).addClass("circle-selected");
+      $(".point-size").eq(radius + 1).addClass("point-size-selected");
       this.services.pointmap.params.radius = parseInt(radius);
       var hexColor = '#' + toHex(parseInt(mapParams.pointR)) + toHex(parseInt(mapParams.pointG)) +  toHex(parseInt(mapParams.pointB));
       $("#pointColorPicker").minicolors('value', hexColor);
@@ -950,11 +951,12 @@ var PointMap = {
     }); 
     
     //click(function() {return false;});
-    $(".circle").click($.proxy(function(e) { 
+    $(".point-size").click($.proxy(function(e) { 
       //this.params.radius = $(e.target).index() + 1;
-      this.params.radius = $(e.target).index();
-      $(".circle").removeClass("circle-selected");
-      $(e.target).addClass("circle-selected");
+      this.params.radius = $(e.target).index() - 1;
+      console.log("this.params.radius: " + this.params.radius);
+      $(".point-size").removeClass("point-size-selected");
+      $(e.target).addClass("point-size-selected");
       this.reload();
       return false;
     }, this));
@@ -1833,6 +1835,7 @@ var Animation = {
   heatLayer: null,
   wordGraph: null,
   heatMax: null,
+  oldRadius: null,
   //pointMap: null,
   //heatMap: null,
   playPauseButton: null,
@@ -1912,6 +1915,14 @@ var Animation = {
         this.frameStart = this.animStart;
         this.frameEnd = this.animStart + this.frameWidth;
         this.heatMax = parseFloat($.cookie('max_value')) * 10.0;
+        var numPoints = parseInt($.cookie('tweet_count'));
+        this.oldRadius = this.mapd.services.pointmap.params.radius;
+        var radius = 2;
+        if (numPoints > 100000)
+            radius = 0;
+        else if (numPoints > 10000)
+            radius = 1;
+        this.mapd.services.pointmap.params.radius = radius;
         console.log(this.heatMax);
         this.formerGraphLockedState = this.wordGraph.locked;
         //this.wordGraph.params.sort = "false";
@@ -1959,6 +1970,7 @@ var Animation = {
       this.playing = false;
       this.playPauseButton.removeClass("pause-icon").addClass("play-icon");
       //this.playPauseButton.attr("id", "play-icon");
+      this.mapd.services.pointmap.params.radius = this.oldRadius;
       this.mapd.services.graph.chart.setBrushExtent([this.mapd.timestart * 1000, this.mapd.timeend * 1000]);
       this.mapd.services.pointmap.reload();
       this.mapd.services.heatmap.reload();

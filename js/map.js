@@ -16,7 +16,7 @@ function init()
 
   //var darkStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "simplified" }, /*{hue: "#333"},*/ {saturation: -50}, {lightness: -50} ] } ];
   //var darkBlueStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "on" }, {hue: "#00c3ff"}, {saturation: -62}, {lightness: -83}, {gamma: 0.27} ] } ];
-  var darkBlueStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "on" }, {saturation: -62}, {hue: "#00c3ff"}, {"gamma": 0.27}, {lightness: -83} ] } ];
+  var darkBlueStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "on" }, {saturation: -62}, {hue: "#00c3ff"}, {"gamma": 0.27}, {lightness: -65} ] } ];
   var darkMap = new OpenLayers.Layer.Google("Dark", {type: 'styled'}, {isBaseLayer:true});
   var styledMapOptions = {
     name: "Dark Map"

@@ -705,6 +705,16 @@ div#widget {
   opacity: 0.5;
 }
 
+#autoPointSize {
+  float: left;
+  color: #EE1785;
+  font-size:11px;
+}
+
+#autoPointSize:hover {
+  border: 1px solid #FFFF00;
+}
+
 .circle {
   float: left;
   //width:20px;
@@ -721,7 +731,7 @@ div#widget {
  
 
 
-.circle-selected {
+.point-size-selected {
   border: 1px solid #EE1785;
 }
 
