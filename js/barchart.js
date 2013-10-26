@@ -90,6 +90,13 @@ var BarChart =
       }).slice(numQueryTerms);
       abbrFormat = d3.format(".2%"); 
     }
+    else if (dataNums == "Trends") {
+      this.data = $.map(dataset.tokens, function(e1, idx) {
+          if (e1 != "") 
+              return {"label": e1, "val":dataset.zScores[idx]};
+      }).slice(numQueryTerms);
+      abbrFormat = d3.format(".2s"); 
+    }
     else {
       this.data = $.map(dataset.tokens, function(e1, idx) {
           if (e1 != "") 
@@ -164,7 +171,15 @@ var BarChart =
         .attr("class", "y axis")
         .attr("transform", "translate(" + this.margin.left + ",0)")
         .call(yAxis);
-
+     /*
+     this.elems.svg.append("text")
+      .attr("class", "y label")
+      .attr("text-anchor", "end")
+      .attr("y", 6)
+      .attr("dy", ".75em")
+      .attr("transform", "rotate(-90-)")
+      .text("Z Scores");
+    */
 
     $(".bar-label").click($.proxy(function(e) {
         var token = e.target.textContent;

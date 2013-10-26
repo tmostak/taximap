@@ -737,14 +737,21 @@ var TopKTokens = {
     }
 
     if (this.modeSetting == "Trends") {
-        var timestart = this.mapd.timestart;
-        var timeend = this.mapd.timeend;
+        var timestart = parseInt(this.mapd.timestart);
+        var timeend = parseInt(this.mapd.timeend);
         var midTime = Math.round ((timestart + timeend) / 2);
+        console.log(timestart);
+        console.log(midTime);
+        console.log(timeend);
         if (options == undefined || options == null)  
             options = {};
-            options.time = {};
         var options1 = options;
-        var options2 = options;
+        var options2 = {}; 
+        for (var key in options) {
+            options2.key = options.key;
+        }
+        options.time = {};
+        options2.time = {};
         options1.time.timestart = timestart;
         options1.time.timeend = midTime;
         options2.time.timestart = midTime;
@@ -753,7 +760,10 @@ var TopKTokens = {
         this.params.sql2 = this.params.sql + this.mapd.getWhere(options2);
         this.params.request = "CompareTopKTokens";
         this.params.sort = "false";
-        this.params.stoptable = "";
+        if (this.sourceSetting == "Word")
+            this.params.stoptable = "multistop";
+        else
+            this.params.stoptable = "";
     }
     else {
         this.params.request = "GroupByToken";
@@ -880,12 +890,20 @@ var TopKTokens = {
                 wordArray[t - numResultsToExclude] = {text: this.tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(counts[t]* tokenRatio * 30.0)), 4)};
             }
         }
-        else {
+        else if (this.modeSetting == "Percents") {
             var percents = json.percents; 
             var tokenRatio = 1.0 / percents[2 + numResultsToExclude];
             for (var t = numResultsToExclude; t < numTokens; t++) {
                 var textPercent = "%" + percents[t].toFixed(3);
                 wordArray[t - numResultsToExclude] = {text: this.tokens[t], html: {title: textPercent},  weight: Math.max(Math.min(40, Math.round(percents[t]* tokenRatio * 30.0)), 4)};
+            }
+        }
+        else if (this.modeSetting == "Trends") {
+            var zScores = json.zScores;
+            n = json.n1 + json.n2;
+            var tokenRatio = 1.0 / zScores[2 + numResultsToExclude];
+            for (var t = numResultsToExclude; t < numTokens; t++) {
+                wordArray[t - numResultsToExclude] = {text: this.tokens[t], html: {title: zScores[t]},  weight: Math.max(Math.min(40, Math.round(zScores[t]* tokenRatio * 30.0)), 4)};
             }
         }
         this.displayDiv.jQCloud(wordArray);
