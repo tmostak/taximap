@@ -21,8 +21,8 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  //host: "http://mapd.csail.mit.edu:8080/",
-  host: "http://www.velocidy.net:7000/",
+  host: "http://mapd2.csail.mit.edu:8080/",
+  //host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -1936,19 +1936,21 @@ var Animation = {
         this.frameStep = (this.animEnd - this.animStart) / this.numFrames;
         //this.frameWidth = this.frameStep * 4.0;
         this.frameWidth = this.mapd.timeend - this.mapd.timestart;
-        if (this.frameWidth > (this.animStart-this.animEnd)*0.5)
+        if (this.frameWidth > (this.animEnd-this.animStart)*0.5)
           this.frameWidth = 21600;
         this.frameStart = this.animStart;
         this.frameEnd = this.animStart + this.frameWidth;
         this.heatMax = parseFloat($.cookie('max_value')) * 10.0;
         var numPoints = parseInt($.cookie('tweet_count'));
         this.oldRadius = this.mapd.services.pointmap.params.radius;
-        var radius = 2;
-        if (numPoints > 100000)
-            radius = 0;
-        else if (numPoints > 10000)
-            radius = 1;
-        this.mapd.services.pointmap.params.radius = radius;
+        if (this.oldRadius == -1) {
+            var radius = 2;
+            if (numPoints > 100000)
+                radius = 0;
+            else if (numPoints > 10000)
+                radius = 1;
+            this.mapd.services.pointmap.params.radius = radius;
+        }
         console.log(this.heatMax);
         this.formerGraphLockedState = this.wordGraph.locked;
         //this.wordGraph.params.sort = "false";
