@@ -739,12 +739,17 @@ var TopKTokens = {
     if (this.modeSetting == "Trends") {
         var timestart = parseInt(this.mapd.timestart);
         var timeend = parseInt(this.mapd.timeend);
-        var midTime = Math.round ((timestart + timeend) / 2);
         console.log(timestart);
         console.log(midTime);
         console.log(timeend);
         if (options == undefined || options == null)  
             options = {};
+        else if (options.time != undefined && options.time != null) {
+            timestart = options.time.timestart;
+            timeend = options.time.timeend;
+        }
+        var midTime = Math.round ((timestart + timeend) / 2);
+        
         var options1 = options;
         var options2 = {}; 
         for (var key in options) {
@@ -868,6 +873,9 @@ var TopKTokens = {
   onLoad: function(json) {
     this.displayDiv.empty();
     var n =json.n;
+    if (this.modeSetting == "Trends") 
+        n = json.n1 + json.n2;
+
     var numQueryTerms = this.mapd.queryTerms.length;
     this.tokens = json.tokens;
     if (this.displaySetting == "Cloud") {
@@ -1960,7 +1968,7 @@ var Animation = {
         console.log("changing to async"); 
 
         //this.wordGraph.locked = true;
-        if (this.formerGraphLockedState == false) {
+        if (this.wordGraph.modeSetting != "Trends" && this.formerGraphLockedState == false) {
             this.wordGraph.lockClickFunction();
         }
         /*****
@@ -1994,7 +2002,7 @@ var Animation = {
       this.mapd.services.heatmap.reload();
       //this.wordGraph.locked = this.formerGraphLockedState;
       this.wordGraph.setMenuItem("Display", this.formerGraphDisplayMode, false);
-      if (this.formerGraphLockedState != this.wordGraph.locked) {
+      if (this.wordGraph.modeSetting != "Trends" && this.formerGraphLockedState != this.wordGraph.locked) {
         this.wordGraph.lockClickFunction(true);
       }
       this.wordGraph.reload();
