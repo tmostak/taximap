@@ -21,8 +21,8 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  host: "http://mapd2.csail.mit.edu:8080/",
-  //host: "http://www.velocidy.net:7000/",
+  //host: "http://mapd2.csail.mit.edu:8080/",
+  host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -142,7 +142,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red"};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Scatter", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red"};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
@@ -290,7 +290,7 @@ var MapD = {
         if (params.dataDisplay == "cloud")
             params.dataDisplay = "Cloud";
         else
-            params.dataDisplay = "Barchart";
+            params.dataDisplay = "Bar";
 
         //params.dataMode = "Counts";
       }
@@ -524,6 +524,7 @@ var TopKTokens = {
   displayDiv: null, 
   defaultCloudK: 30,
   defaultChartK: 15,
+  defaultScatterK: 4000,
   displaySetting: null,
   sourceSetting: null,
   modeSetting: null,
@@ -631,7 +632,7 @@ var TopKTokens = {
     $(dropdownDiv).removeClass('dropdown-open');
     if (choice == "Cloud")
       $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
-    else if (choice == "Barchart")
+    else if (choice == "Bar")
       $(this.displayDiv).off('click');
 
     if (reload)
@@ -724,8 +725,10 @@ var TopKTokens = {
 
     if (this.displaySetting == "Cloud")
         this.params.k = this.defaultCloudK + numQueryTerms;
-    else
+    else if (this.displaySetting == "Bar")
         this.params.k = this.defaultChartK ;
+    else if (this.displaySetting == "Scatter")
+        this.params.k = this.defaultScatterK ;
 
     if (this.locked) {
         this.params.tokens = this.tokens;
@@ -916,7 +919,7 @@ var TopKTokens = {
         }
         this.displayDiv.jQCloud(wordArray);
     }
-    else {
+    else if (this.displaySetting == "Bar") {
         BarChart.init(this.displayDiv, $.proxy(this.barClickCallback, this));
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
@@ -924,10 +927,18 @@ var TopKTokens = {
         console.log("num results to exclude: " + numResultsToExclude);
         BarChart.addData(json, numResultsToExclude, this.modeSetting);
     }
-        var label = (this.sourceSetting == "Word") ? "# Words: " : ((this.sourceSetting == "User") ? "# Tweets: " : "# Tweets: ");
-        $('#numTokensText').text(label + numberWithCommas(n));
-        console.log("triggering loadend");
-        $(this).trigger('loadend');
+    else if (this.displaySetting == "Scatter") {
+        ScatterPlot.init(this.displayDiv);
+        var numResultsToExclude = 0;
+        if (this.sourceSetting == "Word")
+          numResultsToExclude = numQueryTerms; 
+        ScatterPlot.addData(json, numResultsToExclude, this.modeSetting);
+    }
+
+    var label = (this.sourceSetting == "Word") ? "# Words: " : ((this.sourceSetting == "User") ? "# Tweets: " : "# Tweets: ");
+    $('#numTokensText').text(label + numberWithCommas(n));
+    console.log("triggering loadend");
+    $(this).trigger('loadend');
 
   }
 
