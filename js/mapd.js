@@ -637,9 +637,24 @@ var TopKTokens = {
       $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
     else if (choice == "Bar")
       $(this.displayDiv).off('click');
-
+    else if (choice == "Scatter" || (menu == "Source" && this.displaySetting == "Scatter")) {
+      $.getJSON(this.getScatterVarsURL()).done($.proxy(this.onScatterVarsLoad, this));
+    }
     if (reload)
       this.reload();
+  },
+
+  getScatterVarsURL: function() {
+    var scatterParams = {};
+    scatterParams.request = "GetTableCols";
+    //scatterParams.table = this.sourceSetting + "_data";
+    scatterParams.table = "county_data";
+    var url = this.mapd.host + '?' + buildURI(scatterParams);
+    return url;
+  },
+
+  onScatterVarsLoad: function(json) {
+    console.log(json);
   },
 
   lockClickFunction: function (preventReload) {  
