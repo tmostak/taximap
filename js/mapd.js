@@ -142,7 +142,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Scatter", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red"};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Scatter", dataSource: "County", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red"};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
@@ -540,7 +540,10 @@ var TopKTokens = {
     k: 30,
     stoptable: "multistop",
     sort: "true",
-    tokens: []
+    tokens: [],
+    jointable: null,
+    joinvar: null,
+    joinattrs: null,
   },
 
   init: function(displayDiv) {
@@ -679,6 +682,19 @@ var TopKTokens = {
     //$("#dataNums").buttonset("refresh");
     //if (this.modeSetting == "Percents" && this.sourceSetting == "Word")
     //    this.setMenuItem("Mode", "Counts", false);
+    if (this.displaySetting == "Scatter") {
+        this.params.jointable = "county_data";
+        this.params.joinvar = "name";
+        //this.params.joinattrs = "inc910211";
+        this.params.joinattrs = "inc910211";
+        this.params.sort = "false";
+    }
+    else {
+        this.params.jointable = null;
+        this.params.joinvar = null;
+        this.params.joinattrs = null;
+        this.params.sort = "true";
+    }
 
     if (this.modeSetting == "Percents") { 
       if (options == undefined || options == null) 
@@ -735,7 +751,8 @@ var TopKTokens = {
         this.params.sort = "false";
     }
     else {
-        this.params.sort = "true";
+        if (this.displaySetting != "Scatter") 
+            this.params.sort = "true";
         this.params.tokens = [];
     }
 

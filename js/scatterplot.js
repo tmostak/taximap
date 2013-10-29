@@ -46,16 +46,19 @@ var ScatterPlot =
   },
 
   addData: function(dataset, numQueryTerms, dataNums) { 
+
+    /*
     if (dataNums == "Percents") { 
       this.data = $.map(dataset.tokens, function(e1, idx) {
           if (e1 != "") {
             if (dataset.percents[idx] < 0.0)
               return null;
-            return {"label": e1, "x": Math.random()*1000.0 , "y": (dataset.percents[idx])};
+            return {"label": e1, "x": dataset.inc910211[idx] , "y": dataset.y[idx]};
           }
         }).slice(numQueryTerms);
      this.abbrFormat = d3.format(".2%"); 
     }
+    /*
     else if (dataNums == "Trends") {
       this.data = $.map(dataset.tokens, function(e1, idx) {
           if (e1 != "") 
@@ -63,21 +66,30 @@ var ScatterPlot =
       }).slice(numQueryTerms);
       this.abbrFormat = d3.format(".2s"); 
     }
-    else {
+    else if (dataNums == "Counts") {
       this.data = $.map(dataset.tokens, function(e1, idx) {
           if (e1 != "") {
             if (dataset.counts[idx] < 1)
               return null;
-              return {"label": e1, "x": Math.random() * 1000.0, "y":dataset.counts[idx]};
+              return {"label": e1, "x": dataset.inc910211[idx], "y":dataset.y[idx]};
           }
       }).slice(numQueryTerms);
       this.abbrFormat = d3.format(".1s"); 
     }
     console.log(this.data);
+    */
+    this.data = dataset.results;
+    if (dataNums == "Percents") { 
+      this.abbrFormat = d3.format(".2%"); 
+    }
+    else {
+      this.abbrFormat = d3.format(".1s"); 
+    }
     this.yAxis.tickFormat(this.abbrFormat);
+    this.xAxis.tickFormat(d3.format(".1s"));
 
     this.xScale
-      .domain([d3.min(this.data, function(d) {return d.x;}), d3.max(this.data, function(d) {return d.x;})]);
+      .domain([d3.min(this.data, function(d) {return d.inc910211;}), d3.max(this.data, function(d) {return d.inc910211;})]);
 
     this.yScale
       .domain([d3.min(this.data, function(d) {return d.y;}), d3.max(this.data, function(d) {return d.y;})]);
@@ -91,7 +103,7 @@ var ScatterPlot =
       .enter()
       .append("circle")
       .attr("cx", function(d) {
-          return xScale(d.x);
+          return xScale(d.inc910211);
         })
       .attr("cy", function(d) {
           return yScale(d.y);
@@ -105,7 +117,7 @@ var ScatterPlot =
       });
 
      console.log("# items: " + this.data.length);
-     if (this.data.length < 50) {
+     if (this.data.length < 20) {
         this.elems.svg.selectAll("text")
           .data(this.data)
           .enter()
