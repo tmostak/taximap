@@ -544,6 +544,7 @@ var TopKTokens = {
     jointable: null,
     joinvar: null,
     joinattrs: null,
+    //joinattrs: "inc910211"
   },
 
   init: function(displayDiv) {
@@ -645,6 +646,7 @@ var TopKTokens = {
   },
 
   getScatterVarsURL: function() {
+    console.log("getscattervars");
     var scatterParams = {};
     scatterParams.request = "GetTableCols";
     //scatterParams.table = this.sourceSetting + "_data";
@@ -654,7 +656,22 @@ var TopKTokens = {
   },
 
   onScatterVarsLoad: function(json) {
-    console.log(json);
+    console.log("onscattervarsload");
+    ScatterPlot.setVars(json);
+    TopKTokens.params.joinattrs = ScatterPlot.selectedVar; 
+    TopKTokens.reload();
+    //ScatterPlot.init(this, this.displayDiv);
+    //console.log(json);
+  },
+
+  scatterVarChange: function(e) {
+    //console.log(this);
+    //console.log(e);
+    //console.log($(this).find("option:selected"));
+    TopKTokens.params.joinattrs = $(this).find("option:selected").get(0).value;
+    ScatterPlot.selectedVar = TopKTokens.params.joinattrs;
+    console.log(ScatterPlot.selectedVar);
+    TopKTokens.reload();
   },
 
   lockClickFunction: function (preventReload) {  
@@ -699,9 +716,10 @@ var TopKTokens = {
     //    this.setMenuItem("Mode", "Counts", false);
     if (this.displaySetting == "Scatter") {
         this.params.jointable = "county_data";
+        this.params.jointable = this.sourceSetting.toLowerCase(); + "_data";
         this.params.joinvar = "name";
         //this.params.joinattrs = "inc910211";
-        this.params.joinattrs = "inc910211";
+        //this.params.joinattrs = "inc910211";
         this.params.sort = "false";
     }
     else {
@@ -960,7 +978,9 @@ var TopKTokens = {
         BarChart.addData(json, numResultsToExclude, this.modeSetting);
     }
     else if (this.displaySetting == "Scatter") {
-        ScatterPlot.init(this.displayDiv);
+        ScatterPlot.init(this, this.displayDiv);
+        console.log("at load scatter");
+        console.log(ScatterPlot);
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 

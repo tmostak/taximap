@@ -1,5 +1,6 @@
 var ScatterPlot =
 {
+  topktokens: null,
   xScale: null,
   yScale: null,
   rScale: null,
@@ -11,6 +12,8 @@ var ScatterPlot =
   series: [],
   abbrFormat: null,
   data: null,
+  vars: null,
+  //selectedVar: "inc910211",
   elems: {
     container: null,
     svg: null,
@@ -18,7 +21,8 @@ var ScatterPlot =
     info: null,
   },
 
-  init: function(container) {
+  init: function(topktokens, container) {
+    this.topktokens = topktokens;
     this.elems.container = $(container).get(0);
     this.margin = {top: 20, right: 40, bottom: 20, left: 40};
     this.width = $(this.elems.container).width() - this.margin.left - this.margin.right;
@@ -39,13 +43,71 @@ var ScatterPlot =
     this.xAxis = d3.svg.axis().scale(this.xScale).orient("bottom").ticks(7);
 
     this.yAxis = d3.svg.axis().scale(this.yScale).orient("left").ticks(7);
+    $(this.elems.varPicker).appendTo($(this.elems.container));
+    $(this.elems.varPicker).change(this.topktokens.scatterVarChange);
 
-    this.elems.varPicker = $("<select></select>").attr("id", "scatterXVarSelect").appendTo($(this.elems.container));
-    $(this.elems.varPicker).append("<option Value='income'>Income Level</option><option Value='education'>Education Level</option>");
+    //$(this.elems.varPicker).append("<option Value='income'>Income Level</option><option Value='education'>Education Level</option>");
 
   },
 
+  scatterVarChange: function() {
+    //console.log($(this).find("option:selected"));
+    //console.log($(this).find("option:selected").get(0).value);
+    this.selectedVar = $(this).find("option:selected").get(0).value;
+    
+  },
+
+  setVars: function(vars) {
+    //this.elems.varPicker = $("<select></select>").attr("id", "scatterXVarSelect").appendTo($(this.elems.container));
+    this.elems.varPicker = $("<select></select>").attr("id", "scatterXVarSelect");
+    //console.log(vars);
+    //console.log(this);
+    this.vars = $.map(vars.columns, function (c, idx) {
+      if (c.tag == "null" || c.tag.search(":") == -1)
+        return null;
+      return c;
+    });
+ 
+    var defaultIndex = -1;
+    $(this.vars).each($.proxy(function(index, element) {
+      var tag = element.tag.substring(1,element.tag.length-1)      
+      var elemArray = tag.split(':');
+      if (elemArray[0].substring(0,3) == "pct")
+        elemArray[1] = "% " + elemArray[1];
+      if (elemArray[0].search("default") != -1) {
+        defaultIndex = index;
+        this.selectedVar = element.name; 
+      }
+      $(this.elems.varPicker).append('<option Value="' + element.name +'">'+elemArray[1]+'</option>');
+
+      //console.log(element);
+      //console.log(this);
+      //console.log(this.elems.varPicker);
+    }, this));
+
+    console.log("default index: " + defaultIndex);
+    if (defaultIndex != -1) {
+      //$("#scatterXVarSelect").val(this.selectedVar);
+      //$('option[value=' + this.selectedVar + ']').attr('selected', 'selected');
+      //console.log($("#scatterXVarSelect option"));
+      //console.log(this.elems.varPicker);
+      $(this.elems.varPicker).children().eq(defaultIndex).prop('selected', true);
+      //console.log($("#scatterXVarSelect option").eq(defaultIndex).prop('selected', true));
+    }
+
+  
+
+      //$(ScatterPlot.elems.varPicker).append('<option Value=' + c.name +'>'+c.tag+'</option>');
+
+
+    //console.log(this.vars);
+  },
+    
+
+
+
   addData: function(dataset, numQueryTerms, dataNums) { 
+    //d3.select("svg").remove();
 
     /*
     if (dataNums == "Percents") { 
@@ -88,8 +150,11 @@ var ScatterPlot =
     this.yAxis.tickFormat(this.abbrFormat);
     this.xAxis.tickFormat(d3.format(".1s"));
 
+    var selectedVar = this.selectedVar;
+    if (selectedVar == null)
+      return null;
     this.xScale
-      .domain([d3.min(this.data, function(d) {return d.inc910211;}), d3.max(this.data, function(d) {return d.inc910211;})]);
+      .domain([d3.min(this.data, function(d) {return d[selectedVar];}), d3.max(this.data, function(d) {return d[selectedVar];})]);
 
     this.yScale
       .domain([d3.min(this.data, function(d) {return d.y;}), d3.max(this.data, function(d) {return d.y;})]);
@@ -103,7 +168,7 @@ var ScatterPlot =
       .enter()
       .append("circle")
       .attr("cx", function(d) {
-          return xScale(d.inc910211);
+          return xScale(d[selectedVar]);
         })
       .attr("cy", function(d) {
           return yScale(d.y);
