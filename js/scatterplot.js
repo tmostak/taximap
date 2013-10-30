@@ -148,7 +148,7 @@ var ScatterPlot =
       this.abbrFormat = d3.format(".1s"); 
     }
     this.yAxis.tickFormat(this.abbrFormat);
-    this.xAxis.tickFormat(d3.format(".1s"));
+    this.xAxis.tickFormat(d3.format(".2s"));
 
     var selectedVar = this.selectedVar;
     if (selectedVar == null)

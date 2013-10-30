@@ -716,7 +716,7 @@ var TopKTokens = {
     //    this.setMenuItem("Mode", "Counts", false);
     if (this.displaySetting == "Scatter") {
         this.params.jointable = "county_data";
-        this.params.jointable = this.sourceSetting.toLowerCase(); + "_data";
+        this.params.jointable = this.sourceSetting.toLowerCase() + "_data";
         this.params.joinvar = "name";
         //this.params.joinattrs = "inc910211";
         //this.params.joinattrs = "inc910211";
