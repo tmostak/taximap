@@ -21,8 +21,8 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  host: "http://mapd.csail.mit.edu:8080/",
-  //host: "http://www.velocidy.net:7000/",
+  //host: "http://mapd.csail.mit.edu:8080/",
+  host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -2020,7 +2020,7 @@ var Animation = {
         //this.wordGraph.params.sort = "false";
         this.formerGraphDisplayMode = this.wordGraph.displaySetting;
 
-        this.wordGraph.setMenuItem("Display", "Chart", false);
+        this.wordGraph.setMenuItem("Display", "Bar", false);
         console.log("changing to sync"); 
         $.ajaxSetup({
             async: false
