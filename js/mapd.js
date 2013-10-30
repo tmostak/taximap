@@ -21,8 +21,8 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  //host: "http://mapd2.csail.mit.edu:8080/",
-  host: "http://www.velocidy.net:7000/",
+  host: "http://mapd.csail.mit.edu:8080/",
+  //host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -142,7 +142,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Scatter", dataSource: "County", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red"};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red"};
       mapParams = this.readLink(mapParams);
       console.log(mapParams);
       this.timestart = mapParams.t0;
@@ -639,6 +639,7 @@ var TopKTokens = {
     else if (choice == "Bar")
       $(this.displayDiv).off('click');
     else if (choice == "Scatter" || (menu == "Source" && this.displaySetting == "Scatter")) {
+      $(this.displayDiv).off('click');
       $.getJSON(this.getScatterVarsURL()).done($.proxy(this.onScatterVarsLoad, this));
     }
     if (reload)
