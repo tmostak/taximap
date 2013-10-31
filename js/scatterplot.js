@@ -4,6 +4,7 @@ var ScatterPlot =
   xScale: null,
   yScale: null,
   rScale: null,
+  cScale: d3.scale.category10(),
   width: null,
   height: null,
   margin: null,
@@ -13,6 +14,7 @@ var ScatterPlot =
   abbrFormat: null,
   data: null,
   vars: null,
+  colorVar: null,
   //selectedVar: "inc910211",
   elems: {
     container: null,
@@ -38,6 +40,7 @@ var ScatterPlot =
     this.elems.svg = svg;
     this.xScale = d3.scale.linear().range([0,this.width]);
     this.yScale = d3.scale.linear().range([this.height,0]);
+    //this.cScale = d3.scale.category10();
     this.rScale = d3.scale.linear().range([2,5]);
 
     this.xAxis = d3.svg.axis().scale(this.xScale).orient("bottom").ticks(7);
@@ -70,6 +73,12 @@ var ScatterPlot =
  
     var defaultIndex = -1;
     $(this.vars).each($.proxy(function(index, element) {
+      console.log(element.tag);
+      if ((element.tag) == "color:") {
+        console.log("color!!!!");
+        this.colorVar = element.name;
+        return true;
+      }
       var tag = element.tag.substring(1,element.tag.length-1)      
       var elemArray = tag.split(':');
       if (elemArray[0].substring(0,3) == "pct")
@@ -151,6 +160,7 @@ var ScatterPlot =
     this.xAxis.tickFormat(d3.format(".2s"));
 
     var selectedVar = this.selectedVar;
+    var colorVar = this.colorVar;
     if (selectedVar == null)
       return null;
     this.xScale
@@ -159,8 +169,10 @@ var ScatterPlot =
     this.yScale
       .domain([d3.min(this.data, function(d) {return d.y;}), d3.max(this.data, function(d) {return d.y;})]);
 
+
     var xScale = this.xScale;
     var yScale = this.yScale;
+    var cScale = this.cScale;
 
 
     this.elems.svg.selectAll("circle")
@@ -176,6 +188,9 @@ var ScatterPlot =
       .attr("r", function(d) {
           return (2);
         })
+      .style("fill", function(d) {
+        return cScale(d[colorVar]);
+      })
       .append("svg:title")
       .text(function (d) {
         return d.label; 
@@ -191,7 +206,7 @@ var ScatterPlot =
             return d.label;
           })
           .attr("x", function(d) {
-            return xScale(d.x) + 4;
+            return xScale(d[selectedVar]) + 4;
           })
           .attr("y", function(d) {
             return yScale(d.y);

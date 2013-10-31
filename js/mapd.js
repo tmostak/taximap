@@ -651,7 +651,9 @@ var TopKTokens = {
     var scatterParams = {};
     scatterParams.request = "GetTableCols";
     //scatterParams.table = this.sourceSetting + "_data";
-    scatterParams.table = "county_data";
+    scatterParams.table = this.sourceSetting.toLowerCase() + "_data";
+    //scatterParams.table = "county_data";
+        this.params.jointable = this.sourceSetting.toLowerCase() + "_data";
     var url = this.mapd.host + '?' + buildURI(scatterParams);
     return url;
   },
@@ -716,11 +718,9 @@ var TopKTokens = {
     //if (this.modeSetting == "Percents" && this.sourceSetting == "Word")
     //    this.setMenuItem("Mode", "Counts", false);
     if (this.displaySetting == "Scatter") {
-        this.params.jointable = "county_data";
+        //this.params.jointable = "county_data";
         this.params.jointable = this.sourceSetting.toLowerCase() + "_data";
         this.params.joinvar = "name";
-        //this.params.joinattrs = "inc910211";
-        //this.params.joinattrs = "inc910211";
         this.params.sort = "false";
     }
     else {
@@ -779,6 +779,8 @@ var TopKTokens = {
         this.params.k = this.defaultChartK ;
     else if (this.displaySetting == "Scatter")
         this.params.k = this.defaultScatterK ;
+        if (ScatterPlot.colorVar != null)
+            this.params.joinattrs += "," + ScatterPlot.colorVar;
 
     if (this.locked) {
         this.params.tokens = this.tokens;
