@@ -115,7 +115,7 @@ var ScatterPlot =
 
 
 
-  addData: function(dataset, numQueryTerms, dataNums) { 
+  addData: function(dataset, numQueryTerms, dataNums, update) { 
     //d3.select("svg").remove();
 
     /*
@@ -169,9 +169,13 @@ var ScatterPlot =
     this.yScale
       .domain([d3.min(this.data, function(d) {return d.y;}), d3.max(this.data, function(d) {return d.y;})]);
 
+    if (dataNums == "Percents") { 
+        this.rScale
+          .domain([d3.min(this.data, function(d) {return d.n;}), d3.max(this.data, function(d) {return d.n;})]);
 
     var xScale = this.xScale;
     var yScale = this.yScale;
+    var rScale = this.rScale;
     var cScale = this.cScale;
 
 
@@ -186,7 +190,7 @@ var ScatterPlot =
           return yScale(d.y);
         })
       .attr("r", function(d) {
-          return (2);
+          return rScale(d.n);
         })
       .style("fill", function(d) {
         return cScale(d[colorVar]);
@@ -224,7 +228,6 @@ var ScatterPlot =
         .call(this.xAxis);
   }
 }
-
 
 
 

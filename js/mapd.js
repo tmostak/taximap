@@ -21,8 +21,9 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  //host: "http://mapd.csail.mit.edu:8080/",
-  host: "http://www.velocidy.net:7000/",
+  host: "http://127.0.0.1:8080/",
+  //host: "http://geops.cga.harvard.edu:8080/",
+  //host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -981,13 +982,14 @@ var TopKTokens = {
         BarChart.addData(json, numResultsToExclude, this.modeSetting);
     }
     else if (this.displaySetting == "Scatter") {
-        ScatterPlot.init(this, this.displayDiv);
+        if (update) 
+            ScatterPlot.init(this, this.displayDiv);
         console.log("at load scatter");
         console.log(ScatterPlot);
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
-        ScatterPlot.addData(json, numResultsToExclude, this.modeSetting);
+        ScatterPlot.addData(json, numResultsToExclude, this.modeSetting, update);
     }
 
     var label = (this.sourceSetting == "Word") ? "# Words: " : ((this.sourceSetting == "User") ? "# Tweets: " : "# Tweets: ");
