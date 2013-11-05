@@ -21,9 +21,10 @@ function toHex(num) {
 
 var MapD = {
   map: null,
-  host: "http://127.0.0.1:8080/",
+  //host: "http://127.0.0.1:8080/",
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://www.velocidy.net:7000/",
+  host: "http://192.168.1.90:8080/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -143,8 +144,9 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red"};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", joinattrs: null};
       mapParams = this.readLink(mapParams);
+      console.log("map params");
       console.log(mapParams);
       this.timestart = mapParams.t0;
       this.timeend = mapParams.t1;
@@ -155,9 +157,14 @@ var MapD = {
         this.services.search.userInput.val(params.who);
         $('#userInput').trigger('input');
       }
-      this.services.topktokens.setMenuItem("Display", mapParams.dataDisplay, false);
       this.services.topktokens.setMenuItem("Source", mapParams.dataSource, false);
       this.services.topktokens.setMenuItem("Mode", mapParams.dataMode, false);
+      this.services.topktokens.setMenuItem("Display", mapParams.dataDisplay, false);
+
+      this.services.topktokens.params.joinattrs = mapParams.joinattrs; 
+      console.log("Join attrs: " + this.services.topktokens.params.joinattrs);
+      ScatterPlot.selectedVar = mapParams.joinAttrs;
+      
 
       //this.services.topktokens.displayMode = mapParams.dataMode;
       /*
@@ -259,6 +266,7 @@ var MapD = {
     uriParams.pointRadius = this.services.pointmap.params.radius;
     uriParams.pointColorBy = this.services.pointmap.colorBy;
     uriParams.heatRamp = this.services.heatmap.params.colorramp;
+    uriParams.joinattrs = this.services.topktokens.params.joinattrs;
     var uri = buildURI(uriParams);
     if (fullEncode)
         url += encodeURIComponent(uri);
@@ -290,8 +298,10 @@ var MapD = {
       if ("dataMode" in params && params.dataMode.charAt(0).toLowerCase()) {
         if (params.dataDisplay == "cloud")
             params.dataDisplay = "Cloud";
-        else
+        else if (params.dataDisplay == "bar")
             params.dataDisplay = "Bar";
+        //else
+        //    params.dataDisplay = "Bar";
 
         //params.dataMode = "Counts";
       }
@@ -778,10 +788,11 @@ var TopKTokens = {
         this.params.k = this.defaultCloudK + numQueryTerms;
     else if (this.displaySetting == "Bar")
         this.params.k = this.defaultChartK ;
-    else if (this.displaySetting == "Scatter")
+    else if (this.displaySetting == "Scatter") {
         this.params.k = this.defaultScatterK ;
         if (ScatterPlot.colorVar != null)
             this.params.joinattrs += "," + ScatterPlot.colorVar;
+    }
 
     if (this.locked) {
         this.params.tokens = this.tokens;
@@ -982,14 +993,14 @@ var TopKTokens = {
         BarChart.addData(json, numResultsToExclude, this.modeSetting);
     }
     else if (this.displaySetting == "Scatter") {
-        if (update) 
-            ScatterPlot.init(this, this.displayDiv);
+        //if (update) 
+        ScatterPlot.init(this, this.displayDiv);
         console.log("at load scatter");
         console.log(ScatterPlot);
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
-        ScatterPlot.addData(json, numResultsToExclude, this.modeSetting, update);
+        ScatterPlot.addData(json, numResultsToExclude, this.modeSetting);
     }
 
     var label = (this.sourceSetting == "Word") ? "# Words: " : ((this.sourceSetting == "User") ? "# Tweets: " : "# Tweets: ");

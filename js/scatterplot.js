@@ -172,33 +172,59 @@ var ScatterPlot =
     if (dataNums == "Percents") { 
         this.rScale
           .domain([d3.min(this.data, function(d) {return d.n;}), d3.max(this.data, function(d) {return d.n;})]);
+    }
 
     var xScale = this.xScale;
     var yScale = this.yScale;
     var rScale = this.rScale;
     var cScale = this.cScale;
 
+    console.log("Selected Var: " +  selectedVar);
+    console.log("ColorVar: " +  colorVar);
 
-    this.elems.svg.selectAll("circle")
-      .data(this.data)
-      .enter()
-      .append("circle")
-      .attr("cx", function(d) {
-          return xScale(d[selectedVar]);
+    if (dataNums == "Percents") {
+      this.elems.svg.selectAll("circle")
+        .data(this.data)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+            return xScale(d[selectedVar]);
+          })
+        .attr("cy", function(d) {
+            return yScale(d.y);
+          })
+        .attr("r", function(d) {
+            return rScale(d.n);
+          })
+        .style("fill", function(d) {
+          return cScale(d[colorVar]);
         })
-      .attr("cy", function(d) {
-          return yScale(d.y);
+        .append("svg:title")
+        .text(function (d) {
+          return d.label; 
+        });
+    }
+    else {
+      console.log("not percents");
+      this.elems.svg.selectAll("circle")
+        .data(this.data)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+            return xScale(d[selectedVar]);
+          })
+        .attr("cy", function(d) {
+            return yScale(d.y);
+          })
+        .attr("r", 2)
+        .style("fill", function(d) {
+          return cScale(d[colorVar]);
         })
-      .attr("r", function(d) {
-          return rScale(d.n);
-        })
-      .style("fill", function(d) {
-        return cScale(d[colorVar]);
-      })
-      .append("svg:title")
-      .text(function (d) {
-        return d.label; 
-      });
+        .append("svg:title")
+        .text(function (d) {
+          return d.label; 
+        });
+    }
 
      console.log("# items: " + this.data.length);
      if (this.data.length < 20) {
@@ -228,6 +254,7 @@ var ScatterPlot =
         .call(this.xAxis);
   }
 }
+
 
 
 
