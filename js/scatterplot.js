@@ -15,7 +15,7 @@ var ScatterPlot =
   data: null,
   vars: null,
   colorVar: null,
-  //selectedVar: "inc910211",
+  selectedVar: null,
   elems: {
     container: null,
     svg: null,
@@ -72,20 +72,27 @@ var ScatterPlot =
     });
  
     var defaultIndex = -1;
+    var defaultVar = null;
+    var selectedVarFoundIndex = -1;
+    var colorIndex = -1;
     $(this.vars).each($.proxy(function(index, element) {
       console.log(element.tag);
       if ((element.tag) == "color:") {
         console.log("color!!!!");
         this.colorVar = element.name;
+        colorIndex = index;
         return true;
       }
+      if (element.name == this.selectedVar)
+        selectedVarFoundIndex = index;
       var tag = element.tag.substring(1,element.tag.length-1)      
       var elemArray = tag.split(':');
       if (elemArray[0].substring(0,3) == "pct")
         elemArray[1] = "% " + elemArray[1];
       if (elemArray[0].search("default") != -1) {
         defaultIndex = index;
-        this.selectedVar = element.name; 
+        console.log("default: " + element.name);
+        defaultVar = element.name; 
       }
       $(this.elems.varPicker).append('<option Value="' + element.name +'">'+elemArray[1]+'</option>');
 
@@ -95,25 +102,55 @@ var ScatterPlot =
     }, this));
 
     console.log("default index: " + defaultIndex);
-    if (defaultIndex != -1) {
-      //$("#scatterXVarSelect").val(this.selectedVar);
-      //$('option[value=' + this.selectedVar + ']').attr('selected', 'selected');
-      //console.log($("#scatterXVarSelect option"));
-      //console.log(this.elems.varPicker);
+    console.log("selected index: " + selectedVarFoundIndex);
+
+    if (selectedVarFoundIndex >= 0) {
+      if (colorIndex != -1 && colorIndex < selectedVarFoundIndex)
+        selectedVarFoundIndex--;
+      $(this.elems.varPicker).children().eq(selectedVarFoundIndex).prop('selected', true);
+    }
+    else if (defaultIndex >= 0) {
+      if (colorIndex != -1 && colorIndex < defaultIndex)
+        defaultIndex--;
+      this.selectedVar = defaultVar;
+      console.log("this selected var: " + this.selectedVar);
       $(this.elems.varPicker).children().eq(defaultIndex).prop('selected', true);
-      //console.log($("#scatterXVarSelect option").eq(defaultIndex).prop('selected', true));
     }
 
-  
-
       //$(ScatterPlot.elems.varPicker).append('<option Value=' + c.name +'>'+c.tag+'</option>');
-
-
-    //console.log(this.vars);
   },
     
 
+  getLeastSquares: function (data, xVar, yVar) {
+    var sumX = 0;
+    var sumY =0;
+    var sumXY = 0;
+    var sumXX = 0;
+    var count = 0;
 
+    var x = 0;
+    var y = 0;
+    var numVals = data.length;
+    if (numVals == 0)
+      return 0;
+    for (var v = 0; v < numVals; v++) {
+      x = data[v][xVar];
+      y = data[v][yVar];
+      sumX += x;
+      sumY += y;
+      sumXX += x*x;
+      sumXY += x*y;
+      count++;
+    }
+
+    // y = mx + b
+   
+    results = {}
+    results.m = (count * sumXY - sumX*sumY) / (count*sumXX - sumX * sumX);
+    results.b = (sumY / count) - (results.m*sumX)/count;
+    return results;
+
+  },
 
   addData: function(dataset, numQueryTerms, dataNums, update) { 
     //d3.select("svg").remove();
@@ -225,6 +262,33 @@ var ScatterPlot =
           return d.label; 
         });
     }
+
+    var regResults = this.getLeastSquares(this.data, selectedVar, "y");
+    console.log("reg results:");
+    console.log(regResults);
+
+    var xSubDomain = this.xScale.domain();
+    var xMean = xSubDomain[0] + xSubDomain[1] * 0.5;
+    xSubDomain[0] = xMean - (xMean - xSubDomain[0]) * 0.95;
+    xSubDomain[1] = xMean + (xSubDomain[1] - xMean) * 0.95;
+
+    console.log("x0 = " + xScale(xSubDomain[0]));
+    console.log("x1 = " + xScale(xSubDomain[1]));
+
+    var p0 = [xScale(xSubDomain[0]) + 0.5, yScale(regResults.m * xSubDomain[0] + regResults.b) + 0.5]
+    var p1 = [xScale(xSubDomain[1]) + 0.5, yScale(regResults.m * xSubDomain[1] + regResults.b) + 0.5]
+    console.log(p0);
+    console.log(p1);
+    
+    //console log ("(" + x0 + "," + x1 + ") - (" + y0 + "," + y1 + ")");
+    this.elems.svg.append('svg:line')
+      .attr('x1', p0[0])
+      .attr('y1', p0[1])
+      .attr('x2', p1[0])
+      .attr('y2', p1[1])
+      .attr("stroke-width",2)
+      .attr("stroke", "blue");
+
 
      console.log("# items: " + this.data.length);
      if (this.data.length < 20) {

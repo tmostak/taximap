@@ -65,8 +65,8 @@ var MapD = {
         //console.log(link);
         //$("#link-dialog").html(link).dialog({width: 900});
 
-    $("#twitter-share").on('click', $.proxy(this.genLink, this, true, this.sendTweet));
-    $("#facebook-share").on('click', $.proxy(this.genLink, this, true, this.facebookShare));
+    $("#twitter-share").on('click', $.proxy(this.genLink, this, false, this.sendTweet));
+    $("#facebook-share").on('click', $.proxy(this.genLink, this, false, this.facebookShare));
         
     this.services.pointmap = pointmap;
     this.services.heatmap = heatmap;
@@ -144,7 +144,7 @@ var MapD = {
 
       
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", joinattrs: null};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null};
       mapParams = this.readLink(mapParams);
       console.log("map params");
       console.log(mapParams);
@@ -161,9 +161,10 @@ var MapD = {
       this.services.topktokens.setMenuItem("Mode", mapParams.dataMode, false);
       this.services.topktokens.setMenuItem("Display", mapParams.dataDisplay, false);
 
-      this.services.topktokens.params.joinattrs = mapParams.joinattrs; 
-      console.log("Join attrs: " + this.services.topktokens.params.joinattrs);
-      ScatterPlot.selectedVar = mapParams.joinAttrs;
+      this.services.topktokens.xVar = mapParams.scatterXVar; 
+      console.log("xvar: " + this.services.topktokens.xVar);
+      //console.log("Join attrs: " + this.services.topktokens.params.joinattrs);
+      ScatterPlot.selectedVar = mapParams.scatterXVar;
       
 
       //this.services.topktokens.displayMode = mapParams.dataMode;
@@ -266,7 +267,7 @@ var MapD = {
     uriParams.pointRadius = this.services.pointmap.params.radius;
     uriParams.pointColorBy = this.services.pointmap.colorBy;
     uriParams.heatRamp = this.services.heatmap.params.colorramp;
-    uriParams.joinattrs = this.services.topktokens.params.joinattrs;
+    uriParams.scatterXVar = this.services.topktokens.xVar;
     var uri = buildURI(uriParams);
     if (fullEncode)
         url += encodeURIComponent(uri);
@@ -542,6 +543,7 @@ var TopKTokens = {
   settingDict: {Display: 'displaySetting', Source: 'sourceSetting', Mode: 'modeSetting'},
   locked: false,
   tokens: [],
+  xVar: null,
   params: {
     request: "GroupByToken",
     sql: null,
@@ -672,7 +674,7 @@ var TopKTokens = {
   onScatterVarsLoad: function(json) {
     console.log("onscattervarsload");
     ScatterPlot.setVars(json);
-    TopKTokens.params.joinattrs = ScatterPlot.selectedVar; 
+    TopKTokens.xVar = ScatterPlot.selectedVar; 
     TopKTokens.reload();
     //ScatterPlot.init(this, this.displayDiv);
     //console.log(json);
@@ -682,8 +684,8 @@ var TopKTokens = {
     //console.log(this);
     //console.log(e);
     //console.log($(this).find("option:selected"));
-    TopKTokens.params.joinattrs = $(this).find("option:selected").get(0).value;
-    ScatterPlot.selectedVar = TopKTokens.params.joinattrs;
+    TopKTokens.xVar = $(this).find("option:selected").get(0).value;
+    ScatterPlot.selectedVar = TopKTokens.xVar;
     console.log(ScatterPlot.selectedVar);
     TopKTokens.reload();
   },
@@ -738,6 +740,8 @@ var TopKTokens = {
         this.params.jointable = null;
         this.params.joinvar = null;
         this.params.joinattrs = null;
+        this.xVar = null;
+        ScatterPlot.selectedVar = null;
         this.params.sort = "true";
     }
 
@@ -791,7 +795,9 @@ var TopKTokens = {
     else if (this.displaySetting == "Scatter") {
         this.params.k = this.defaultScatterK ;
         if (ScatterPlot.colorVar != null)
-            this.params.joinattrs += "," + ScatterPlot.colorVar;
+            this.params.joinattrs = this.xVar + "," + ScatterPlot.colorVar;
+        else
+            this.params.joinattrs = this.xVar;
     }
 
     if (this.locked) {
