@@ -3,7 +3,8 @@
 // geocodeend:       geocoding service is ready
 
 var BBOX = {
-  WORLD: "-19813026.92,-8523983.06,19813026.92,12002425.38",
+  //WORLD: "-19313026.92,-6523983.06,14187182.33,12002425.38",
+  WORLD: "-19813026.92,-8523983.06, 19813026.92,12002425.38",
   US: "-13888497.96,2817023.96,-7450902.94,6340356.62"
 };
 
@@ -34,6 +35,7 @@ var MapD = {
   dataend: null,
   linkButton: null,
   services: {
+    baseLayerName: "Dark",
     pointmap: null,
     heatmap: null,
     geotrends: null,
@@ -142,9 +144,7 @@ var MapD = {
       this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
      this.timestart = Math.max(this.dataend - 432000,  Math.round((this.dataend-this.datastart)*.4 + this.datastart));
 
-      
-
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark"};
       mapParams = this.readLink(mapParams);
       console.log("map params");
       console.log(mapParams);
@@ -226,6 +226,8 @@ var MapD = {
       $(".color-ramp").removeClass("ramp-selected");
       $("#" + mapParams.colorRamp).addClass("ramp-selected");
       */
+      BaseMap.currentLayer = mapParams.baseLayer;
+      this.services.settings.baseButtonFunction(mapParams.baseOn);
       if (mapParams.pointOn == 1)
         this.services.settings.pointButtonFunction();
       if (mapParams.heatOn == 1)
@@ -255,6 +257,8 @@ var MapD = {
     var who = this.services.search.userInput.val();
     if (who != "") 
       uriParams.who = who;
+    uriParams.baseOn = (Settings.baseOn ? 1 : 0);
+    uriParams.baseLayer = BaseMap.currentLayer;
     uriParams.pointOn = pointLayer.getVisibility() == true ? 1 : 0; 
     uriParams.heatOn = heatLayer.getVisibility() == true ? 1 : 0; 
     uriParams.dataDisplay = this.services.topktokens.displaySetting;
@@ -378,7 +382,14 @@ var MapD = {
   },
 
   setQueryTerms: function(queryTerms) {
-    this.queryTerms = queryTerms.trim().split(" ").filter(function(d) {return d});
+    if (queryTerms[0] != '"' && this.queryTerms[this.queryTerms.length -1] != '"')
+        this.queryTerms = queryTerms.trim().split(" ").filter(function(d) {return d});
+    else {
+        this.queryTerms = []
+        this.queryTerms.push(queryTerms);
+    }
+
+
   },
 
   parseQueryTerms: function(queryTerms) { 
@@ -1131,6 +1142,38 @@ var PointMap = {
     this.wms.mergeNewParams(this.getParams(options));
   }
 };
+
+var BaseMap = {
+  mapd: MapD,
+  baseLayerNames: [],
+  currentLayer: null,
+
+  init: function() {
+    this.currentLayer = map.getLayersBy("visibility",true)[0].name;
+    var layers = map.layers;
+    var baseMenu = $("#baseMenu");
+    for (var v = 0; v < layers.length; v++) {
+      if (layers[v].isBaseLayer && layers[v].name != "Blank") {
+        this.baseLayerNames.push(layers[v].name);
+          $("<li></li>")
+          .attr("class", "base-choice")
+          //.html("<span>" + layers[v].name + '</span><span class="checkmark">\&#x2713</span>')
+          .html("<span>" + layers[v].name + "</span>")
+          .appendTo(baseMenu);
+      }
+    }
+    console.log(this.baseLayerNames);
+    
+    $(".base-choice").click($.proxy(function(e) { 
+      this.currentLayer = $(e.target).text();
+      map.setBaseLayer(map.getLayersByName(this.currentLayer)[0]);
+    }, this));
+  }
+
+
+}
+
+  
 
 var HeatMap = {
   mapd: MapD,
@@ -2115,14 +2158,18 @@ var Animation = {
 var Settings = {
   pointLayer: null,
   heatLayer: null,
+  baseMap: null,
+  baseOn: null,
   pointOn: null,
   heatOn: null,
+  baseButton: null,
   pointButton: null,
   heatButton: null,
 
-  init: function(pointLayer, heatLayer, pointButton, heatButton) {
+  init: function(pointLayer, heatLayer, baseButton, pointButton, heatButton) {
     this.pointLayer = pointLayer;
     this.heatLayer = heatLayer;
+    this.baseButton=baseButton;
     this.pointButton = pointButton;
     this.heatButton = heatButton;
     this.pointOn = pointLayer.getVisibility();
@@ -2130,6 +2177,11 @@ var Settings = {
     console.log("settings point: " + this.pointOn);
     console.log("settings heat: " + this.heatOn);
     //$("#pointButton").button().next().button().parent().buttonset().next().hide().menu();
+
+    if (this.baseOn)
+      this.baseButton.addClass("basemapButtonOnImg");
+    else
+      this.baseButton.addClass("basemapButtonOffImg");
 
     if (this.pointOn)
       this.pointButton.addClass("pointButtonOnImg");
@@ -2140,9 +2192,12 @@ var Settings = {
     else
       this.heatButton.addClass("heatButtonOffImg");
 
+
+   $(this.baseButton).hover($.proxy(function() {this.baseButton.addClass("basemapButtonHoverImg");}, this), $.proxy(function () {this.baseButton.removeClass("basemapButtonHoverImg");}, this));
    $(this.pointButton).hover($.proxy(function() {this.pointButton.addClass("pointButtonHoverImg");}, this), $.proxy(function () {this.pointButton.removeClass("pointButtonHoverImg");}, this));
    $(this.heatButton).hover($.proxy(function() {this.heatButton.addClass("heatButtonHoverImg");}, this), $.proxy(function () {this.heatButton.removeClass("heatButtonHoverImg");}, this));
 
+    $(this.baseButton).click($.proxy(this.baseButtonFunction, this));
     $(this.pointButton).click($.proxy(this.pointButtonFunction, this));
     $(this.heatButton).click($.proxy(this.heatButtonFunction, this));
     
@@ -2159,6 +2214,33 @@ var Settings = {
     }, this));
     */
   },
+
+  baseButtonFunction: function(baseOn) {
+    
+    console.log($.type(baseOn));
+    if ($.type(baseOn) != "object") {
+      this.baseOn = parseInt(baseOn);
+    }
+    else
+      this.baseOn = !this.baseOn; 
+    if (this.baseOn)
+      this.baseButton.removeClass("basemapButtonOffImg").addClass("basemapButtonOnImg");
+    else
+      this.baseButton.removeClass("basemapButtonOnImg").addClass("basemapButtonOffImg");
+    //this.baseButton.toggleClass("basemapButtonOffImg").toggleClass("basemapButtonOnImg");
+    if (!this.baseOn) {
+      map.setBaseLayer(map.getLayersByName("Blank")[0]);
+    }
+    else {
+      console.log("hi");
+      console.log(BaseMap.currentLayer);
+      map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);
+      //map.setBaseLayer(map.getLayersByName(MapD.services.baseLayerName)[0]);
+    }
+  },
+
+
+
   pointButtonFunction: function() {
     this.pointLayer.setVisibility(!this.pointOn);
     this.pointOn = !this.pointOn;

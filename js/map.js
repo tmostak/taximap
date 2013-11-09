@@ -13,7 +13,11 @@ function init()
 { 
   //map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", maxResolution: 156543.0339, numZoomLevels:24});
   var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
+/*<<<<<<< HEAD
   map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.ZoomPanel(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", restrictedExtent: extent, maxResolution: 156543.0339, numZoomLevels:24});
+=======
+*/
+  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.ZoomPanel(),/* new OpenLayers.Control.LayerSwitcher({'ascending':true})*/], projection: "EPSG:900913", restrictedExtent: extent, maxResolution: 156543.0339, numZoomLevels:24});
 
   //var darkStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "simplified" }, /*{hue: "#333"},*/ {saturation: -50}, {lightness: -50} ] } ];
   //var darkBlueStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "on" }, {hue: "#00c3ff"}, {saturation: -62}, {lightness: -83}, {gamma: 0.27} ] } ];
@@ -24,7 +28,7 @@ function init()
   };
   var styledMapType = new google.maps.StyledMapType(darkBlueStyle,styledMapOptions);
 
-  baseLayers = new Array( darkMap, new OpenLayers.Layer.Google("Google Roadmap", {type: google.maps.MapTypeId.ROADMAP}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Topo", {type: google.maps.MapTypeId.TERRAIN}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Hybrid", {type: google.maps.MapTypeId.HYBRID}, {isBaseLayer: true}), new OpenLayers.Layer.OSM("OpenStreeMap"), new OpenLayers.Layer("Blank", {isBaseLayer: true}) );
+  baseLayers = new Array( darkMap, new OpenLayers.Layer.Google("Google Roadmap", {type: google.maps.MapTypeId.ROADMAP}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Topo", {type: google.maps.MapTypeId.TERRAIN}, {isBaseLayer:true}), new OpenLayers.Layer.Google("Google Hybrid", {type: google.maps.MapTypeId.HYBRID}, {isBaseLayer: true}), new OpenLayers.Layer.OSM("OpenStreeMap"),  new OpenLayers.Layer.OSM("Blank","data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=") /* new OpenLayers.Layer("Blank", {isBaseLayer: true},*/ );
 
   map.addLayers(baseLayers);
 
@@ -35,6 +39,7 @@ function init()
   //map.addLayer(baseLayer);
 
   map.zoomToExtent(extent);
+  BaseMap.init();
   MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation);
   pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.0, "displayInLayerSwitcher": false, removeBackBufferDelay:0 });
   heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, opacity: 0.55, ratio: 1.0, "displayInLayerSwitcher": false});
@@ -49,7 +54,7 @@ function init()
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
   Search.init(map, $('form#search'), $('input#termsInput'), $('input#userInput'), $('input#locationInput'));
-  Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
+  Settings.init(pointLayer, heatLayer, $('button#basemapButton'), $('button#pointButton'), $('button#heatButton'));
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   Animation.init(pointLayer, heatLayer, TopKTokens, $('button#play-pause'), $('button#stop'));

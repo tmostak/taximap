@@ -42,7 +42,7 @@ div#topbar button:hover {
   position: relative;
   float: left;
   height: 20px;
-  width: 120px;
+  width: 90px;
   margin: 4px 0 4px 10px;
   padding: 4px;
   padding-right: 17px;
@@ -239,6 +239,11 @@ div#social-share:hover {
   //webkit-box-shadow: 2px rgba(255,255,255,.25);
   //box-shadow: 2px rgba(255,255,255,.25);
   cursor: pointer;
+  width: 100px;
+  height:30px;
+  opacity: 1.0;
+  border: none!important;
+
 
 
   //borderft: 2px solid grey;
@@ -254,8 +259,8 @@ div#social-share:hover {
   margin: 0px;
   position: relative;
   //top: 0px;
-  left: -4.5px;
-  height: 28px;
+  left: -5.0px;
+  height: 30px;
   color: white;
   border-radius: 5px;
   border: 2px outset #444;
@@ -655,46 +660,62 @@ div#widget {
     height:30px;
 }
 
+.basemapButtonOffImg {
+    background: #252525 url('../img/buttons/rev_census_110x30_bw.png') no-repeat center center;
+}
+
+.basemapButtonOnImg {
+    background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
+}
+
+.basemapButtonHoverImg {
+  border: none!important;
+  background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
+}
+
+
 
 .pointButtonOffImg {
-    border: none!important;
-    width: 110px;
-    height:30px;
+    //border: none!important;
+    //width: 110px;
+    //height:30px;
     background: #252525 url('../img/buttons/rev_points_110x30_bw.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .pointButtonOnImg {
-    width: 110px;
-    height:30px;
+    //width: 110px;
+    //height:30px;
     background: #252525 url('../img/buttons/rev_points_110x30_color.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .pointButtonHoverImg {
-    width: 110px;
-    height:30px;
+    border: none!important;
+    //width: 110px;
+    //height:30px;
     background: #252525 url('../img/buttons/rev_points_110x30_color.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonOffImg {
-    width: 110px;
+    //width: 110px;
     height: 30px;
     background: #252525 url('../img/buttons/rev_heat_110x30_bw.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonOnImg {
-    width: 110px;
+    //width: 110px;
     height: 30px;
     background: #252525 url('../img/buttons/rev_heat_110x30_color.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonHoverImg {
-    width: 110px;
-    height:30px;
+    border: none!important;
+    //width: 110px;
+    //height:30px;
     background: #252525 url('../img/buttons/rev_heat_110x30_color.png') no-repeat center center;
     opacity: 1.0;
 }

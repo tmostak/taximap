@@ -82,6 +82,8 @@
 
     <div id="settings" class="settings">
       <!--<button id="pointButton" class="settings-button" title="Points">Points</button>-->
+      <button id="basemapButton" class="settings-button" title="Basemap">Basemap</button>
+      <button id="basemapSelect" class="settings-drop-button" data-dropdown="#baseDropdown">▾</button>
       <button id="pointButton" class="settings-button" title="Points">Points</button>
       <button id="pointSelect" class="settings-drop-button" data-dropdown="#pointDropdown">▾</button>
         <!--<div id="pointButtonImg"></div>-->
@@ -157,6 +159,16 @@
       <div id="chart"></div>
     </div>
     <div id="link-dialog" title="Link to this map view"> </div>
+
+    <div id="baseDropdown" class="dropdown dropdown-anchor-right">
+        <ul id="baseMenu"class="dropdown-menu drop-menu">
+            <!--
+            <li id ="darkMap">Dark</li>
+            <li id ="googleRoadmap">Google Roadmap</li>
+            -->
+        </ul>
+    </div>
+
     <div id="pointDropdown" class="dropdown dropdown-anchor-right">
       <ul id="pointMenu" class="dropdown-menu drop-menu">
         <li id="pointSizeOpt">
