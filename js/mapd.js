@@ -201,8 +201,8 @@ var MapD = {
         this.services.topktokens.lockClickFunction(); 
       */
       if ("cx" in mapParams) {
-        this.map.setCenter(new OpenLayers.LonLat(mapParams.cx, mapParams.cy));
         this.map.zoomTo(mapParams.zoom);
+        this.map.setCenter(new OpenLayers.LonLat(mapParams.cx, mapParams.cy));
       }
       else {
         this.map.zoomToExtent(mapParams.extent);
@@ -1132,9 +1132,11 @@ var BaseMap = {
   mapd: MapD,
   baseLayerNames: [],
   currentLayer: null,
+  defaultLayer: null,
 
   init: function() {
     this.currentLayer = map.getLayersBy("visibility",true)[0].name;
+    this.defaultLayer = this.currentLayer;
     var layers = map.layers;
     var baseMenu = $("#baseMenu");
     for (var v = 0; v < layers.length; v++) {
@@ -2219,7 +2221,8 @@ var Settings = {
     else {
       console.log("hi");
       console.log(BaseMap.currentLayer);
-      map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);
+      if (BaseMap.currentLayer != BaseMap.defaultLayer)
+          map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);
       //map.setBaseLayer(map.getLayersByName(MapD.services.baseLayerName)[0]);
     }
   },
