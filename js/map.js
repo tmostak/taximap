@@ -12,7 +12,8 @@ var clickControl;
 function init()
 { 
   //map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", maxResolution: 156543.0339, numZoomLevels:24});
-  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.ZoomPanel(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", maxResolution: 156543.0339, numZoomLevels:24});
+  var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
+  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.ZoomPanel(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", restrictedExtent: extent, maxResolution: 156543.0339, numZoomLevels:24});
 
   //var darkStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "simplified" }, /*{hue: "#333"},*/ {saturation: -50}, {lightness: -50} ] } ];
   //var darkBlueStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "on" }, {hue: "#00c3ff"}, {saturation: -62}, {lightness: -83}, {gamma: 0.27} ] } ];
@@ -33,11 +34,10 @@ function init()
   //baseLayer = new OpenLayers.Layer.Google("Google Maps", {numZoomLevels: 20});
   //map.addLayer(baseLayer);
 
-  var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
   map.zoomToExtent(extent);
   MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation);
-  pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.1, "displayInLayerSwitcher": false, removeBackBufferDelay:0 });
-  heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, opacity: 0.55, ratio: 1.1, "displayInLayerSwitcher": false});
+  pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.0, "displayInLayerSwitcher": false, removeBackBufferDelay:0 });
+  heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, opacity: 0.55, ratio: 1.0, "displayInLayerSwitcher": false});
   pointLayer.setVisibility(false);
   heatLayer.setVisibility(false);
   map.addLayer(heatLayer);

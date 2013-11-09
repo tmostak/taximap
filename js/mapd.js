@@ -3,7 +3,7 @@
 // geocodeend:       geocoding service is ready
 
 var BBOX = {
-  WORLD: "-19313026.92,-6523983.06,14187182.33,12002425.38",
+  WORLD: "-19813026.92,-8523983.06,19813026.92,12002425.38",
   US: "-13888497.96,2817023.96,-7450902.94,6340356.62"
 };
 
@@ -24,7 +24,7 @@ var MapD = {
   //host: "http://127.0.0.1:8080/",
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://www.velocidy.net:7000/",
-  host: "http://192.168.1.90:8080/",
+  host: "http://mapd.csail.mit.edu:8080/",
   table: "tweets",
   timestart: null,
   timeend: null,
@@ -647,6 +647,21 @@ var TopKTokens = {
     $(menuDiv + " span.choice-text").text(choice);
     this[this.settingDict[menu]] = choice;
     $(dropdownDiv).removeClass('dropdown-open');
+    /*
+    if (menu == "Source") {
+        console.log("source!!!");
+        if (choice == "Words") { 
+            if (this.modeSetting == "Percents") {
+                this.setMenuItem("Mode", "Counts", false); 
+            }
+            $("#dataModePercents").hide();
+        }
+        else {
+            $("#dataModePercents").show();
+        }
+    }
+    */
+
     if (choice == "Cloud")
       $(this.displayDiv).click($.proxy(this.addClickedWord, this)); 
     else if (choice == "Bar")
@@ -744,8 +759,8 @@ var TopKTokens = {
         ScatterPlot.selectedVar = null;
         this.params.sort = "true";
     }
-
-    if (this.modeSetting == "Percents") { 
+    var getPercents = (this.modeSetting == "Percents" && this.sourceSetting != "Word");
+    if (getPercents) { 
       if (options == undefined || options == null) 
         options = {splitQuery: true};
       else
@@ -781,7 +796,7 @@ var TopKTokens = {
     }
    
 
-    if (this.modeSetting == "Percents") 
+    if (getPercents) 
       this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
     else if (this.modeSetting == "Counts")
       this.params.sql += " from " + this.mapd.table + query; 
