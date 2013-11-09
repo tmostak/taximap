@@ -259,8 +259,8 @@ div#social-share:hover {
   margin: 0px;
   position: relative;
   //top: 0px;
-  left: -4.5px;
-  height: 28px;
+  left: -5.0px;
+  height: 30px;
   color: white;
   border-radius: 5px;
   border: 2px outset #444;
@@ -661,16 +661,16 @@ div#widget {
 }
 
 .basemapButtonOffImg {
-    background: #252525 url('../img/buttons/rev_base_110x30_bw.png') no-repeat center center;
+    background: #252525 url('../img/buttons/rev_census_110x30_bw.png') no-repeat center center;
 }
 
 .basemapButtonOnImg {
-    background: #252525 url('../img/buttons/rev_base_110x30_color.png') no-repeat center center;
+    background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
 }
 
 .basemapButtonHoverImg {
   border: none!important;
-  background: #252525 url('../img/buttons/rev_base_110x30_color.png') no-repeat center center;
+  background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
 }
 
 
