@@ -2219,10 +2219,9 @@ var Settings = {
       map.setBaseLayer(map.getLayersByName("Blank")[0]);
     }
     else {
-      console.log("hi");
       console.log(BaseMap.currentLayer);
-      if (BaseMap.currentLayer != BaseMap.defaultLayer)
-          map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);
+      //if (BaseMap.currentLayer != BaseMap.defaultLayer)
+      map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);
       //map.setBaseLayer(map.getLayersByName(MapD.services.baseLayerName)[0]);
     }
   },
