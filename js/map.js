@@ -13,7 +13,7 @@ function init()
 { 
   //map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", maxResolution: 156543.0339, numZoomLevels:24});
   var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
-  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.ZoomPanel(),/* new OpenLayers.Control.LayerSwitcher({'ascending':true})*/], projection: "EPSG:900913", restrictedExtent: extent, maxResolution: 156543.0339, numZoomLevels:24});
+  map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.ZoomPanel(), new OpenLayers.Control.KeyboardDefaults(), new OpenLayers.Control.ScaleLine(), /* new OpenLayers.Control.LayerSwitcher({'ascending':true})*/], projection: "EPSG:900913", restrictedExtent: extent,  maxResolution: 156543.0339,  numZoomLevels:24});
 
   //var darkStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "simplified" }, /*{hue: "#333"},*/ {saturation: -50}, {lightness: -50} ] } ];
   //var darkBlueStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "on" }, {hue: "#00c3ff"}, {saturation: -62}, {lightness: -83}, {gamma: 0.27} ] } ];
@@ -54,6 +54,7 @@ function init()
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   Animation.init(pointLayer, heatLayer, TopKTokens, $('button#play-pause'), $('button#stop'));
+  //RealTimeOverlay.init();
   MapD.start();
   //baseLayer.display(false);
   //pointLayer.display(true);

@@ -20,6 +20,8 @@ div#topbar {
   z-index:1000;
   background-color: #232323;
   background-image: linear-gradient(#4f4f4f, #232323);
+  //background-image: linear-gradient(#5f5f5f, #333333);
+  //background-image: linear-gradient(#666, #333);
   webkit-box-shadow: 2px 0 3px rgba(0,0,0,.25);
   box-shadow: 2px 0 3px rgba(0,0,0,.25);
 }
@@ -46,7 +48,8 @@ div#topbar button:hover {
   margin: 4px 0 4px 10px;
   padding: 4px;
   padding-right: 17px;
-  border-radius: 3px;
+  //border-radius: 3px;
+  border-radius: 6px;
   border: 1px solid #232323;
   webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
   box-shadow: 0 0 2px rgba(255,255,255,.25);
@@ -204,7 +207,7 @@ div#social-share:hover {
   position: relative;
   float: left;
   margin-left:10px;
-  margin-top: 4px;
+  margin-top: 5px;
   margin-right: 2px;
   padding: 0;
 }
@@ -234,13 +237,13 @@ div#social-share:hover {
   text-align: right;
   padding-right:5px;
   font-weight:bold;
-  border-radius: 5px;
-  border: 2px outset #444;
+  border-radius: 14px 0px 0px 14px;
+  border: 1.5px outset #444;
   //webkit-box-shadow: 2px rgba(255,255,255,.25);
   //box-shadow: 2px rgba(255,255,255,.25);
   cursor: pointer;
   width: 100px;
-  height:30px;
+  height:28px;
   opacity: 1.0;
   border: none!important;
 
@@ -259,17 +262,13 @@ div#social-share:hover {
   margin: 0px;
   position: relative;
   //top: 0px;
-  left: -5.0px;
-  height: 30px;
+  left: -4.0px;
+  height: 28px;
   color: white;
-  border-radius: 5px;
-  border: 2px outset #444;
-  //background-image: linear-gradient(#5f5f5f, #343434);
-  //background-color:#5f5f5f;
+  //border-radius: 5px;
+  border-radius: 0px 14px 14px 0px;
+  border: 1.5px outset #444;
   background-color:#252525;
-  //webkit-box-shadow: 2px rgba(255,255,255,.25);
-  //box-shadow: 2px rgba(255,255,255,.25);
-  //background: url('../img/buttons/rev_points_110x30_bw.png') no-repeat center center;
   //border: none!important;
 }
 
@@ -700,14 +699,14 @@ div#widget {
 
 .heatButtonOffImg {
     //width: 110px;
-    height: 30px;
+    //height: 30px;
     background: #252525 url('../img/buttons/rev_heat_110x30_bw.png') no-repeat center center;
     opacity: 1.0;
 }
 
 .heatButtonOnImg {
     //width: 110px;
-    height: 30px;
+    //height: 30px;
     background: #252525 url('../img/buttons/rev_heat_110x30_color.png') no-repeat center center;
     opacity: 1.0;
 }
