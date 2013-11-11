@@ -323,19 +323,19 @@ div#mapview {
 
 div#sizeButton {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   z-index: 10000;
   right: 0px;
   bottom: 0px;
 }
 
 .expandImg {
-  background: url('../img/expand.png') no-repeat center center;
+  background: url('../img/expand-24.png') no-repeat center center;
 }
 
 .collapseImg {
-  background: url('../img/collapse.png') no-repeat center center;
+  background: url('../img/collapse-24.png') no-repeat center center;
 }
 
 
