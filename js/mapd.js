@@ -71,6 +71,7 @@ var MapD = {
     $("#twitter-share").on('click', $.proxy(this.genLink, this, false, this.sendTweet));
     $("#facebook-share").on('click', $.proxy(this.genLink, this, false, this.facebookShare));
     $("#sizeButton").removeClass("collapseImg").addClass("expandImg");
+    $("#mapAnimControls").hide();
         
     this.services.pointmap = pointmap;
     this.services.heatmap = heatmap;
@@ -92,6 +93,7 @@ var MapD = {
             $("#control").hide();
             $("#chart").hide();
             $("#mapview").css({left: 0, bottom:0});
+            $("#mapAnimControls").show();
             //$("#chart").css({left: 0});
         }
         else {
@@ -100,6 +102,7 @@ var MapD = {
             $("#control").show();
             $("#chart").show();
             $("#mapview").css({left: 400, bottom:200});
+            $("#mapAnimControls").hide();
             //$("#chart").css({left: 400, bottom: 200});
         }
         this.map.updateSize();
@@ -2067,7 +2070,9 @@ var Animation = {
   layerLoadEnd: function () {
     console.log(this.numLayersLoaded);
     if (this.playing == true) {
-      var numLayersVisible = this.mapd.services.settings.getNumLayersVisible() + 1; //1 is for 
+      var numLayersVisible = this.mapd.services.settings.getNumLayersVisible(); 
+      if (this.mapd.fullScreen == false)
+          numLayersVisible++;
       this.numLayersLoaded++;
       if (this.numLayersLoaded >= numLayersVisible) {
           this.numLayersLoaded = 0;
@@ -2090,7 +2095,8 @@ var Animation = {
       this.mapd.services.graph.chart.setBrushExtent([this.frameStart * 1000, this.frameEnd * 1000]);
       this.mapd.services.pointmap.reload(options);
       this.mapd.services.heatmap.reload(options);
-      this.wordGraph.reload(graphOptions);
+      if (this.mapd.fullScreen == false)
+          this.wordGraph.reload(graphOptions);
     }
     else {
       this.stopFunc();
