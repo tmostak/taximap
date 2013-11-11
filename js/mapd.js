@@ -83,6 +83,7 @@ var MapD = {
     this.services.tweetclick = tweetclick;
     this.services.animation = animation;
     this.map.events.register('moveend', this, this.reload);
+    //this.map.events.register('changebaselayer', this, this.moveBaseAttr);
 
     $("#sizeButton").click($.proxy(function() {
         if (this.fullScreen == false) {
@@ -108,10 +109,20 @@ var MapD = {
     },this));
 
 
-    $(".olControlZoomPanel").css("top",17);
+    $(".olControlZoomPanel").css("top",35);
 
     
     $(document).on('mapdreload', $.proxy(this.reload, this));
+  },
+
+  moveBaseAttr: function() {
+    console.log("movebaseattr");
+    $(".gmnoprint").each(function() {
+        var right = parseInt($(this).css("right"), 10);
+        console.log(right);
+        $(this).css("right", right+40);
+    })
+    $(".gmnoprint").hide();
   },
 
   displayLink: function(response) {
