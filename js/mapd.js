@@ -34,6 +34,7 @@ var MapD = {
   datastart: null,
   dataend: null,
   linkButton: null,
+  fullScreen: false,
   services: {
     baseLayerName: "Dark",
     pointmap: null,
@@ -69,6 +70,7 @@ var MapD = {
 
     $("#twitter-share").on('click', $.proxy(this.genLink, this, false, this.sendTweet));
     $("#facebook-share").on('click', $.proxy(this.genLink, this, false, this.facebookShare));
+    $("#sizeButton").removeClass("collapseImg").addClass("expandImg");
         
     this.services.pointmap = pointmap;
     this.services.heatmap = heatmap;
@@ -81,6 +83,30 @@ var MapD = {
     this.services.tweetclick = tweetclick;
     this.services.animation = animation;
     this.map.events.register('moveend', this, this.reload);
+
+    $("#sizeButton").click($.proxy(function() {
+        if (this.fullScreen == false) {
+            this.fullScreen=true;
+            $("#sizeButton").removeClass("expandImg").addClass("collapseImg");
+            $("#control").hide();
+            $("#chart").hide();
+            $("#mapview").css({left: 0, bottom:0});
+            //$("#chart").css({left: 0});
+        }
+        else {
+            this.fullScreen=false;
+            $("#sizeButton").removeClass("collapseImg").addClass("expandImg");
+            $("#control").show();
+            $("#chart").show();
+            $("#mapview").css({left: 400, bottom:200});
+            //$("#chart").css({left: 400, bottom: 200});
+        }
+        this.map.updateSize();
+        //this.services.graph.updateSize();
+        //Chart.updateSize();
+
+    },this));
+
 
     $(".olControlZoomPanel").css("top",17);
 
@@ -144,7 +170,7 @@ var MapD = {
       this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
      this.timestart = Math.max(this.dataend - 432000,  Math.round((this.dataend-this.datastart)*.4 + this.datastart));
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark"};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark", fullScreen: 0};
       mapParams = this.readLink(mapParams);
       console.log("map params");
       console.log(mapParams);
@@ -165,6 +191,9 @@ var MapD = {
       console.log("xvar: " + this.services.topktokens.xVar);
       //console.log("Join attrs: " + this.services.topktokens.params.joinattrs);
       ScatterPlot.selectedVar = mapParams.scatterXVar;
+      if (mapParams.fullScreen == 1) {
+        $("#sizeButton").click();
+      }
       
 
       //this.services.topktokens.displayMode = mapParams.dataMode;
@@ -272,6 +301,7 @@ var MapD = {
     uriParams.pointColorBy = this.services.pointmap.colorBy;
     uriParams.heatRamp = this.services.heatmap.params.colorramp;
     uriParams.scatterXVar = this.services.topktokens.xVar;
+    uriParams.fullScreen = this.fullScreen == true ? 1: 0;
     var uri = buildURI(uriParams);
     if (fullEncode)
         url += encodeURIComponent(uri);
@@ -333,10 +363,12 @@ var MapD = {
 
   reload: function() {
     //console.log('in reload');
-    this.services.geotrends.reload();
-    this.services.topktokens.reload();
-    this.services.tweets.reload();
-    this.services.graph.reload();
+    if (this.fullScreen == false) {
+      this.services.geotrends.reload();
+      this.services.topktokens.reload();
+      this.services.tweets.reload();
+      this.services.graph.reload();
+    }
   },
 
   reloadByGraph: function(start, end) {
@@ -2306,7 +2338,11 @@ var Chart =
 
   init: function(viewDiv) {
     this.viewDiv = viewDiv;
-    this.chart.init(d3.select(this.viewDiv.get(0)), $.proxy(this.onZoom, this), $.proxy(this.onCompare, this));
+    //this.viewDiv.html("");
+    this.chart.init(d3.select(this.viewDiv.get(0)),160,  $.proxy(this.onZoom, this), $.proxy(this.onCompare, this));
+  },
+  updateSize: function() {
+    this.chart.updateSize();
   },
 
   getWhere: function(options) {
