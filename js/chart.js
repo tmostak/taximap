@@ -23,6 +23,9 @@ var LineChart =
   prevZoomXTranslate: null,
   prevXDomain: null,
   brush: null,
+  chartHeight: null,
+  svg: null,
+  path: null,
   elems: {
     container: null,
     svg: null,
@@ -40,19 +43,20 @@ var LineChart =
   zoomCallback: function() {},
   formatDate: d3.time.format("%b %e, %Y %I:%M %p"),
 
-  init: function(container, zoomCallback, compareCallback) {
+
+  init: function(container, chartHeight, zoomCallback, compareCallback) {
     this.elems.container = container;
     this.zoomCallback = zoomCallback;
     this.compareCallback = compareCallback;
-  
-
+    this.chartHeight = chartHeight;
     
     this.margin = {top: 25, right: 25, bottom: 25, left: 25};
         //width = 400 - this.margin.left - this.margin.right,
         var cont =  $($(this.elems.container).get(0));
-        this.width = cont.width() - 400 - this.margin.left - this.margin.right;
+        console.log("Chart width: " + cont.width());
+        this.width = cont.width() - this.margin.left - this.margin.right;
         //this.width = cont.width() - cont.offset().left - this.margin.left - this.margin.right;
-         this.height = 200 - this.margin.top - this.margin.bottom;
+         this.height = this.chartHeight - this.margin.top - this.margin.bottom;
 
     this.x = d3.time.scale().range([0, this.width - 39]);
     this.y = d3.scale.linear().range([this.height, 0]);
@@ -72,46 +76,46 @@ var LineChart =
         .scale(this.y)
         .orient("left")
         .tickSize(-this.width)
-        .tickPadding(6);
+        .tickPadding(6)
+        .ticks(6);
 
     this.zoom = d3.behavior.zoom()
         .scaleExtent([1, 16])
         .on("zoom", $.proxy(this.onZoom, this));
 
-    var svg = this.elems.container
+    this.elems.svg = this.elems.container
         .attr("class", "chart")
          .append("svg")
-       //.attr("width", width + this.margin.left + this.margin.right)
         .attr("width", this.width + this.margin.right)
         .attr("height", this.height + this.margin.top + this.margin.bottom)
-      .append("g")
-       .attr("transform", "translate(" + 60 + "," + this.margin.top + ")");
-       //.attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
-        //.attr("this.margin-left", this.margin.left);
-    this.elems.svg = svg;
+        .attr("class", "linechart")
+       .append("g")
+         .attr("transform", "translate(" + 60 + "," + this.margin.top + ")");
 
-    svg.append("g")
+    this.svg = $(".linechart")
+    this.elems.svg.append("g")
         .attr("class", "y axis");
 
-    svg.append("g")
+    this.elems.svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + this.height + ")");
 
-    svg.append("clipPath")
+    this.elems.svg.append("clipPath")
         .attr("id", "clip")
       .append("rect")
+        .attr("class", "rect-clip")
         .attr("x", this.x(0))
         .attr("y", this.y(1))
         .attr("width", this.x(1) - this.x(0))
         .attr("height", this.y(0) - this.y(1));
 
     var self = this;
-    var pane = svg.append("rect")
+    this.pane = this.elems.svg.append("rect")
         .attr("class", "pane")
         .attr("width", this.width)
         .attr("height", this.height);
 
-    pane.on("mousemove", function() { return self.mousemove(self, this) })
+    this.pane.on("mousemove", function() { return self.mousemove(self, this) })
         .on("mouseout", function() { return self.mouseout(self, this) })
         .call(this.zoom);
 
@@ -156,6 +160,70 @@ var LineChart =
     this.elems.detailsDiv = this.elems.settingsDiv.append("div")
         .attr("class", "chart-details");
 
+  },
+
+  updateSize: function() {
+    console.log("updating");
+    var cont =  $($(this.elems.container).get(0));
+    this.width = cont.width() - this.margin.left - this.margin.right;
+    console.log("width: " + this.width);
+    this.height = this.chartHeight - this.margin.top - this.margin.bottom;
+    this.svg.remove();
+
+    this.elems.svg = this.elems.container
+        .attr("class", "chart")
+         .append("svg")
+        .attr("width", this.width + this.margin.right)
+        .attr("height", this.height + this.margin.top + this.margin.bottom)
+        .attr("class", "linechart")
+       .append("g")
+         .attr("transform", "translate(" + 60 + "," + this.margin.top + ")");
+
+    this.svg = $(".linechart")
+    this.elems.svg.append("g")
+        .attr("class", "y axis");
+
+    this.elems.svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + this.height + ")");
+
+    this.elems.svg.append("clipPath")
+        .attr("id", "clip")
+      .append("rect")
+        .attr("class", "rect-clip")
+        .attr("x", this.x(0))
+        .attr("y", this.y(1))
+        .attr("width", this.x(1) - this.x(0))
+        .attr("height", this.y(0) - this.y(1));
+
+    var self = this;
+    this.pane = this.elems.svg.append("rect")
+        .attr("class", "pane")
+        .attr("width", this.width)
+        .attr("height", this.height);
+
+    this.pane.on("mousemove", function() { return self.mousemove(self, this) })
+        .on("mouseout", function() { return self.mouseout(self, this) })
+        .call(this.zoom);
+
+    this.elems.info = this.elems.container.select("svg").append("g")
+        .attr("class", "info")
+        //.attr("transform", "translate(" + this.margin.left + "," + (this.margin.top - 5) + ")");
+        .attr("transform", "translate(" + 60 + "," + (this.margin.top - 5) + ")");
+    
+    this.elems.info.append("text")
+        .attr("class", "date");
+    this.draw();
+    /*
+    this.svg
+        .attr("width", this.width + this.margin.right)
+        .attr("height", this.height + this.margin.top + this.margin.bottom)
+    */
+    /*
+    this.elems.svg
+        .attr("width", this.width + this.margin.right)
+        .attr("height", this.height + this.margin.top + this.margin.bottom)
+    */
   },
 
   brushed: function() {

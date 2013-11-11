@@ -318,8 +318,26 @@ div#mapview {
   top: 40px;
   left: 400px;
   right: 0;
-  bottom: 207px;
+  bottom: 200px;
 }
+
+div#sizeButton {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  z-index: 10000;
+  right: 0px;
+  bottom: 0px;
+}
+
+.expandImg {
+  background: url('../img/expand.png') no-repeat center center;
+}
+
+.collapseImg {
+  background: url('../img/collapse.png') no-repeat center center;
+}
+
 
 div#map {
   position: relative;
