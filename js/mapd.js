@@ -71,6 +71,7 @@ var MapD = {
     $("#twitter-share").on('click', $.proxy(this.genLink, this, false, this.sendTweet));
     $("#facebook-share").on('click', $.proxy(this.genLink, this, false, this.facebookShare));
     $("#sizeButton").removeClass("collapseImg").addClass("expandImg");
+    $("#mapAnimControls").hide();
         
     this.services.pointmap = pointmap;
     this.services.heatmap = heatmap;
@@ -88,18 +89,22 @@ var MapD = {
     $("#sizeButton").click($.proxy(function() {
         if (this.fullScreen == false) {
             this.fullScreen=true;
+            this.services.animation.stopFunc();
             $("#sizeButton").removeClass("expandImg").addClass("collapseImg");
             $("#control").hide();
             $("#chart").hide();
             $("#mapview").css({left: 0, bottom:0});
+            $("#mapAnimControls").show();
             //$("#chart").css({left: 0});
         }
         else {
             this.fullScreen=false;
+            this.services.animation.stopFunc();
             $("#sizeButton").removeClass("collapseImg").addClass("expandImg");
             $("#control").show();
             $("#chart").show();
             $("#mapview").css({left: 400, bottom:200});
+            $("#mapAnimControls").hide();
             //$("#chart").css({left: 400, bottom: 200});
         }
         this.map.updateSize();
@@ -179,7 +184,7 @@ var MapD = {
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
       this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
-     this.timestart = Math.max(this.dataend - 432000,  Math.round((this.dataend-this.datastart)*.4 + this.datastart));
+     this.timestart = Math.max(this.dataend - 832000,  Math.round((this.dataend-this.datastart)*.4 + this.datastart));
 
       var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark", fullScreen: 0};
       mapParams = this.readLink(mapParams);
@@ -2082,7 +2087,9 @@ var Animation = {
   layerLoadEnd: function () {
     console.log(this.numLayersLoaded);
     if (this.playing == true) {
-      var numLayersVisible = this.mapd.services.settings.getNumLayersVisible() + 1; //1 is for 
+      var numLayersVisible = this.mapd.services.settings.getNumLayersVisible(); 
+      if (this.mapd.fullScreen == false)
+          numLayersVisible++;
       this.numLayersLoaded++;
       if (this.numLayersLoaded >= numLayersVisible) {
           this.numLayersLoaded = 0;
@@ -2105,7 +2112,8 @@ var Animation = {
       this.mapd.services.graph.chart.setBrushExtent([this.frameStart * 1000, this.frameEnd * 1000]);
       this.mapd.services.pointmap.reload(options);
       this.mapd.services.heatmap.reload(options);
-      this.wordGraph.reload(graphOptions);
+      if (this.mapd.fullScreen == false)
+          this.wordGraph.reload(graphOptions);
     }
     else {
       this.stopFunc();
