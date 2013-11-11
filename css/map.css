@@ -326,8 +326,8 @@ div#sizeButton {
   width: 24px;
   height: 24px;
   z-index: 10000;
-  right: 0px;
-  bottom: 0px;
+  left: 12px;
+  top: 5px;
 }
 
 .expandImg {
