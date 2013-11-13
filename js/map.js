@@ -52,9 +52,10 @@ function init()
   Search.init(map, $('form#search'), $('input#termsInput'), $('input#userInput'), $('input#locationInput'));
   Settings.init(pointLayer, heatLayer, $('button#basemapButton'), $('button#pointButton'), $('button#heatButton'));
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
-  Chart.init($('div#chart'));
   Animation.init(pointLayer, heatLayer, TopKTokens, $('.play-pause'), $('.stop'));
-  RealTimeOverlay.init();
+  Chart.init($('div#chart'));
+  //RealTimeOverlay.init();
+  //RealTimeOverlay.addData();
   MapD.start();
   //baseLayer.display(false);
   //pointLayer.display(true);
