@@ -379,15 +379,18 @@ var MapD = {
     return search; */
   },
 
-  reload: function() {
-    //console.log('in reload');
+  reload: function(e) {
+
     if (this.fullScreen == false) {
       this.services.geotrends.reload();
       this.services.topktokens.reload();
       this.services.tweets.reload();
       this.services.graph.reload();
     }
-    this.services.choropleth.reload();
+    if (e.type != "moveend") {
+        console.log("reloading");
+        this.services.choropleth.reload();
+    }
   },
 
   reloadByGraph: function(start, end) {

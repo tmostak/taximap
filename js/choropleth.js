@@ -15,11 +15,15 @@ var Choropleth = {
   data: null,
   path: null,
   feature: null,
+  percents: false,
   source: "state",
   params: {
     request: "GroupByToken",
     sql: null,
     sort: "false",
+    jointable: "state_data",
+    joinvar: "name",
+    joinattrs: "pst045212",
     //bbox: null,
     //stoptable: "",
     //tokens: [],
@@ -30,6 +34,7 @@ var Choropleth = {
 
    init: function() {
      this.overlay = new OpenLayers.Layer.Vector("tweets");
+     this.overlay.setZIndex(0);
      this.overlay.afterAdd = $.proxy(function() {
       var div = d3.selectAll("#" + this.overlay.div.id);
       div.selectAll("svg").remove();
@@ -60,11 +65,15 @@ var Choropleth = {
 
       this.params.sql = "select " + this.source;
 
-      if (numQueryTerms > 0)
+      if (numQueryTerms > 0) {
           this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
-      else
+          this.percents = true;
+      }
+      else {
           this.params.sql += " from " + this.mapd.table + query; 
-    
+          this.percents = false;
+      }
+   
       //this.params.bbox = this.mapd.map.getExtent().toBBOX();
       var url = this.mapd.host + '?' + buildURI(this.params);
       return url;
@@ -75,7 +84,9 @@ var Choropleth = {
     },
     
     onLoad: function(dataset) {
-      console.log(dataset);
+      //console.log(dataset);
+      this.data = dataset.results;
+      /*
       if ('percents' in dataset) {
       this.data = $.map(dataset.tokens, function(e1, idx) {
           if (e1 != "") 
@@ -94,13 +105,19 @@ var Choropleth = {
               return {"label": e1, "val":dataset.counts[idx]};
       });
     }
+     */
 
       var g = this.g;
       var data = this.data;
       var numVals = data.length;
+      if (this.percents == false) {
+        for (var i = 0; i < numVals; i++)
+            data[i].y /= data[i].pst045212;
+      }
+
       this.colorScale.domain([
-        d3.min(this.data, function(d) {return d.val}),
-        d3.max(this.data, function(d) {return d.val})
+        d3.min(this.data, function(d) {return d.y}),
+        d3.max(this.data, function(d) {return d.y})
       ]);
 
 
@@ -108,15 +125,16 @@ var Choropleth = {
       this.feature = g.selectAll("path")
         .style("fill", function(d) {
             var abbr = d.properties.abbr;
-            console.log(abbr);
+            //console.log(abbr);
             var joined = false;
                 for (var i = 0; i < numVals; i++) {
                     if (data[i].label == abbr) {
-                        console.log(data[i].val);
-                        if (data[i].val == null)
+                        //console.log(data[i].y);
+                        if (data[i].y == null)
                             return "#33b"; 
-                        else 
-                            return(colorScale(data[i].val));
+                        else { 
+                                return(colorScale(data[i].y));
+                        }
                     }
                 }
                 return "#33b";
@@ -137,7 +155,7 @@ var Choropleth = {
           .data(json.features)
           .enter().append("path")
           .attr("d",path)
-          .style("opacity", 0.9)
+          .style("opacity", 0.7)
           .style("fill", "#4684B5");
         //Choropleth.feature = g.append("path")
         //  .datum(topojson.mesh(us))
