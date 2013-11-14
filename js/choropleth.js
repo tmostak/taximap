@@ -36,9 +36,10 @@ var Choropleth = {
       this.svg = div.append("svg").attr("class", "happy");
       this.g = this.svg.append("g");
       this.path = d3.geo.path().projection(project);
-      this.colorScale = d3.scale.quantize()
+      this.colorScale = d3.scale.quantize().range(["rgb(255,255,229)","rgb(255,247,188)", "rgb(254,227,145)", "rgb(254,196,79)", "rgb(254,153,41)", "rgb(236,112,20)", "rgb(204,76,2)", "rgb(140,45,4)"]);
+      /*this.colorScale = d3.scale.quantize()
                          .range(["rgb(237,248,233)", "rgb(186,228,179)",
-                          "rgb(116,196,118)", "rgb(49,163,84)","rgb(0,109,44)"]);
+                          "rgb(116,196,118)", "rgb(49,163,84)","rgb(0,109,44)"]);*/
       this.reset();
 
      }, this);
@@ -74,13 +75,11 @@ var Choropleth = {
     },
     
     onLoad: function(dataset) {
+      console.log(dataset);
       if ('percents' in dataset) {
-      /*this.data = $.map(dataset.tokens, function(e1, idx) {
-          return {"label": e1, "val":dataset.sums[idx]/(dataset.counts[idx] + 0.01)};
-      */
       this.data = $.map(dataset.tokens, function(e1, idx) {
           if (e1 != "") 
-              return {"label": e1, "val":dataset.percents[idx]};
+              return {"label": e1, "val":dataset.percents[idx] < -0.8 ? null : dataset.percents[idx]};
       });
     }
     else if ('zScores' in dataset) {
@@ -113,7 +112,11 @@ var Choropleth = {
             var joined = false;
                 for (var i = 0; i < numVals; i++) {
                     if (data[i].label == abbr) {
-                        return(colorScale(data[i].val));
+                        console.log(data[i].val);
+                        if (data[i].val == null)
+                            return "#33b"; 
+                        else 
+                            return(colorScale(data[i].val));
                     }
                 }
                 return "#33b";
@@ -134,7 +137,7 @@ var Choropleth = {
           .data(json.features)
           .enter().append("path")
           .attr("d",path)
-          .style("opacity", 0.5)
+          .style("opacity", 0.9)
           .style("fill", "#4684B5");
         //Choropleth.feature = g.append("path")
         //  .datum(topojson.mesh(us))

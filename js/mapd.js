@@ -387,6 +387,7 @@ var MapD = {
       this.services.tweets.reload();
       this.services.graph.reload();
     }
+    this.services.choropleth.reload();
   },
 
   reloadByGraph: function(start, end) {
@@ -2101,6 +2102,7 @@ var Animation = {
       this.mapd.services.graph.chart.setBrushExtent([this.frameStart * 1000, this.frameEnd * 1000]);
       this.mapd.services.pointmap.reload(options);
       this.mapd.services.heatmap.reload(options);
+      //this.mapd.services.choropleth.reload(options);
       if (this.mapd.fullScreen == false)
           this.wordGraph.reload(graphOptions);
     }
