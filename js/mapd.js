@@ -25,8 +25,8 @@ var MapD = {
   //host: "http://127.0.0.1:8080/",
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd.csail.mit.edu:8080/",
-  host: "http://www.velocidy.net:7000/",
-  //host: "http://192.168.1.90:8080/",
+  //host: "http://www.velocidy.net:7000/",
+  host: "http://192.168.1.90:8080/",
   //host: "http://127.0.0.1:8080/",
   table: "tweets",
   timestart: null,
@@ -48,12 +48,13 @@ var MapD = {
     search: null,
     settings: null,
     tweetclick: null,
-    animation: null
+    animation: null,
+    choropleth: null
   },
 
 
 
-  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation) {
+  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation, choropleth) {
   
     //$("#dataDisplayBarchart").click(function() {console.log($(this).attr("id"));});  
     if (window.location.search == "?local")
@@ -85,6 +86,7 @@ var MapD = {
     this.services.settings = settings;
     this.services.tweetclick = tweetclick;
     this.services.animation = animation;
+    this.services.choropleth = choropleth;
     this.map.events.register('moveend', this, this.reload);
     //this.map.events.register('changebaselayer', this, this.moveBaseAttr);
 
@@ -402,6 +404,8 @@ var MapD = {
       this.services.tweets.reload();
       this.services.pointmap.reload();
       this.services.heatmap.reload();
+      this.services.choropleth.reload();
+
     }
     //this.timestart = oldStart;
     //this.timeend = oldEnd;

@@ -36,7 +36,7 @@ function init()
 
   map.zoomToExtent(extent);
   BaseMap.init();
-  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation);
+  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation, Choropleth);
   pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.0, "displayInLayerSwitcher": false, removeBackBufferDelay:0 });
   heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, opacity: 0.55, ratio: 1.0, "displayInLayerSwitcher": false});
   pointLayer.setVisibility(false);
@@ -56,6 +56,7 @@ function init()
   Chart.init($('div#chart'));
   //RealTimeOverlay.init();
   //RealTimeOverlay.addData();
+  Choropleth.init();
   MapD.start();
   //baseLayer.display(false);
   //pointLayer.display(true);
