@@ -188,7 +188,7 @@ var MapD = {
       this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
      this.timestart = Math.max(this.dataend - 432000,  Math.round((this.dataend-this.datastart)*.4 + this.datastart));
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark", fullScreen: 0};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark", fullScreen: 0};
       mapParams = this.readLink(mapParams);
       console.log("map params");
       console.log(mapParams);
@@ -275,6 +275,7 @@ var MapD = {
       */
       BaseMap.currentLayer = mapParams.baseLayer;
       this.services.settings.baseButtonFunction(mapParams.baseOn);
+      this.services.settings.polyButtonFunction(mapParams.polyOn);
       if (mapParams.pointOn == 1)
         this.services.settings.pointButtonFunction();
       if (mapParams.heatOn == 1)
@@ -306,6 +307,7 @@ var MapD = {
       uriParams.who = who;
     uriParams.baseOn = (Settings.baseOn ? 1 : 0);
     uriParams.baseLayer = BaseMap.currentLayer;
+    uriParams.polyOn = (Settings.polyOn ? 1 : 0);
     uriParams.pointOn = pointLayer.getVisibility() == true ? 1 : 0; 
     uriParams.heatOn = heatLayer.getVisibility() == true ? 1 : 0; 
     uriParams.dataDisplay = this.services.topktokens.displaySetting;
@@ -2046,6 +2048,7 @@ var Animation = {
   pointLayer: null,
   heatLayer: null,
   wordGraph: null,
+  choropleth: null,
   heatMax: null,
   oldRadius: null,
   //pointMap: null,
@@ -2062,15 +2065,17 @@ var Animation = {
   formerGraphLockedState: false,
   formerGraphDisplayMode: "cloud",
 
-  init: function(pointLayer, heatLayer, wordGraph, playPauseButton, stopButton) {
+  init: function(pointLayer, heatLayer, wordGraph, choropleth, playPauseButton, stopButton) {
     this.pointLayer = pointLayer;
     this.heatLayer = heatLayer;
     this.wordGraph = wordGraph;
+    this.choropleth = choropleth;
     this.pointLayer.events.register("loadend", this, this.layerLoadEnd);
     this.heatLayer.events.register("loadend", this, this.layerLoadEnd);
     //$(this.wordGraph).bind('loadend', this, this.layerLoadEnd);
     //$("#numTokensText").bind('loadend', this, this.layerLoadEnd);
     $(this.wordGraph).on('loadend', $.proxy(this.layerLoadEnd, this));
+    $(this.choropleth).on('loadend', $.proxy(this.layerLoadEnd, this));
     this.playPauseButton = playPauseButton;
     this.stopButton = stopButton;
     $(this.playPauseButton).click($.proxy(this.playFunc, this));
@@ -2083,6 +2088,7 @@ var Animation = {
       var numLayersVisible = this.mapd.services.settings.getNumLayersVisible(); 
       if (this.mapd.fullScreen == false)
           numLayersVisible++;
+      numLayersVisible++; // choropleth
       this.numLayersLoaded++;
       if (this.numLayersLoaded >= numLayersVisible) {
           this.numLayersLoaded = 0;
@@ -2096,6 +2102,7 @@ var Animation = {
   },
 
   animFunc: function() {
+     console.log("animating");
      if (this.frameEnd < this.animEnd) {
         var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
        var graphOptions = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
@@ -2105,7 +2112,7 @@ var Animation = {
       this.mapd.services.graph.chart.setBrushExtent([this.frameStart * 1000, this.frameEnd * 1000]);
       this.mapd.services.pointmap.reload(options);
       this.mapd.services.heatmap.reload(options);
-      //this.mapd.services.choropleth.reload(options);
+      this.mapd.services.choropleth.reload(options);
       if (this.mapd.fullScreen == false)
           this.wordGraph.reload(graphOptions);
     }
@@ -2116,10 +2123,11 @@ var Animation = {
 
 
   playFunc: function () {
-    //console.log("play");
+    console.log("play");
     if (this.playing == false) {
       this.playing = true;
       this.playPauseButton.removeClass("play-icon").addClass("pause-icon");
+      console.log("anim play");
       if (this.animStart == null) { // won't trigger if paused
         this.animStart = this.mapd.datastart;
         this.animEnd = this.mapd.dataend;
@@ -2209,26 +2217,25 @@ var Settings = {
   baseOn: null,
   pointOn: null,
   heatOn: null,
+  polyOn: null,
   baseButton: null,
   pointButton: null,
   heatButton: null,
+  polyButton: null,
 
-  init: function(pointLayer, heatLayer, baseButton, pointButton, heatButton) {
+  init: function(pointLayer, heatLayer, baseButton, pointButton, heatButton, polyButton) {
     this.pointLayer = pointLayer;
     this.heatLayer = heatLayer;
     this.baseButton=baseButton;
     this.pointButton = pointButton;
     this.heatButton = heatButton;
+    this.polyButton = polyButton;
     this.pointOn = pointLayer.getVisibility();
     this.heatOn = heatLayer.getVisibility();
     console.log("settings point: " + this.pointOn);
     console.log("settings heat: " + this.heatOn);
     //$("#pointButton").button().next().button().parent().buttonset().next().hide().menu();
 
-    if (this.baseOn)
-      this.baseButton.addClass("basemapButtonOnImg");
-    else
-      this.baseButton.addClass("basemapButtonOffImg");
 
     if (this.pointOn)
       this.pointButton.addClass("pointButtonOnImg");
@@ -2238,15 +2245,27 @@ var Settings = {
       this.heatButton.addClass("heatButtonOnImg");
     else
       this.heatButton.addClass("heatButtonOffImg");
+    /* 
+    if (this.baseOn)
+      this.baseButton.addClass("basemapButtonOnImg");
+    else
+      this.baseButton.addClass("basemapButtonOffImg");
 
+    if (this.polyOn)
+      this.polyButton.addClass("polyButtonOnImg");
+    else
+      this.polyButton.addClass("polyButtonOffImg");
+    */
 
    $(this.baseButton).hover($.proxy(function() {this.baseButton.addClass("basemapButtonHoverImg");}, this), $.proxy(function () {this.baseButton.removeClass("basemapButtonHoverImg");}, this));
    $(this.pointButton).hover($.proxy(function() {this.pointButton.addClass("pointButtonHoverImg");}, this), $.proxy(function () {this.pointButton.removeClass("pointButtonHoverImg");}, this));
    $(this.heatButton).hover($.proxy(function() {this.heatButton.addClass("heatButtonHoverImg");}, this), $.proxy(function () {this.heatButton.removeClass("heatButtonHoverImg");}, this));
+   $(this.polyButton).hover($.proxy(function() {this.polyButton.addClass("polyButtonHoverImg");}, this), $.proxy(function () {this.polyButton.removeClass("polyButtonHoverImg");}, this));
 
     $(this.baseButton).click($.proxy(this.baseButtonFunction, this));
     $(this.pointButton).click($.proxy(this.pointButtonFunction, this));
     $(this.heatButton).click($.proxy(this.heatButtonFunction, this));
+    $(this.polyButton).click($.proxy(this.polyButtonFunction, this));
     
     /*
     $(this.pointButton).click($.proxy(function() {
@@ -2286,7 +2305,23 @@ var Settings = {
     }
   },
 
-
+  polyButtonFunction: function(polyOn) {
+    if ($.type(polyOn) != "object") {
+      this.polyOn = parseInt(polyOn);
+    }
+    else
+      this.polyOn = !this.polyOn; 
+    console.log("at poly function");
+    console.log(this.polyOn);
+    if (this.polyOn) {
+      this.polyButton.removeClass("polyButtonOffImg").addClass("polyButtonOnImg");
+      Choropleth.activate();
+    }
+    else {
+      this.polyButton.removeClass("polyButtonOnImg").addClass("polyButtonOffImg");
+      Choropleth.deactivate();
+    }
+  },
 
   pointButtonFunction: function() {
     this.pointLayer.setVisibility(!this.pointOn);

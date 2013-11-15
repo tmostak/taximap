@@ -7,6 +7,7 @@
     }
 
 var Choropleth = {
+  active: false,
   mapd: MapD,
   svg: null,
   overlay: null,
@@ -14,9 +15,12 @@ var Choropleth = {
   projection: null,
   data: null,
   path: null,
-  feature: null,
+  minTweets: 10000,
+  colorScale: null,
+  features: null,
   percents: false,
   source: "state",
+  opacity: 0.7,
   params: {
     request: "GroupByToken",
     sql: null,
@@ -24,17 +28,27 @@ var Choropleth = {
     jointable: "state_data",
     joinvar: "name",
     joinattrs: "pst045212",
-    //bbox: null,
-    //stoptable: "",
-    //tokens: [],
     k: 400 
   },
     
     
 
    init: function() {
+     $("#polyMinSlider").slider({
+        min: 0,
+        max: 30000,
+        value: this.minTweets,
+        stop: $.proxy(function(e, ui) {
+          this.minTweets = ui.value;
+          this.draw();
+        }, this)
+     });
+     $("#polyMinOpt").hide();
+
+
+
      this.overlay = new OpenLayers.Layer.Vector("tweets");
-     this.overlay.setZIndex(0);
+     //this.overlay.setZIndex(0);
      this.overlay.afterAdd = $.proxy(function() {
       var div = d3.selectAll("#" + this.overlay.div.id);
       div.selectAll("svg").remove();
@@ -53,34 +67,54 @@ var Choropleth = {
      this.addGeoData();
 
     },
-  
-   getUrl: function() {
+ 
+   getUrl: function(options) {
       var numQueryTerms = this.mapd.queryTerms.length;
-      var query = this.mapd.getWhere(options);
-      var options = {};
       if (numQueryTerms > 0) {
-        options = {splitQuery: true};
-      }
+           if (options == undefined || options == null) 
+             options = {splitQuery: true};
+           else
+              options.splitQuery = true;
+    }
       var query = this.mapd.getWhere(options);
 
       this.params.sql = "select " + this.source;
+      console.log("query terms: " + numQueryTerms);
 
       if (numQueryTerms > 0) {
           this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
           this.percents = true;
+          $("#polyMinOpt").show();
       }
       else {
           this.params.sql += " from " + this.mapd.table + query; 
           this.percents = false;
+          $("#polyMinOpt").hide();
       }
    
       //this.params.bbox = this.mapd.map.getExtent().toBBOX();
       var url = this.mapd.host + '?' + buildURI(this.params);
       return url;
     },
-          
+   
+    activate: function() {
+      this.active = true;
+      this.features = this.g.selectAll("path")
+        .style("opacity", 0.7);
+      //$(this.svg).show();
+      this.reload();
+    },
+
+    deactivate: function() {
+      this.active = false;
+      this.features = this.g.selectAll("path")
+        .style("opacity", 0.0);
+      //$(this.svg).hide();
+    },
+
     reload: function(options) {
-      $.getJSON(this.getUrl(options)).done($.proxy(this.onLoad, this));
+      if (this.active)
+        $.getJSON(this.getUrl(options)).done($.proxy(this.onLoad, this));
     },
     
     onLoad: function(dataset) {
@@ -114,49 +148,103 @@ var Choropleth = {
         for (var i = 0; i < numVals; i++)
             data[i].y /= data[i].pst045212;
       }
+      /*
+        this.colorScale.domain([
+          d3.min(this.data, function(d) {
+              return d.y}),
+          d3.max(this.data, function(d) {return d.y})
+        ]);
+      }
+      else {
+        this.colorScale.domain([
+          d3.min(this.data, function(d) {
+              if (d.n >= minTweets)
+              return d.y}),
+          d3.max(this.data, function(d) {
+              if (d.n >= minTweets)
+                return d.y}),
+        ]);
+      }
+      */
 
-      this.colorScale.domain([
-        d3.min(this.data, function(d) {return d.y}),
-        d3.max(this.data, function(d) {return d.y})
-      ]);
+      var numFeatures = this.features[0].length;
+      for (var f = 0; f < numFeatures; f++) {
+        var joined = false;
+            var abbr = this.features[0][f].__data__.properties.abbr;
+            for (var i = 0; i < numVals; i++) {
+              var found = false;
+              if (data[i].label == abbr) {
+               this.features[0][f].__data__.properties.y = data[i].y;
+               this.features[0][f].__data__.properties.n = data[i].n;
+               console.log(this.features[0][f].__data__);
+               found = true;
+               break;
+              }
+            }
+            if (!found) {
+              this.features[0][f].__data__.properties.y = null;
+              this.features[0][f].__data__.properties.n = null;
+            }
+        }
+        this.draw();
+        $(this).trigger('loadend');
+    },
 
-
+    draw: function() {
+      var minTweets = this.minTweets;
+      if (this.percents == false) {
+        this.colorScale.domain([
+          d3.min(this.features[0], function(d) {
+              return d.__data__.properties.y}),
+          d3.max(this.features[0], function(d) {return d.__data__.properties.y})
+        ]);
+      }
+      else {
+        this.colorScale.domain([
+          d3.min(this.features[0], function(d) {
+              if (d.__data__.properties.n >= minTweets)
+              return d.__data__.properties.y}),
+          d3.max(this.features[0], function(d) {
+              if (d.__data__.properties.n >= minTweets)
+                return d.__data__.properties.y}),
+        ]);
+      }
+      var g = this.g;
       var colorScale = this.colorScale;
-      this.feature = g.selectAll("path")
-        .style("fill", function(d) {
-            var abbr = d.properties.abbr;
-            //console.log(abbr);
-            var joined = false;
-                for (var i = 0; i < numVals; i++) {
-                    if (data[i].label == abbr) {
-                        //console.log(data[i].y);
-                        if (data[i].y == null)
-                            return "#33b"; 
-                        else { 
-                                return(colorScale(data[i].y));
-                        }
-                    }
-                }
-                return "#33b";
-            //console.log(d.name);
-        });
+      var opacity= this.opacity;
+      if (this.percents == true) {
+        this.features = g.selectAll("path")
+          .style("fill", function(d) {
+            return(colorScale(d.properties.y));
+          })
+          .style("fill-opacity", function(d) {
+            if (d.properties.n >= minTweets)
+              return opacity;
+            else
+              return 0.0;
+          });
+       }
+      else {
+        this.features = g.selectAll("path")
+          .style("fill", function(d) {
+            return(colorScale(d.properties.y));
+          })
+          .style("fill-opacity",opacity);
 
-      //for (var i = 0; i < numVals; i++) {
-        
-      
-      
+      }
     },
 
    addGeoData: function() {
       var path = this.path;
       var g = this.g;
       d3.json("data/us_states.json", function(error,json) {
-        Choropleth.feature = g.selectAll("path")
+        Choropleth.features = g.selectAll("path")
           .data(json.features)
           .enter().append("path")
           .attr("d",path)
-          .style("opacity", 0.7)
-          .style("fill", "#4684B5");
+
+          //.style("opacity", 0.7)
+          //.style("fill", "#4684B5");
         //Choropleth.feature = g.append("path")
         //  .datum(topojson.mesh(us))
         //  .attr("d", path);
@@ -171,9 +259,9 @@ var Choropleth = {
      this.svg.attr("width", size.w)
        .attr("height", size.h);
      
-     if (this.feature != null) {
+     if (this.features != null) {
       console.log("not null");
-      this.feature.attr("d", this.path);
+      this.features.attr("d", this.path);
     }
 
 

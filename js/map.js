@@ -37,6 +37,7 @@ function init()
   map.zoomToExtent(extent);
   BaseMap.init();
   MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation, Choropleth);
+  Choropleth.init();
   pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.0, "displayInLayerSwitcher": false, removeBackBufferDelay:0 });
   heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, opacity: 0.55, ratio: 1.0, "displayInLayerSwitcher": false});
   pointLayer.setVisibility(false);
@@ -50,13 +51,12 @@ function init()
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
   Search.init(map, $('form#search'), $('input#termsInput'), $('input#userInput'), $('input#locationInput'));
-  Settings.init(pointLayer, heatLayer, $('button#basemapButton'), $('button#pointButton'), $('button#heatButton'));
+  Settings.init(pointLayer, heatLayer, $('button#basemapButton'), $('button#pointButton'), $('button#heatButton'), $('button#polyButton'));
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
-  Animation.init(pointLayer, heatLayer, TopKTokens, $('.play-pause'), $('.stop'));
+  Animation.init(pointLayer, heatLayer, TopKTokens, Choropleth, $('.play-pause'), $('.stop'));
   Chart.init($('div#chart'));
   //RealTimeOverlay.init();
   //RealTimeOverlay.addData();
-  Choropleth.init();
   MapD.start();
   //baseLayer.display(false);
   //pointLayer.display(true);

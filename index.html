@@ -8,6 +8,7 @@
     <title>mapD Tweetmap</title>
     <link rel="stylesheet" href="css/map.css" />
     <link rel="stylesheet" href="css/chart.css" />
+    <link rel="stylesheet" href="css/choropleth.css" />
     <!--<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />-->
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/dark-hive/jquery-ui.css" />
     <!--<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/smoothness/jquery-ui.min.css" />-->
@@ -90,11 +91,13 @@
       <!--<button id="pointButton" class="settings-button" title="Points">Points</button>-->
       <button id="basemapButton" class="settings-button" title="Basemap">Basemap</button>
       <button id="basemapSelect" class="settings-drop-button" data-dropdown="#baseDropdown">▾</button>
-      <button id="pointButton" class="settings-button" title="Points">Pointmap</button>
+      <button id="pointButton" class="settings-button" title="Pointmap">Pointmap</button>
       <button id="pointSelect" class="settings-drop-button" data-dropdown="#pointDropdown">▾</button>
         <!--<div id="pointButtonImg"></div>-->
       <button id="heatButton" class="settings-button" title="Heatmap">Heatmap</button>
       <button id="heatSelect" class="settings-drop-button" data-dropdown="#heatDropdown">▾</button>
+      <button id="polyButton" class="settings-button" title="Choropleth">Choropleth</button>
+      <button id="polySelect" class="settings-drop-button" data-dropdown="#polyDropdown">▾</button>
     </div>
     
     <!--<div id="animControls">
@@ -228,6 +231,16 @@
         </li>-->
       </ul>
     </div>
+    <div id="polyDropdown" class="dropdown dropdown-anchor-right">
+      <ul id="polyMenu" class="dropdown-menu drop-menu">
+        <li id="polyMinOpt">
+          <span style="float:left">Min Tweets</span>
+          <div style=" margin-left: 70px;" id="polyMinSlider"></div>
+          <div style="clear: both;"></div>
+        </li>
+      </ul>
+    </div>
+
     <div id="share-dropdown" class="dropdown dropdown-anchor-right has-icons">
         <ul id="shareMenu" class="dropdown-menu drop-menu">
             <li id="twitter-share"><span>On Twitter</span></li>
