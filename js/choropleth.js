@@ -6,6 +6,11 @@
       return [point.x, point.y];
     }
 
+var joinParams = {
+    "countries": {jointable: "country_data", joinvar: "name", joinattrs: "pop_est,iso_a2", pop_var: "pop_est", map_key: "ISO2", data_key: "iso_a2", data_col: "country"}
+    "states": {jointable: "state_data", joinvar: "name", joinattrs: "pst045212", pop_var: "pst045212", map_key: "name", data_key: "label", data_col: "state"}
+};
+
 var Choropleth = {
   active: false,
   mapd: MapD,
@@ -19,8 +24,9 @@ var Choropleth = {
   colorScale: null,
   features: null,
   percents: false,
-  source: "state",
+  //data_col: "state",
   opacity: 0.7,
+  curJoinParams: null
   params: {
     request: "GroupByToken",
     sql: null,
@@ -33,7 +39,7 @@ var Choropleth = {
     
     
 
-   init: function() {
+   init: function(filename) {
      $("#polyMinSlider").slider({
         min: 0,
         max: 30000,
@@ -52,7 +58,7 @@ var Choropleth = {
      this.overlay.afterAdd = $.proxy(function() {
       var div = d3.selectAll("#" + this.overlay.div.id);
       div.selectAll("svg").remove();
-      this.svg = div.append("svg").attr("class", "happy");
+      this.svg = div.append("svg").attr("class", "choropleth");
       this.g = this.svg.append("g");
       this.path = d3.geo.path().projection(project);
       this.colorScale = d3.scale.quantize().range(["rgb(255,255,229)","rgb(255,247,188)", "rgb(254,227,145)", "rgb(254,196,79)", "rgb(254,153,41)", "rgb(236,112,20)", "rgb(204,76,2)", "rgb(140,45,4)"]);
@@ -64,7 +70,7 @@ var Choropleth = {
      }, this);
      map.addLayer(this.overlay);
      map.events.register("moveend", map, $.proxy(this.reset,this));
-     this.addGeoData();
+     this.addGeoData(filename);
 
     },
  
@@ -144,9 +150,10 @@ var Choropleth = {
       var g = this.g;
       var data = this.data;
       var numVals = data.length;
+      var curJoinParmas = this.curJoinParams;
       if (this.percents == false) {
         for (var i = 0; i < numVals; i++)
-            data[i].y /= data[i].pst045212;
+            data[i].y /= data[i][curJoinParams.pop_var];
       }
       /*
         this.colorScale.domain([
@@ -168,15 +175,18 @@ var Choropleth = {
       */
 
       var numFeatures = this.features[0].length;
+      console.log("numFeatures: " + numFeatures);
       for (var f = 0; f < numFeatures; f++) {
         var joined = false;
-            var abbr = this.features[0][f].__data__.properties.abbr;
+            var abbr = this.features[0][f].__data__.properties.ISO2;
+            console.log(abbr);
+            console.log(data[0]);
             for (var i = 0; i < numVals; i++) {
               var found = false;
-              if (data[i].label == abbr) {
+              if (data[i].iso_a2 == abbr) {
                this.features[0][f].__data__.properties.y = data[i].y;
                this.features[0][f].__data__.properties.n = data[i].n;
-               //console.log(this.features[0][f].__data__);
+               console.log(this.features[0][f].__data__);
                found = true;
                break;
               }
@@ -236,10 +246,20 @@ var Choropleth = {
       }
     },
 
-   addGeoData: function() {
+   addGeoData: function(filename) {
+      this.g = "";
       var path = this.path;
       var g = this.g;
-      d3.json("data/us_states.json", function(error,json) {
+      var file = "data/" + filename;
+      var fileParts = filename.split('.');
+      var curJoinParams = joinParams[fileParts[0]];
+      /*
+      if (filename == "countries.json") {
+        this.params.joinTable = "country_data";
+        this.params.joinAttrs= "pop_est,iso_a2";
+      }
+      */
+      d3.json(file, function(error,json) {
         Choropleth.features = g.selectAll("path")
           .data(json.features)
           .enter().append("path")
