@@ -79,7 +79,7 @@ var Choropleth = {
       var query = this.mapd.getWhere(options);
 
       this.params.sql = "select " + this.source;
-      console.log("query terms: " + numQueryTerms);
+      //console.log("query terms: " + numQueryTerms);
 
       if (numQueryTerms > 0) {
           this.params.sql += "," + query[0] + " from " + this.mapd.table + query[1]; 
@@ -176,7 +176,7 @@ var Choropleth = {
               if (data[i].label == abbr) {
                this.features[0][f].__data__.properties.y = data[i].y;
                this.features[0][f].__data__.properties.n = data[i].n;
-               console.log(this.features[0][f].__data__);
+               //console.log(this.features[0][f].__data__);
                found = true;
                break;
               }
@@ -188,6 +188,8 @@ var Choropleth = {
         }
         this.draw();
         $(this).trigger('loadend');
+        //setTimeout($.proxy(function() {$(this).trigger('loadend'); console.log('yeah');}, this),100);
+        //setTimeout($.proxy(function() {$(this).trigger('loadend'); console.log('yeah');}, this),100);
     },
 
     draw: function() {
@@ -253,14 +255,14 @@ var Choropleth = {
 
    reset: function() {
      var size = map.getSize();
-     console.log("size: ");
-     console.log(size);
+     //console.log("size: ");
+     //console.log(size);
 
      this.svg.attr("width", size.w)
        .attr("height", size.h);
      
      if (this.features != null) {
-      console.log("not null");
+      //console.log("not null");
       this.features.attr("d", this.path);
     }
 

@@ -2061,6 +2061,8 @@ var Animation = {
   animEnd: null,
   frameStep: null,
   frameWidth: null,
+  prevTime: null,
+  frameWait: 80, // milliseconds - minimum
   numLayersLoaded: 0,
   formerGraphLockedState: false,
   formerGraphDisplayMode: "cloud",
@@ -2087,12 +2089,22 @@ var Animation = {
     if (this.playing == true) {
       var numLayersVisible = this.mapd.services.settings.getNumLayersVisible(); 
       if (this.mapd.fullScreen == false)
-          numLayersVisible++;
-      numLayersVisible++; // choropleth
+          numLayersVisible++; // for chart
+      if (this.choropleth.active)
+          numLayersVisible++; // choropleth
       this.numLayersLoaded++;
       if (this.numLayersLoaded >= numLayersVisible) {
+          var curTime = new Date().getTime();
           this.numLayersLoaded = 0;
-          this.animFunc();
+          var timeDiff = curTime - this.prevTime;
+          console.log("Time diff: " + timeDiff);
+          if (timeDiff <  this.frameWait) {
+              var waitTime = this.frameWait - timeDiff;
+              console.log("setting timeout");
+              setTimeout($.proxy(this.animFunc,this),waitTime);
+          }
+          else
+              this.animFunc();
       }
     }
   },
@@ -2104,6 +2116,7 @@ var Animation = {
   animFunc: function() {
      console.log("animating");
      if (this.frameEnd < this.animEnd) {
+        this.prevTime = new Date().getTime();
         var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
        var graphOptions = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
       //console.log (this.frameStart + "-" + this.frameEnd);
@@ -2132,6 +2145,7 @@ var Animation = {
         this.animStart = this.mapd.datastart;
         this.animEnd = this.mapd.dataend;
         this.frameStep = (this.animEnd - this.animStart) / this.numFrames;
+        this.prevTime = 0;
         //this.frameWidth = this.frameStep * 4.0;
         this.frameWidth = this.mapd.timeend - this.mapd.timestart;
         if (this.frameWidth > (this.animEnd-this.animStart)*0.5)
