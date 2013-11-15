@@ -186,7 +186,7 @@ var MapD = {
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
       this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
-     this.timestart = Math.max(this.dataend - 432000,  Math.round((this.dataend-this.datastart)*.4 + this.datastart));
+     this.timestart = Math.max(this.dataend - 864000,  Math.round((this.dataend-this.datastart)*.01 + this.datastart));
 
       var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark", fullScreen: 0};
       mapParams = this.readLink(mapParams);
