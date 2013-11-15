@@ -318,7 +318,7 @@ div#mapview {
   //top: 247px;
   top: 40px;
   left: 400px;
-  right: 0;
+  right: 0px;
   bottom: 200px;
 }
 
@@ -699,18 +699,30 @@ div#widget {
 }
 
 .basemapButtonOffImg {
-    background: #252525 url('../img/buttons/rev_census_110x30_bw.png') no-repeat center center;
+    background: #252525 url('../img/buttons/base_bw.png') no-repeat center center;
 }
 
 .basemapButtonOnImg {
-    background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
+    background: #252525 url('../img/buttons/base_color.png') no-repeat center center;
 }
 
 .basemapButtonHoverImg {
   border: none!important;
-  background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
+  background: #252525 url('../img/buttons/base_color.png') no-repeat center center;
 }
 
+.polyButtonOffImg {
+    background: #252525 url('../img/buttons/rev_census_110x30_bw.png') no-repeat center center;
+}
+
+.polyButtonOnImg {
+    background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
+}
+
+.polyButtonHoverImg {
+  border: none!important;
+  background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
+}
 
 
 .pointButtonOffImg {

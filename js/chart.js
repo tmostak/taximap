@@ -92,7 +92,7 @@ var LineChart =
        .append("g")
          .attr("transform", "translate(" + 60 + "," + this.margin.top + ")");
 
-    this.svg = $(".linechart")
+    this.svg = $(".linechart");
     this.elems.svg.append("g")
         .attr("class", "y axis");
 
@@ -168,7 +168,22 @@ var LineChart =
     this.width = cont.width() - this.margin.left - this.margin.right;
     console.log("width: " + this.width);
     this.height = this.chartHeight - this.margin.top - this.margin.bottom;
-    this.svg.remove();
+    //this.svg.remove();
+
+    this.x = d3.time.scale().range([0, this.width - 39]);
+    this.y = d3.scale.linear().range([this.height, 0]);
+
+    this.xAxis = d3.svg.axis()
+        .scale(this.x)
+        .orient("bottom")
+        .tickPadding(6);
+
+    this.yAxis = d3.svg.axis()
+        .scale(this.y)
+        .orient("left")
+        .tickSize(-this.width)
+        .tickPadding(6)
+        .ticks(6);
 
     this.elems.svg = this.elems.container
         .attr("class", "chart")
@@ -179,7 +194,7 @@ var LineChart =
        .append("g")
          .attr("transform", "translate(" + 60 + "," + this.margin.top + ")");
 
-    this.svg = $(".linechart")
+    this.svg = $(".linechart");
     this.elems.svg.append("g")
         .attr("class", "y axis");
 

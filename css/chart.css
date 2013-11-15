@@ -9,7 +9,7 @@
 //}
 
 #chart {
-  position: absolute;
+  position: fixed;
   //height: 20%;
   bottom: 0px;
   left: 400px;
