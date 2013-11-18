@@ -9,7 +9,7 @@
 var joinParams = {
     "countries": {jointable: "country_data", joinvar: "name", joinattrs: "pop_est,iso_a2", pop_var: "pop_est", map_key: "ISO2", data_key: "iso_a2", data_col: "country"},
     "states": {jointable: "state_data", joinvar: "name", joinattrs: "pst045212", pop_var: "pst045212", map_key: "abbr", data_key: "label", data_col: "state"},
-    "counties": {jointable: "county_data", joinvar: "name", joinattrs: "pst045212,fips", pop_var: "pst045212", map_key: "name", data_key: "fips", data_col: "county"}
+    "counties": {jointable: "county_data", joinvar: "name", joinattrs: "pst045212,fips", pop_var: "pst045212", map_key: "id", data_key: "fips", data_col: "county"}
 };
 
 var Choropleth = {
@@ -36,7 +36,7 @@ var Choropleth = {
     jointable: "state_data",
     joinvar: "name",
     joinattrs: "pst045212",
-    k: 400 
+    k: 5000 
   },
     
     
@@ -225,9 +225,24 @@ var Choropleth = {
 
       var numFeatures = this.features[0].length;
       console.log("numFeatures: " + numFeatures);
+      console.log("numVals: " + numVals);
+
+      var wasFound = 0;
+      var notFound = 0;
       for (var f = 0; f < numFeatures; f++) {
         var joined = false;
-            var key = this.features[0][f].__data__.properties[curJoinParams.map_key];
+        var key = "";
+            if (this.params.jointable == "county_data") {
+                key = this.features[0][f].__data__.id;
+                /*key = (this.features[0][f].__data__.id).toString();
+                //console.log(key.length);
+                if (key.length < 5)
+                    key = "0" + key;
+                */
+            }
+            else
+                key = this.features[0][f].__data__.properties[curJoinParams.map_key];
+            //console.log("key: " + key);
             //console.log(this.features[0][f].__data__.properties);
             //console.log(data[0]);
             for (var i = 0; i < numVals; i++) {
@@ -235,16 +250,21 @@ var Choropleth = {
               if (data[i][curJoinParams.data_key] == key) {
                this.features[0][f].__data__.properties.y = data[i].y;
                this.features[0][f].__data__.properties.n = data[i].n;
+               wasFound++;
+
                //console.log(this.features[0][f].__data__);
                found = true;
                break;
               }
             }
             if (!found) {
+              notFound++;
               this.features[0][f].__data__.properties.y = null;
               this.features[0][f].__data__.properties.n = null;
             }
         }
+        console.log("Found: " + wasFound);
+        console.log("Not found: " + notFound);
         this.draw();
         $(this).trigger('loadend');
         //setTimeout($.proxy(function() {$(this).trigger('loadend'); console.log('yeah');}, this),100);
@@ -253,6 +273,7 @@ var Choropleth = {
 
     draw: function() {
       var minTweets = this.minTweets;
+      var isCounty = this.params.jointable == "county_data";
       if (this.percents == false) {
         this.colorScale.domain([
           d3.min(this.features[0], function(d) {
@@ -282,10 +303,15 @@ var Choropleth = {
             return(colorScale(d.properties.y));
           })
           .style("fill-opacity", function(d) {
-            if (d.properties.n >= minTweets)
+            if (d.properties.n != null && d.properties.n >= minTweets)
               return opacity;
             else
               return 0.0;
+          })
+          .style("stroke-width", function() {
+            if (isCounty)
+                return 0.5;
+            return 1.5;
           });
        }
       else {
@@ -293,7 +319,13 @@ var Choropleth = {
           .style("fill", function(d) {
             return(colorScale(d.properties.y));
           })
-          .style("fill-opacity",opacity);
+          .style("fill-opacity",opacity)
+          .style("stroke-width", function() {
+            if (isCounty)
+                return 0.5;
+            return 1.5;
+          });
+
 
       }
     },
