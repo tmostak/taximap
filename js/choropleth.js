@@ -7,8 +7,9 @@
     }
 
 var joinParams = {
-    "countries": {jointable: "country_data", joinvar: "name", joinattrs: "pop_est,iso_a2", pop_var: "pop_est", map_key: "ISO2", data_key: "iso_a2", data_col: "country"}
-    "states": {jointable: "state_data", joinvar: "name", joinattrs: "pst045212", pop_var: "pst045212", map_key: "name", data_key: "label", data_col: "state"}
+    "countries": {jointable: "country_data", joinvar: "name", joinattrs: "pop_est,iso_a2", pop_var: "pop_est", map_key: "ISO2", data_key: "iso_a2", data_col: "country"},
+    "states": {jointable: "state_data", joinvar: "name", joinattrs: "pst045212", pop_var: "pst045212", map_key: "abbr", data_key: "label", data_col: "state"},
+    "counties": {jointable: "county_data", joinvar: "name", joinattrs: "pst045212,fips", pop_var: "pst045212", map_key: "name", data_key: "fips", data_col: "county"}
 };
 
 var Choropleth = {
@@ -20,13 +21,14 @@ var Choropleth = {
   projection: null,
   data: null,
   path: null,
-  minTweets: 10000,
+  minTweets: 4000,
   colorScale: null,
   features: null,
   percents: false,
   //data_col: "state",
   opacity: 0.7,
-  curJoinParams: null
+  geoData: null,
+  curJoinParams: null,
   params: {
     request: "GroupByToken",
     sql: null,
@@ -39,7 +41,8 @@ var Choropleth = {
     
     
 
-   init: function(filename) {
+   init: function(geoChoice) {
+
      $("#polyMinSlider").slider({
         min: 0,
         max: 30000,
@@ -51,11 +54,20 @@ var Choropleth = {
      });
      $("#polyMinOpt").hide();
 
+     $("#polyMenu").click($.proxy(function(e) {
+        var menu
+        var choice = this.getMenuItemClicked(e.target);
+        console.log(choice);
+        this.setMenuItem(choice);
+        
+      }, this));
+
 
 
      this.overlay = new OpenLayers.Layer.Vector("tweets");
      //this.overlay.setZIndex(0);
      this.overlay.afterAdd = $.proxy(function() {
+      console.log("After add!");
       var div = d3.selectAll("#" + this.overlay.div.id);
       div.selectAll("svg").remove();
       this.svg = div.append("svg").attr("class", "choropleth");
@@ -65,15 +77,52 @@ var Choropleth = {
       /*this.colorScale = d3.scale.quantize()
                          .range(["rgb(237,248,233)", "rgb(186,228,179)",
                           "rgb(116,196,118)", "rgb(49,163,84)","rgb(0,109,44)"]);*/
+      //this.addGeoData(filename);
+      this.setMenuItem(geoChoice);
       this.reset();
 
      }, this);
      map.addLayer(this.overlay);
      map.events.register("moveend", map, $.proxy(this.reset,this));
-     this.addGeoData(filename);
 
     },
+
+   setMenuItem: function(choice) {
+       //debugger;
+       if (choice != this.geoData) {
+         this.geoData = choice;
+         var choiceDiv = "#poly" + choice;
+         $("#polyMenu span.checkmark").css("visibility", "hidden");
+         $(choiceDiv + " .checkmark").css("visibility","visible");
+           switch (choice) {
+             case "Country":
+                this.addGeoData("countries.json");
+                break;
+             case "State":
+                this.addGeoData("states.json");
+                break;
+             case "County":
+                this.addGeoData("counties.json");
+                break;
+            }
+         }
+         this.reload();
+
+    },
+
  
+  getMenuItemClicked: function(target) {
+    if (target.localName != "span")
+        innerText = target.firstChild.innerText;
+    else {
+        if (target.className == "checkmark")
+            innerText = target.parentElement.firstChild.innerText;
+        else
+            innerText = target.innerText;
+            
+    }
+    return innerText;
+  },
    getUrl: function(options) {
       var numQueryTerms = this.mapd.queryTerms.length;
       if (numQueryTerms > 0) {
@@ -84,7 +133,7 @@ var Choropleth = {
     }
       var query = this.mapd.getWhere(options);
 
-      this.params.sql = "select " + this.source;
+      this.params.sql = "select " + this.curJoinParams.data_col;
       //console.log("query terms: " + numQueryTerms);
 
       if (numQueryTerms > 0) {
@@ -150,7 +199,7 @@ var Choropleth = {
       var g = this.g;
       var data = this.data;
       var numVals = data.length;
-      var curJoinParmas = this.curJoinParams;
+      var curJoinParams = this.curJoinParams;
       if (this.percents == false) {
         for (var i = 0; i < numVals; i++)
             data[i].y /= data[i][curJoinParams.pop_var];
@@ -178,15 +227,15 @@ var Choropleth = {
       console.log("numFeatures: " + numFeatures);
       for (var f = 0; f < numFeatures; f++) {
         var joined = false;
-            var abbr = this.features[0][f].__data__.properties.ISO2;
-            console.log(abbr);
-            console.log(data[0]);
+            var key = this.features[0][f].__data__.properties[curJoinParams.map_key];
+            //console.log(this.features[0][f].__data__.properties);
+            //console.log(data[0]);
             for (var i = 0; i < numVals; i++) {
               var found = false;
-              if (data[i].iso_a2 == abbr) {
+              if (data[i][curJoinParams.data_key] == key) {
                this.features[0][f].__data__.properties.y = data[i].y;
                this.features[0][f].__data__.properties.n = data[i].n;
-               console.log(this.features[0][f].__data__);
+               //console.log(this.features[0][f].__data__);
                found = true;
                break;
               }
@@ -207,8 +256,11 @@ var Choropleth = {
       if (this.percents == false) {
         this.colorScale.domain([
           d3.min(this.features[0], function(d) {
-              return d.__data__.properties.y}),
-          d3.max(this.features[0], function(d) {return d.__data__.properties.y})
+              //if (d.__data__.properties.y >= minTweets)
+                return d.__data__.properties.y;}),
+          d3.max(this.features[0], function(d) {
+              //if (d.__data__.properties.y >= minTweets)
+                return d.__data__.properties.y;})
         ]);
       }
       else {
@@ -247,30 +299,45 @@ var Choropleth = {
     },
 
    addGeoData: function(filename) {
-      this.g = "";
-      var path = this.path;
+      console.log(filename);
+      //debugger;
+      //this.g = "";
+      d3.select("g").remove();
+      this.g = this.svg.append("g");
       var g = this.g;
+      var path = this.path;
       var file = "data/" + filename;
       var fileParts = filename.split('.');
-      var curJoinParams = joinParams[fileParts[0]];
-      /*
-      if (filename == "countries.json") {
-        this.params.joinTable = "country_data";
-        this.params.joinAttrs= "pop_est,iso_a2";
-      }
-      */
-      d3.json(file, function(error,json) {
-        Choropleth.features = g.selectAll("path")
-          .data(json.features)
-          .enter().append("path")
-          .attr("d",path)
+      this.curJoinParams = joinParams[fileParts[0]];
+      this.params.jointable = this.curJoinParams.jointable;
+      this.params.joinvar = this.curJoinParams.joinvar;
+      this.params.joinattrs = this.curJoinParams.joinattrs;
+      console.log(this.curJoinParams);
+      if (filename == "counties.json") {
+        d3.json(file, function(error,json) {
+          Choropleth.features = g.selectAll("path")
+            .data(topojson.feature(json, json.objects.counties).features)
+            .enter().append("path")
+            .attr("d",path)
 
-          //.style("opacity", 0.7)
-          //.style("fill", "#4684B5");
-        //Choropleth.feature = g.append("path")
-        //  .datum(topojson.mesh(us))
-        //  .attr("d", path);
-      });
+          if (Choropleth.active == false)
+            Choropleth.deactivate();
+          //Choropleth.feature = g.append("path")
+          //  .datum(topojson.mesh(us))
+          //  .attr("d", path);
+        });
+      }
+      else {
+        d3.json(file, function(error,json) {
+          Choropleth.features = g.selectAll("path")
+            .data(json.features)
+            .enter().append("path")
+            .attr("d",path)
+
+          if (Choropleth.active == false)
+            Choropleth.deactivate();
+        });
+      }
    },
 
    reset: function() {
