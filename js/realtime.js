@@ -40,6 +40,7 @@ var RealTimeOverlay = {
       .data(data, function(d) {return d.id;})
       .enter()
        .append("circle")
+       .attr("r", 3)
         .style("fill","white")
       .transition()
        .delay(function() {return Math.round(Math.random() * 1000);})
@@ -51,7 +52,7 @@ var RealTimeOverlay = {
         })
        .attr("r", 3)
         .style("fill","red")
-       .style("opacity", 0.8);
+       .style("opacity", 0.7);
 
         g.selectAll("circle")
         .data(data, function(d) {return d.id;})

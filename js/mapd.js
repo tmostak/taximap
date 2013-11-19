@@ -26,7 +26,7 @@ var MapD = {
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd2.csail.mit.edu:8080/",
   //host: "http://mapd.csail.mit.edu:8080/",
-  host: "http://140.221.141.152:8081/",
+  host: "http://140.221.141.152:8080/",
   //host: "http://www.velocidy.net:7000/",
   //host: "http://192.168.1.90:8080/",
   //host: "http://127.0.0.1:8080/",
@@ -1855,12 +1855,16 @@ init: function(sortDiv, viewDiv) {
     this.bottomOffset = this.topOffset + this.viewDiv.height(); 
 
     var results = json.results;
+    var numResults = results.length;
+    var delay = Math.round(1000 / numResults);
+    console.log("delay: " + delay);
+
     for (i in results)
     {
       var result = results[i];
       if (!result || !result.tweet_text)
         continue;
-      this.add(result, i, container);
+      setTimeout($.proxy(this.add(result, i, container), this), delay * i);
     }
     $('.tweet-profile, .username').click( $.proxy(function(e) {
       var userName = $(e.target).html();
