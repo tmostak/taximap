@@ -1,7 +1,8 @@
 
 
- function project (pos){
+ function pointProject (pos){
       var point= map.getViewPortPxFromLonLat(new OpenLayers.LonLat(pos[0], pos[1]));
+      //console.log(point);
       return [point.x, point.y];
     }
 
@@ -11,13 +12,14 @@ var RealTimeOverlay = {
    g: null,
    projection: null,
    data: null,
+   circles: null,
 
    init: function() {
      this.overlay = new OpenLayers.Layer.Vector("tweets");
      this.overlay.afterAdd = $.proxy(function() {
       var div = d3.selectAll("#" + this.overlay.div.id);
       div.selectAll("svg").remove();
-      this.svg = div.append("svg").attr("class", "happy");
+      this.svg = div.append("svg").attr("class", "realtime");
       this.g = this.svg.append("g");
 780780
       this.reset();
@@ -30,48 +32,53 @@ var RealTimeOverlay = {
     },
 
    addData: function(data) {
+      //console.log(data);
+      //this.data = data;
       var svg = this.svg;
+      var g = this.g;
       g.selectAll("circle")
-      .data(data)
+      .data(data, function(d) {return d.id;})
       .enter()
        .append("circle")
+        .style("fill","white")
+      .transition()
+       .delay(function() {return Math.round(Math.random() * 1000);})
        .attr("cx",function(d){
-          return project([d.goog_x, d.goog_y])[0];
+          return pointProject([d.goog_x, d.goog_y])[0];
         })
        .attr("cy",function(d){
-          return project([d.goog_x, d.goog_y])[1];
+          return pointProject([d.goog_x, d.goog_y])[1];
         })
-       .attr("r", 4)
+       .attr("r", 3)
         .style("fill","red")
        .style("opacity", 0.8);
 
-       g.selectAll("circle")
-        .data(data)
+        g.selectAll("circle")
+        .data(data, function(d) {return d.id;})
         .exit()
         .transition()
-        .delay(5000)
-        .duration(500)
+        //.delay(5000)
+        .duration(2000)
         .attr("r",0)
         .style("opacity", 0.0)
-        
-     });
-   },
+        .remove();
+     },
     
    addCsvData: function() {
       var svg = this.svg;
       var g = this.g;
       d3.csv("js/test.csv", function(data) {
-       console.log(data);
+       //console.log(data);
        RealTimeOverlay.data = data;
        g.selectAll("circle")
        .data(data)
        .enter()
        .append("circle")
        .attr("cx",function(d){
-          return project([d.x, d.y])[0];
+          return pointProject([d.x, d.y])[0];
         })
        .attr("cy",function(d){
-          return project([d.x, d.y])[1];
+          return pointProject([d.x, d.y])[1];
         })
        .attr("r", 0)
        .style("fill","white")
@@ -92,7 +99,7 @@ var RealTimeOverlay = {
      });
 
    },
-
+   /*
    addData: function(dataset) {
       var svg = this.svg;
       var g = this.g;
@@ -128,25 +135,30 @@ var RealTimeOverlay = {
      });
 
    },
+   */
    reset: function() {
      var size = map.getSize();
-     console.log("size: ");
-     console.log(size);
+     //console.log("size: ");
+     //console.log(size);
 
      this.svg.attr("width", size.w)
        .attr("height", size.h);
-     if (this.data != null) {
-       var g = this.g;
-       var data = this.data;
-       g.selectAll("circle")
-         .data(data)
-         .attr("cx",function(d){
-            return project([d.x, d.y])[0];
-          })
-         .attr("cy",function(d){
-            return project([d.x, d.y])[1];
+     //if (this.data != null) {
+     this.g.selectAll("circle")
+     .attr("cx",function(d){
+        console.log(d.goog_x);
+        return project([d.goog_x, d.goog_y])[0];
+      })
+     .attr("cy",function(d){
+        return project([d.goog_x, d.goog_y])[1];
           });
-      }
+       //var data = this.data;
+       /*
+       g.selectAll("circle")
+         .data()
+         .update()
+         */
+      //}
    }
        
 

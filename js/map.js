@@ -36,7 +36,7 @@ function init()
 
   map.zoomToExtent(extent);
   BaseMap.init();
-  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation, Choropleth);
+  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation, Choropleth, RealTimeOverlay);
   Choropleth.init("Country");
   pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.0, "displayInLayerSwitcher": false, removeBackBufferDelay:0});
   heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, opacity: 0.55, ratio: 1.0, "displayInLayerSwitcher": false});
@@ -55,7 +55,7 @@ function init()
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   Animation.init(pointLayer, heatLayer, TopKTokens, Choropleth, $('.play-pause'), $('.stop'));
-  //RealTimeOverlay.init();
+  RealTimeOverlay.init();
   //RealTimeOverlay.addData();
   MapD.start();
   //baseLayer.display(false);
@@ -84,7 +84,7 @@ function init()
           console.log('at click');
           if (MapD.services.settings.pointOn) {
             MapD.services.tweetclick.handleClick(e);
-            console.log(e);
+            //console.log(e);
             //$.getJSON(this.getURL()).done($.proxy(this.onTweet,this));
           }
         

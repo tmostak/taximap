@@ -39,6 +39,7 @@ var MapD = {
   dataend: null,
   linkButton: null,
   fullScreen: false,
+  timeUpdates: 0,
   services: {
     baseLayerName: "Dark",
     pointmap: null,
@@ -51,12 +52,13 @@ var MapD = {
     settings: null,
     tweetclick: null,
     animation: null,
-    choropleth: null
+    choropleth: null,
+    realtime: null
   },
 
 
 
-  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation, choropleth) {
+  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation, choropleth, realtime) {
   
     //$("#dataDisplayBarchart").click(function() {console.log($(this).attr("id"));});  
     if (window.location.search == "?local")
@@ -89,6 +91,7 @@ var MapD = {
     this.services.tweetclick = tweetclick;
     this.services.animation = animation;
     this.services.choropleth = choropleth;
+    this.services.realtime = realtime;
     this.map.events.register('moveend', this, this.reload);
     //this.map.events.register('changebaselayer', this, this.moveBaseAttr);
 
@@ -390,12 +393,15 @@ var MapD = {
 
            if (this.timeend >  (this.dataend-this.datastart)*.98 + this.datastart) {
              // pointLayer.clearGrid();
-              this.services.pointmap.reload();
-              this.services.heatmap.reload();
-              if (this.fullScreen == false) {
+             if (this.timeUpdates % 5 == 0) {
+                  this.services.pointmap.reload();
+                  this.services.heatmap.reload();
+              }
+              //if (this.fullScreen == false) {
                   this.services.tweets.reload(true);
                   //this.services.graph.reload();
-              }
+              //}
+              this.timeUpdates++;
             }
         }
 
@@ -1795,10 +1801,10 @@ init: function(sortDiv, viewDiv) {
       if (this.numDisplayTweets > 200) {
         $(".tweet-container").slice(200).remove();
         this.numDisplayTweets = 200;
+        }
+      this.mapd.services.realtime.addData(json.results);
       }
-        
 
-    }
 
 
     if (this.sortDesc) {
