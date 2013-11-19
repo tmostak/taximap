@@ -2,6 +2,8 @@
 // heatmapreload:    tell HeatMap to reload
 // geocodeend:       geocoding service is ready
 
+var timeUpdateInterval = 1200;
+
 var BBOX = {
   //WORLD: "-19313026.92,-6523983.06,14187182.33,12002425.38",
   WORLD: "-19813026.92,-8523983.06, 19813026.92,12002425.38",
@@ -128,17 +130,17 @@ var MapD = {
   },
 
   moveBaseAttr: function() {
-    console.log("movebaseattr");
+    //console.log("movebaseattr");
     $(".gmnoprint").each(function() {
         var right = parseInt($(this).css("right"), 10);
-        console.log(right);
+        //console.log(right);
         $(this).css("right", right+40);
     })
     $(".gmnoprint").hide();
   },
 
   displayLink: function(response) {
-    console.log(response.data.url);
+    //console.log(response.data.url);
     $("#link-dialog").html(response.data.url).dialog({width: 200, height: 70});
   },
     
@@ -155,14 +157,14 @@ var MapD = {
 
   genLink: function(fullEncode, callback) {
     var link = this.writeLink(fullEncode);
-    console.log ("long link: " + link);
+    //console.log ("long link: " + link);
     this.getShortURL(link, callback);
   },
   
   facebookShare: function(response) {
     //var link = this.writeLink(true);
     var link = response.data.url; 
-    console.log(link);
+    //console.log(link);
     var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
     var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
     window.open(
@@ -173,7 +175,7 @@ var MapD = {
   sendTweet: function(response) {
     //var link = this.writeLink(true);
     var link = response.data.url; 
-    console.log("tweet link");
+    //console.log("tweet link");
     var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
     var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
     window.open("https://twitter.com/share?" +
@@ -196,8 +198,8 @@ var MapD = {
 
       var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: "pst045212", baseLayer: "Dark", fullScreen: 0};
       mapParams = this.readLink(mapParams);
-      console.log("map params");
-      console.log(mapParams);
+      //console.log("map params");
+      //console.log(mapParams);
       this.timestart = mapParams.t0;
       this.timeend = mapParams.t1;
       if ("what" in mapParams) {
@@ -212,7 +214,7 @@ var MapD = {
       this.services.topktokens.setMenuItem("Display", mapParams.dataDisplay, false);
 
       this.services.topktokens.xVar = mapParams.scatterXVar; 
-      console.log("xvar: " + this.services.topktokens.xVar);
+      //console.log("xvar: " + this.services.topktokens.xVar);
       //console.log("Join attrs: " + this.services.topktokens.params.joinattrs);
       ScatterPlot.selectedVar = mapParams.scatterXVar;
       if (mapParams.fullScreen == 1) {
@@ -265,14 +267,13 @@ var MapD = {
       if (mapParams.pointColorBy == "sender_name" || mapParams.pointColorBy == "origin") 
           $("#pointStaticColor").hide();
       var radius = parseInt(mapParams.pointRadius);
-      console.log("radius: " + radius);
+      //console.log("radius: " + radius);
       //$(".circle").eq(radius - 1).addClass("circle-selected");
       $(".point-size").eq(radius + 1).addClass("point-size-selected");
       this.services.pointmap.params.radius = parseInt(radius);
       var hexColor = '#' + toHex(parseInt(mapParams.pointR)) + toHex(parseInt(mapParams.pointG)) +  toHex(parseInt(mapParams.pointB));
       $("#pointColorPicker").minicolors('value', hexColor);
-      console.log("lao;ksdfasdflk;j");
-      console.log(mapParams.heatRamp);
+      //console.log(mapParams.heatRamp);
       this.services.heatmap.setRamp(mapParams.heatRamp, false);
       /*
       this.services.heatmap.params.colorramp = mapParams.heatRamp;
@@ -287,7 +288,7 @@ var MapD = {
       if (mapParams.heatOn == 1)
         this.services.settings.heatButtonFunction();
 
-      setTimeout($.proxy(this.timeReload,this),1000);
+      setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
       //pointLayer.setVisibility(mapParams.pointOn);
       //heatLayer.setVisibility(mapParams.heatOn);
       //Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
@@ -343,9 +344,9 @@ var MapD = {
 
   readLink: function(mapParams) {
     if (window.location.search.substr(0,1) == "?") {
-      console.log("params");
+      //console.log("params");
       params = this.getURIJson();
-      console.log(params);
+      //console.log(params);
 
       // next two are to provide backward compatibility
       if ("dataSource" in params) {
@@ -393,7 +394,8 @@ var MapD = {
 
            if (this.timeend >  (this.dataend-this.datastart)*.98 + this.datastart) {
              // pointLayer.clearGrid();
-             if (this.timeUpdates % 5 == 0) {
+             var updateInterval = (map.zoom > 7 : 10 ? 5);
+             if (this.timeUpdates % updateInterval == 0) {
                   this.services.pointmap.reload();
                   this.services.heatmap.reload();
               }
@@ -405,7 +407,7 @@ var MapD = {
             }
         }
 
-          setTimeout($.proxy(this.timeReload,this),1000);
+          setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
    },
 
   reload: function(e) {
@@ -417,7 +419,7 @@ var MapD = {
       this.services.graph.reload();
     }
     if (e.type != "moveend") {
-        console.log("reloading");
+        //console.log("reloading");
         this.services.choropleth.reload();
     }
   },
@@ -478,7 +480,7 @@ var MapD = {
   },
 
   parseQueryTerms: function(queryTerms) { 
-    console.log(queryTerms);
+    //console.log(queryTerms);
     if (queryTerms[0] == "multilanguage:") {
         var query = "tweet_text ilike 'coffee' or tweet_text ilike 'café' or tweet_text ilike 'caffè' or tweet_text ilike 'kaffe' or tweet_text ilike 'kaffe' or tweet_text ilike 'кофе' or tweet_text ilike 'kahve' or tweet_text ilike 'قهوة' or tweet_text ilike '咖啡' or tweet_text ilike '커피' or tweet_text ilike 'コーヒー' or tweet_text ilike 'kopi'";
 	return query;
@@ -535,7 +537,7 @@ var MapD = {
     var minId = null;
     if (options) {
       if (options.time) {
-        console.log("time " + options.time.timestart);
+        //console.log("time " + options.time.timestart);
         timestart = options.time.timestart;
         timeend = options.time.timeend;
       }
@@ -552,7 +554,7 @@ var MapD = {
 
       
     }
-    console.log("minid: " + minId);
+    //console.log("minid: " + minId);
     
       if (splitQuery) {
         var queryArray = new Array(2);
@@ -742,12 +744,12 @@ var TopKTokens = {
   },
 
   setMenuItem: function(menu, choice, reload) {   
-    console.log("menu: " + menu);
+    //console.log("menu: " + menu);
     var menuDiv = "#data" + menu;
     var dropdownDiv = menuDiv + "Dropdown";
     var choiceDiv = menuDiv + choice;
-    console.log(menuDiv);
-    console.log(choiceDiv);
+    //console.log(menuDiv);
+    //console.log(choiceDiv);
     $(dropdownDiv + " span.checkmark").css("visibility", "hidden");
     $(choiceDiv + " .checkmark").css("visibility","visible");
     $(menuDiv + " span.choice-text").text(choice);
@@ -766,7 +768,7 @@ var TopKTokens = {
   },
 
   getScatterVarsURL: function() {
-    console.log("getscattervars");
+    //console.log("getscattervars");
     var scatterParams = {};
     scatterParams.request = "GetTableCols";
     //scatterParams.table = this.sourceSetting + "_data";
@@ -778,25 +780,21 @@ var TopKTokens = {
   },
 
   onScatterVarsLoad: function(json) {
-    console.log("onscattervarsload");
-    console.log("Selected var 0: " + ScatterPlot.selectedVar);
+    //console.log("Selected var 0: " + ScatterPlot.selectedVar);
     ScatterPlot.setVars(json);
-    console.log("Selected var 1: " + ScatterPlot.selectedVar);
+    //console.log("Selected var 1: " + ScatterPlot.selectedVar);
     //TopKTokens.xVar = ScatterPlot.selectedVar; 
     TopKTokens.xVar = "pst045212";
-    console.log("Xvar: " + TopKTokens.xVar);
+    //console.log("Xvar: " + TopKTokens.xVar);
     TopKTokens.reload();
     //ScatterPlot.init(this, this.displayDiv);
-    //console.log(json);
   },
 
   scatterVarChange: function(e) {
-    //console.log(this);
-    //console.log(e);
     //console.log($(this).find("option:selected"));
     TopKTokens.xVar = $(this).find("option:selected").get(0).value;
     ScatterPlot.selectedVar = TopKTokens.xVar;
-    console.log(ScatterPlot.selectedVar);
+    //console.log(ScatterPlot.selectedVar);
     TopKTokens.reload();
   },
 
@@ -863,10 +861,10 @@ var TopKTokens = {
     }
 
     var query = this.mapd.getWhere(options);
-    console.log("query: " + query);
+    //console.log("query: " + query);
 
     this.params.stoptable = "";
-    console.log(this.sourceSetting);
+    //console.log(this.sourceSetting);
     if (this.sourceSetting == "Word") {
         this.params.sql = "select tweet_text";
         this.params.stoptable = "multistop";
@@ -923,9 +921,9 @@ var TopKTokens = {
     if (this.modeSetting == "Trends") {
         var timestart = parseInt(this.mapd.timestart);
         var timeend = parseInt(this.mapd.timeend);
-        console.log(timestart);
-        console.log(midTime);
-        console.log(timeend);
+        //console.log(timestart);
+        //console.log(midTime);
+        //console.log(timeend);
         if (options == undefined || options == null)  
             options = {};
         else if (options.time != undefined && options.time != null) {
@@ -1005,13 +1003,13 @@ var TopKTokens = {
 
 
   addClickedWord: function(event) {
-    console.log(event);
+    //console.log(event);
     //var token = event.originalEvent.srcElement.innerText;
     var token = event.target.innerHTML;
     //console.log("circle cloud token: " + token);
     if (token.substring(0,5) != "<span") {
       //console.log(this.mapd);
-      console.log(this.sourceSetting);
+      //console.log(this.sourceSetting);
       if (this.sourceSetting == "Word") {
         this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
         $('#termsInput').trigger('input');
@@ -1105,14 +1103,14 @@ var TopKTokens = {
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
-        console.log("num results to exclude: " + numResultsToExclude);
+        //console.log("num results to exclude: " + numResultsToExclude);
         BarChart.addData(json, numResultsToExclude, this.modeSetting);
     }
     else if (this.displaySetting == "Scatter") {
         //if (update) 
         ScatterPlot.init(this, this.displayDiv);
-        console.log("at load scatter");
-        console.log(ScatterPlot);
+        //console.log("at load scatter");
+        //console.log(ScatterPlot);
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
@@ -1121,7 +1119,7 @@ var TopKTokens = {
 
     var label = (this.sourceSetting == "Word") ? "# Words: " : ((this.sourceSetting == "User") ? "# Tweets: " : "# Tweets: ");
     $('#numTokensText').text(label + numberWithCommas(n));
-    console.log("triggering loadend");
+    //console.log("triggering loadend");
     $(this).trigger('loadend');
 
   }
@@ -1161,7 +1159,7 @@ var PointMap = {
     $("#pointColorPicker").minicolors({ 
         changeDelay:50,
         change: $.proxy (function (hex) {
-            console.log(hex);
+            //console.log(hex);
             var rgb = $("#pointColorPicker").minicolors('rgbObject');
             this.params.r = rgb.r;
             this.params.g = rgb.g;
@@ -1176,7 +1174,7 @@ var PointMap = {
     $(".point-size").click($.proxy(function(e) { 
       //this.params.radius = $(e.target).index() + 1;
       this.params.radius = $(e.target).index() - 1;
-      console.log("this.params.radius: " + this.params.radius);
+      //console.log("this.params.radius: " + this.params.radius);
       $(".point-size").removeClass("point-size-selected");
       $(e.target).addClass("point-size-selected");
       this.reload();
@@ -1218,12 +1216,12 @@ var PointMap = {
       this.params.sql += ", " + this.colorBy;
     this.params.sql += " from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere(options);
-    console.log(this.params.sql);
+    //console.log(this.params.sql);
     return this.params;
   },
 
   reload: function(options) {
-    console.log("reload");
+    //console.log("reload");
     this.params.rand = Math.round(Math.random() * 10000);
     this.wms.mergeNewParams(this.getParams(options));
   }
@@ -1250,7 +1248,7 @@ var BaseMap = {
           .appendTo(baseMenu);
       }
     }
-    console.log(this.baseLayerNames);
+    //console.log(this.baseLayerNames);
     
     $(".base-choice").click($.proxy(function(e) { 
       this.currentLayer = $(e.target).text();
@@ -1330,20 +1328,20 @@ var HeatMap = {
   },
 
   processColorRamps: function(json) {
-    console.log(json);
+    //console.log(json);
     var rampsCont = $("#colorRamps");
     var x = 80;
     var y = 20;
     for (var i = 0; i < json.length; ++i) {
-      console.log(json[i]);
+      //console.log(json[i]);
       var canvas = $('<canvas></canvas>').attr("id", json[i].name).attr("class", "color-ramp").prop("width", x).prop("height",y).appendTo(rampsCont).click($.proxy(this.changeRamp,this)).get(0);
-      console.log(canvas);
+      //console.log(canvas);
       var context = canvas.getContext("2d");
       context.rect(0,0,x-2,y-2);
       var gradient = context.createLinearGradient(0, 0, x, 0);
       var colors = json[i].colors;
       for (var c = 0; c != colors.length; ++c) {
-        console.log(json[i].name + " - " + colors[c].stop + " (" + colors[c].r + "," + colors[c].g + "," + colors[c].b + ")");
+        //console.log(json[i].name + " - " + colors[c].stop + " (" + colors[c].r + "," + colors[c].g + "," + colors[c].b + ")");
         gradient.addColorStop(colors[c].stop, "rgb(" + colors[c].r +"," + colors[c].g +"," + colors[c].b+")");
       }
       context.fillStyle=gradient;
@@ -1747,7 +1745,7 @@ init: function(sortDiv, viewDiv) {
       //sortDesc = false;
     this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
-    console.log(this.params.sql);
+    //console.log(this.params.sql);
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
   },
@@ -1757,7 +1755,7 @@ init: function(sortDiv, viewDiv) {
     if (getMinId == true) {
       options.minId =this.minId;
     }
-    console.log(options);
+    //console.log(options);
     $.getJSON(this.getURL(options)).done($.proxy(this.onTweets, this));
   },
   //oldSortFunc :function () { 
@@ -1783,7 +1781,7 @@ init: function(sortDiv, viewDiv) {
       return;
     }
 
-      console.log("This numDisplaytweets: " + this.numDisplayTweets);
+      //console.log("This numDisplaytweets: " + this.numDisplayTweets);
     var prepend = true;
     //if (!("id" in json.results[0])) {
     if (this.append == false) {
@@ -1791,7 +1789,6 @@ init: function(sortDiv, viewDiv) {
       this.viewDiv.empty();
       this.startRecord = 0;
       this.endRecord = 1;
-      console.log("no prepend");
       this.numTweets = json.n;
       this.numDisplayTweets = json.results.length; 
     }
@@ -1856,8 +1853,8 @@ init: function(sortDiv, viewDiv) {
 
     var results = json.results;
     var numResults = results.length;
-    var delay = Math.round(1000 / numResults);
-    console.log("delay: " + delay);
+    var delay = Math.round(timeUpdateInterval / numResults);
+    //console.log("delay: " + delay);
 
     for (i in results)
     {
@@ -2016,7 +2013,7 @@ var GeoCoder = {
       return;
     }
     if (data.length != 1)  {
-      console.log('Geocoding service returned', data.length);
+      //console.log('Geocoding service returned', data.length);
     }
     var viewport = data[0].geometry.viewport;
     var ne = viewport.getNorthEast();
@@ -2084,7 +2081,7 @@ var Search = {
     }
     else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" || terms.substring(0,4) == "zip:") {
         var colonPosition = terms.indexOf(":");
-        console.log(colonPosition);
+        //console.log(colonPosition);
         if (terms.substring(1,colonPosition) == this.mapd.services.topktokens.sourceSetting.substring(1))
           this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
@@ -2114,13 +2111,13 @@ var Search = {
     this.user = this.userInput.val();
     this.mapd.setQueryTerms(this.terms);
     this.mapd.setUser(this.user);
-    console.log ("user: " + this.user);
+    //console.log ("user: " + this.user);
     if (this.locationChanged) {
       this.location = location;
       this.geocoder.geocode(this.location);
       return false;
     }
-    console.log("After this location changed");
+    //console.log("After this location changed");
     $(document).trigger({type: 'mapdreload'});
     $(document).trigger({type: 'pointmapreload'});
     $(document).trigger({type: 'heatmapreload'});
@@ -2187,7 +2184,7 @@ var Animation = {
   },
 
   layerLoadEnd: function () {
-    console.log(this.numLayersLoaded);
+    //console.log(this.numLayersLoaded);
     if (this.playing == true) {
       var numLayersVisible = this.mapd.services.settings.getNumLayersVisible(); 
       if (this.mapd.fullScreen == false)
@@ -2199,10 +2196,10 @@ var Animation = {
           var curTime = new Date().getTime();
           this.numLayersLoaded = 0;
           var timeDiff = curTime - this.prevTime;
-          console.log("Time diff: " + timeDiff);
+          //console.log("Time diff: " + timeDiff);
           if (timeDiff <  this.frameWait) {
               var waitTime = this.frameWait - timeDiff;
-              console.log("setting timeout");
+              //console.log("setting timeout");
               setTimeout($.proxy(this.animFunc,this),waitTime);
           }
           else
@@ -2216,7 +2213,7 @@ var Animation = {
   },
 
   animFunc: function() {
-     console.log("animating");
+     //console.log("animating");
      if (this.frameEnd < this.animEnd) {
         this.prevTime = new Date().getTime();
         var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
@@ -2238,11 +2235,9 @@ var Animation = {
 
 
   playFunc: function () {
-    console.log("play");
     if (this.playing == false) {
       this.playing = true;
       this.playPauseButton.removeClass("play-icon").addClass("pause-icon");
-      console.log("anim play");
       if (this.animStart == null) { // won't trigger if paused
         this.animStart = this.mapd.datastart;
         this.animEnd = this.mapd.dataend;
@@ -2265,13 +2260,12 @@ var Animation = {
                 radius = 1;
             this.mapd.services.pointmap.params.radius = radius;
         }
-        console.log(this.heatMax);
+        //console.log(this.heatMax);
         this.formerGraphLockedState = this.wordGraph.locked;
         //this.wordGraph.params.sort = "false";
         this.formerGraphDisplayMode = this.wordGraph.displaySetting;
 
         this.wordGraph.setMenuItem("Display", "Bar", false);
-        console.log("changing to sync"); 
         $.ajaxSetup({
             async: false
         });
@@ -2281,7 +2275,7 @@ var Animation = {
         $.ajaxSetup({
             async: true
         });
-        console.log("changing to async"); 
+        //console.log("changing to async"); 
 
         //this.wordGraph.locked = true;
         if (this.wordGraph.modeSetting != "Trends" && this.formerGraphLockedState == false) {
@@ -2348,8 +2342,8 @@ var Settings = {
     this.polyButton = polyButton;
     this.pointOn = pointLayer.getVisibility();
     this.heatOn = heatLayer.getVisibility();
-    console.log("settings point: " + this.pointOn);
-    console.log("settings heat: " + this.heatOn);
+    //console.log("settings point: " + this.pointOn);
+    //console.log("settings heat: " + this.heatOn);
     //$("#pointButton").button().next().button().parent().buttonset().next().hide().menu();
 
 
@@ -2399,7 +2393,7 @@ var Settings = {
 
   baseButtonFunction: function(baseOn) {
     
-    console.log($.type(baseOn));
+    //console.log($.type(baseOn));
     if ($.type(baseOn) != "object") {
       this.baseOn = parseInt(baseOn);
     }
@@ -2414,7 +2408,7 @@ var Settings = {
       map.setBaseLayer(map.getLayersByName("Blank")[0]);
     }
     else {
-      console.log(BaseMap.currentLayer);
+      //console.log(BaseMap.currentLayer);
       //if (BaseMap.currentLayer != BaseMap.defaultLayer)
       map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);
       //map.setBaseLayer(map.getLayersByName(MapD.services.baseLayerName)[0]);
@@ -2427,8 +2421,8 @@ var Settings = {
     }
     else
       this.polyOn = !this.polyOn; 
-    console.log("at poly function");
-    console.log(this.polyOn);
+    //console.log("at poly function");
+    //console.log(this.polyOn);
     if (this.polyOn) {
       this.polyButton.removeClass("polyButtonOffImg").addClass("polyButtonOnImg");
       Choropleth.activate();

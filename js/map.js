@@ -81,7 +81,7 @@ function init()
         },
       trigger: function(e) {
 
-          console.log('at click');
+          //console.log('at click');
           if (MapD.services.settings.pointOn) {
             MapD.services.tweetclick.handleClick(e);
             //console.log(e);
@@ -93,7 +93,7 @@ function init()
 
     clickControl = new OpenLayers.Control.Click();
     map.addControl(clickControl);
-    console.log(clickControl);
+    //console.log(clickControl);
     clickControl.activate();
 
 
@@ -106,7 +106,7 @@ function numberWithCommas(n) {
 
 function onTrends(filterWords, json) 
 {
-  console.log('in onTrends');
+  //console.log('in onTrends');
   var meta = json['meta'];
   var trends = json['trends'];
   var bounds = meta['boundingBoxM'];
