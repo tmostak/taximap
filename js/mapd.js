@@ -1571,10 +1571,12 @@ var Tweets =
   bottomOffset: null,
   startRecordSpan:null,
   endRecordSpan:null,
+  numDisplayTweets:null,
   minId: 0,
   startRecord: 0,
   endRecord: 1,
   scrollTop:0,
+  append: false,
   numResults: null,
 
 init: function(sortDiv, viewDiv) {
@@ -1725,11 +1727,18 @@ init: function(sortDiv, viewDiv) {
   },
 
   getURL: function(options) {
-    if (options.minId != null)
+    if (options.minId != null) {
       this.params.sql = "select id, goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
-    else
+      this.append = true;
+    }
+    else {
       this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
+      this.append = false;
+    }
     this.params.sql += this.mapd.getWhere(options);
+    //var sortDesc = this.sortDesc;
+    //if (options.minId != null)
+      //sortDesc = false;
     this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     console.log(this.params.sql);
@@ -1755,14 +1764,42 @@ init: function(sortDiv, viewDiv) {
   // },
    
   onTweets: function(json) {
-    if (json == null || json.results.length == 0)
+    if (json == null || json.results.length == 0) {
+      if (this.append == false) {
+        this.viewDiv.empty();
+        this.startRecord = 0;
+        this.endRecord = 1;
+        this.numTweets = 0; 
+        this.numDisplayTweets = 0;
+        $("#resultsCount").html(numberWithCommas(this.numTweets));
+      }
+
       return;
+    }
+
+      console.log("This numDisplaytweets: " + this.numDisplayTweets);
     var prepend = true;
-    if (!("id" in json.results[0])) {
+    //if (!("id" in json.results[0])) {
+    if (this.append == false) {
       prepend = false;
       this.viewDiv.empty();
+      this.startRecord = 0;
+      this.endRecord = 1;
       console.log("no prepend");
+      this.numTweets = json.n;
+      this.numDisplayTweets = json.results.length; 
     }
+    else { 
+      this.numTweets += json.n;
+      this.numDisplayTweets += json.results.length; 
+      if (this.numDisplayTweets > 200) {
+        $(".tweet-container").slice(200).remove();
+        this.numDisplayTweets = 200;
+      }
+        
+
+    }
+
 
     if (this.sortDesc) {
       $("#newSort").addClass("link-visited");
@@ -1774,8 +1811,7 @@ init: function(sortDiv, viewDiv) {
     }
 
     //$('#oldSort').click($.proxy(this.oldSortFunc, this));
-    var container = $('').prependTo(this.viewDiv);
-
+    var container = $('<div></div>').prependTo(this.viewDiv);
     if (json == null) return;
     if (vectors) map.removeLayer(vectors);
     vectors = new OpenLayers.Layer.Vector("Vector Layer", {'displayInLayerSwitcher': false});
@@ -1807,7 +1843,7 @@ init: function(sortDiv, viewDiv) {
     map.addLayer(markers);
     markers.setZIndex(Number(vectors.getZIndex()) + 1);
 
-    this.numTweets = json.n;
+    
     $("#resultsCount").html(numberWithCommas(this.numTweets));
     this.topOffset = this.viewDiv.offset().top + 1;
     this.bottomOffset = this.topOffset + this.viewDiv.height(); 
@@ -1818,7 +1854,7 @@ init: function(sortDiv, viewDiv) {
       var result = results[i];
       if (!result || !result.tweet_text)
         continue;
-      this.add(result, i);
+      this.add(result, i, container);
     }
     $('.tweet-profile, .username').click( $.proxy(function(e) {
       var userName = $(e.target).html();
@@ -1837,7 +1873,7 @@ init: function(sortDiv, viewDiv) {
 
   },
 
-  add: function(tweet, index) {
+  add: function(tweet, index, div) {
     var user = tweet.sender_name;
     var text = tweet.tweet_text;
     if (tweet.id > this.minId)
@@ -1847,7 +1883,7 @@ init: function(sortDiv, viewDiv) {
     var x = tweet.goog_x;
     var y = tweet.goog_y;
     
-    var container = $('<li></li>').addClass("tweet-container").appendTo(this.viewDiv);
+    var container = $('<li></li>').addClass("tweet-container").appendTo(div);
     var header = $('<div></div>').addClass("tweet-header").appendTo(container);
     var content = $('<p></p>').addClass("tweet-content").appendTo(container);
     var profile = $('<a></a>').addClass("tweet-profile").appendTo(header);
