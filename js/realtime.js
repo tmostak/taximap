@@ -88,7 +88,7 @@ var RealTimeOverlay = {
        g.selectAll("circle")
         .data(data)
         .transition()
-        .delay(5000)
+        .delay(1000)
         .duration(500)
         .attr("r",5)
         .style("opacity", 1.0)

@@ -569,9 +569,12 @@ var MapD = {
       }
       else {
         var whereQuery ="";
-        if (minId != null)
-          whereQuery = "id > " + minId + " and ";  
-        whereQuery += this.getTimeQuery(timestart, timeend) + this.getTermsAndUserQuery(queryTerms, user);
+        if (minId != null) {
+          whereQuery = "id > " + minId + " and " + this.getTermsAndUserQuery(queryTerms, user);
+        }
+        else {
+            whereQuery = this.getTimeQuery(timestart, timeend) + this.getTermsAndUserQuery(queryTerms, user);
+        }
         if (whereQuery)
           whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
         return whereQuery;
@@ -1743,7 +1746,10 @@ init: function(sortDiv, viewDiv) {
     //var sortDesc = this.sortDesc;
     //if (options.minId != null)
       //sortDesc = false;
-    this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
+    if (options.minId != null)
+        this.params.sql += " order by id " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
+    else
+        this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
     //console.log(this.params.sql);
     var url = this.mapd.host + '?' + buildURI(this.params);
