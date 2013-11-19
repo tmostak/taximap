@@ -16,6 +16,7 @@ var ScatterPlot =
   vars: null,
   colorVar: "region",
   selectedVar: "pst045212",
+  minTweets: 40000,
   elems: {
     container: null,
     svg: null,
@@ -153,6 +154,17 @@ var ScatterPlot =
   },
 
   addData: function(dataset, numQueryTerms, dataNums, update) { 
+    var minTweets = this.minTweets;
+    this.data = dataset.results;
+    if (dataNums == "Percents") {
+        this.data = this.data.filter(function(d) {
+            if (d.n < minTweets)
+                return false;
+            return true;
+        });
+    }
+
+
     //d3.select("svg").remove();
 
     /*
@@ -186,7 +198,6 @@ var ScatterPlot =
     }
     console.log(this.data);
     */
-    this.data = dataset.results;
     if (dataNums == "Percents") { 
       this.abbrFormat = d3.format(".2%"); 
     }
@@ -200,9 +211,20 @@ var ScatterPlot =
     var colorVar = this.colorVar;
     if (selectedVar == null)
       return null;
+
+
     this.xScale
       .domain([d3.min(this.data, function(d) {return d[selectedVar];}), d3.max(this.data, function(d) {return d[selectedVar];})]);
 
+    /*if (dataNums == "Percents") {
+        this.yScale.domain([d3.extent(this.data, function(d) {
+            if (d.n > minTweets)
+                return d.y;
+        })]);
+   // }*/
+        /*this.yScale.domain([d3.extent(this.data, function(d) {
+                return d.y;
+        })]);*/
     this.yScale
       .domain([d3.min(this.data, function(d) {return d.y;}), d3.max(this.data, function(d) {return d.y;})]);
 
@@ -228,7 +250,8 @@ var ScatterPlot =
             return xScale(d[selectedVar]);
           })
         .attr("cy", function(d) {
-            return yScale(d.y);
+            if (d.n > minTweets)
+                return yScale(d.y);
           })
         .attr("r", function(d) {
             return rScale(d.n);

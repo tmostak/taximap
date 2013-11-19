@@ -7,7 +7,7 @@
     }
 
 var joinParams = {
-    "countries": {jointable: "country_data", joinvar: "name", joinattrs: "pop_est,iso_a2", pop_var: "pop_est", map_key: "ISO2", data_key: "iso_a2", data_col: "country"},
+    "countries": {jointable: "country_data", joinvar: "name", joinattrs: "pst045212,iso_a2", pop_var: "pst045212", map_key: "ISO2", data_key: "iso_a2", data_col: "country"},
     "states": {jointable: "state_data", joinvar: "name", joinattrs: "pst045212", pop_var: "pst045212", map_key: "abbr", data_key: "label", data_col: "state"},
     "counties": {jointable: "county_data", joinvar: "name", joinattrs: "pst045212,fips", pop_var: "pst045212", map_key: "id", data_key: "fips", data_col: "county"}
 };

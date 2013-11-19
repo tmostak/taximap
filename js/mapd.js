@@ -389,11 +389,12 @@ var MapD = {
     if (this.services.animation.isAnimating() == false ) { 
 
            if (this.timeend >  (this.dataend-this.datastart)*.98 + this.datastart) {
+             // pointLayer.clearGrid();
               this.services.pointmap.reload();
               this.services.heatmap.reload();
               if (this.fullScreen == false) {
                   this.services.tweets.reload();
-                  this.services.graph.reload();
+                  //this.services.graph.reload();
               }
             }
         }
@@ -1125,6 +1126,7 @@ var PointMap = {
     r: 0,
     g: 0,
     b: 255,
+    rand:0,
     radius: 1,
     format: "image/png",
     transparent: true,
@@ -1206,6 +1208,7 @@ var PointMap = {
 
   reload: function(options) {
     console.log("reload");
+    this.params.rand = Math.round(Math.random() * 10000);
     this.wms.mergeNewParams(this.getParams(options));
   }
 };
