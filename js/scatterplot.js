@@ -14,8 +14,8 @@ var ScatterPlot =
   abbrFormat: null,
   data: null,
   vars: null,
-  colorVar: null,
-  selectedVar: null,
+  colorVar: "region",
+  selectedVar: "pst045212",
   elems: {
     container: null,
     svg: null,

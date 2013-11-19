@@ -25,7 +25,8 @@ var MapD = {
   //host: "http://127.0.0.1:8080/",
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd2.csail.mit.edu:8080/",
-  host: "http://mapd.csail.mit.edu:8080/",
+  //host: "http://mapd.csail.mit.edu:8080/",
+  host: "http://140.221.141.152:8080/",
   //host: "http://www.velocidy.net:7000/",
   //host: "http://192.168.1.90:8080/",
   //host: "http://127.0.0.1:8080/",
@@ -186,10 +187,11 @@ var MapD = {
 
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
-      this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
-     this.timestart = Math.max(this.dataend - 864000,  Math.round((this.dataend-this.datastart)*.01 + this.datastart));
+      //this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
+      this.timeend = this.dataend-30000; 
+     this.timestart = Math.max(this.dataend - 1814400,  Math.round((this.dataend-this.datastart)*.01 + this.datastart));
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark", fullScreen: 0};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: "pst045212", baseLayer: "Dark", fullScreen: 0};
       mapParams = this.readLink(mapParams);
       console.log("map params");
       console.log(mapParams);
@@ -282,6 +284,7 @@ var MapD = {
       if (mapParams.heatOn == 1)
         this.services.settings.heatButtonFunction();
 
+      setTimeout($.proxy(this.timeReload,this),1000);
       //pointLayer.setVisibility(mapParams.pointOn);
       //heatLayer.setVisibility(mapParams.heatOn);
       //Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
@@ -382,6 +385,22 @@ var MapD = {
     return search; */
   },
 
+  timeReload: function(e) {
+    if (this.services.animation.isAnimating() == false ) { 
+
+           if (this.timeend >  (this.dataend-this.datastart)*.98 + this.datastart) {
+              this.services.pointmap.reload();
+              this.services.heatmap.reload();
+              if (this.fullScreen == false) {
+                  this.services.tweets.reload();
+                  this.services.graph.reload();
+              }
+            }
+        }
+
+          setTimeout($.proxy(this.timeReload,this),1000);
+   },
+
   reload: function(e) {
 
     if (this.fullScreen == false) {
@@ -431,7 +450,7 @@ var MapD = {
 
   setDataTimeRange: function(json) {
     this.datastart = json.results[0].min;
-    this.dataend = json.results[0].max;
+    this.dataend = json.results[0].max + 86400;
     this.startCheck();
   },
 
@@ -613,7 +632,7 @@ var TopKTokens = {
   settingDict: {Display: 'displaySetting', Source: 'sourceSetting', Mode: 'modeSetting'},
   locked: false,
   tokens: [],
-  xVar: null,
+  xVar: "pst045212",
   params: {
     request: "GroupByToken",
     sql: null,
@@ -743,8 +762,12 @@ var TopKTokens = {
 
   onScatterVarsLoad: function(json) {
     console.log("onscattervarsload");
+    console.log("Selected var 0: " + ScatterPlot.selectedVar);
     ScatterPlot.setVars(json);
-    TopKTokens.xVar = ScatterPlot.selectedVar; 
+    console.log("Selected var 1: " + ScatterPlot.selectedVar);
+    //TopKTokens.xVar = ScatterPlot.selectedVar; 
+    TopKTokens.xVar = "pst045212";
+    console.log("Xvar: " + TopKTokens.xVar);
     TopKTokens.reload();
     //ScatterPlot.init(this, this.displayDiv);
     //console.log(json);
@@ -810,7 +833,7 @@ var TopKTokens = {
         this.params.jointable = null;
         this.params.joinvar = null;
         this.params.joinattrs = null;
-        this.xVar = null;
+        //this.xVar = null;
         ScatterPlot.selectedVar = null;
         this.params.sort = "true";
     }
