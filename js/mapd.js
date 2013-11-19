@@ -26,7 +26,7 @@ var MapD = {
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd2.csail.mit.edu:8080/",
   //host: "http://mapd.csail.mit.edu:8080/",
-  host: "http://140.221.141.152:8080/",
+  host: "http://140.221.141.152:8081/",
   //host: "http://www.velocidy.net:7000/",
   //host: "http://192.168.1.90:8080/",
   //host: "http://127.0.0.1:8080/",
@@ -393,7 +393,7 @@ var MapD = {
               this.services.pointmap.reload();
               this.services.heatmap.reload();
               if (this.fullScreen == false) {
-                  this.services.tweets.reload();
+                  this.services.tweets.reload(true);
                   //this.services.graph.reload();
               }
             }
@@ -526,6 +526,7 @@ var MapD = {
     var user = this.user;
     var splitQuery = false; // don't split query into two parts 
     var queryTerms = this.queryTerms;
+    var minId = null;
     if (options) {
       if (options.time) {
         console.log("time " + options.time.timestart);
@@ -539,7 +540,13 @@ var MapD = {
       }
       if ("splitQuery" in options) 
         splitQuery = options.splitQuery;
+
+      if ("minId" in options)
+        minId = options.minId; 
+
+      
     }
+    console.log("minid: " + minId);
     
       if (splitQuery) {
         var queryArray = new Array(2);
@@ -553,7 +560,10 @@ var MapD = {
 
       }
       else {
-        var whereQuery = this.getTimeQuery(timestart, timeend) + this.getTermsAndUserQuery(queryTerms, user);
+        var whereQuery ="";
+        if (minId != null)
+          whereQuery = "id > " + minId + " and ";  
+        whereQuery += this.getTimeQuery(timestart, timeend) + this.getTermsAndUserQuery(queryTerms, user);
         if (whereQuery)
           whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
         return whereQuery;
@@ -1561,6 +1571,7 @@ var Tweets =
   bottomOffset: null,
   startRecordSpan:null,
   endRecordSpan:null,
+  minId: 0,
   startRecord: 0,
   endRecord: 1,
   scrollTop:0,
@@ -1714,16 +1725,25 @@ init: function(sortDiv, viewDiv) {
   },
 
   getURL: function(options) {
-    this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
+    if (options.minId != null)
+      this.params.sql = "select id, goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
+    else
+      this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere(options);
     this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
+    console.log(this.params.sql);
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
   },
 
-  reload: function() {
-    $.getJSON(this.getURL()).done($.proxy(this.onTweets, this));
+  reload: function(getMinId) {
+    var options = {}
+    if (getMinId == true) {
+      options.minId =this.minId;
+    }
+    console.log(options);
+    $.getJSON(this.getURL(options)).done($.proxy(this.onTweets, this));
   },
   //oldSortFunc :function () { 
   //    console.log("oldsort");
@@ -1735,8 +1755,15 @@ init: function(sortDiv, viewDiv) {
   // },
    
   onTweets: function(json) {
-    //console.log('in onTweets');
-    this.viewDiv.empty();
+    if (json == null || json.results.length == 0)
+      return;
+    var prepend = true;
+    if (!("id" in json.results[0])) {
+      prepend = false;
+      this.viewDiv.empty();
+      console.log("no prepend");
+    }
+
     if (this.sortDesc) {
       $("#newSort").addClass("link-visited");
       $("#oldSort").removeClass("link-visited");
@@ -1747,7 +1774,7 @@ init: function(sortDiv, viewDiv) {
     }
 
     //$('#oldSort').click($.proxy(this.oldSortFunc, this));
-    var container = $('').appendTo(this.viewDiv);
+    var container = $('').prependTo(this.viewDiv);
 
     if (json == null) return;
     if (vectors) map.removeLayer(vectors);
@@ -1813,6 +1840,8 @@ init: function(sortDiv, viewDiv) {
   add: function(tweet, index) {
     var user = tweet.sender_name;
     var text = tweet.tweet_text;
+    if (tweet.id > this.minId)
+      this.minId = tweet.id;
     //tweet.time = tweet.time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
     var time = new Date(tweet.time * 1000);
     var x = tweet.goog_x;
