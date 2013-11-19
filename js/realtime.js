@@ -26,13 +26,41 @@ var RealTimeOverlay = {
      map.addLayer(this.overlay);
      map.events.register("moveend", map, $.proxy(this.reset,this));
 
+
     },
 
+   addData: function(data) {
+      var svg = this.svg;
+      g.selectAll("circle")
+      .data(data)
+      .enter()
+       .append("circle")
+       .attr("cx",function(d){
+          return project([d.goog_x, d.goog_y])[0];
+        })
+       .attr("cy",function(d){
+          return project([d.goog_x, d.goog_y])[1];
+        })
+       .attr("r", 4)
+        .style("fill","red")
+       .style("opacity", 0.8);
+
+       g.selectAll("circle")
+        .data(data)
+        .exit()
+        .transition()
+        .delay(5000)
+        .duration(500)
+        .attr("r",0)
+        .style("opacity", 0.0)
+        
+     });
+   },
+    
    addCsvData: function() {
       var svg = this.svg;
       var g = this.g;
       d3.csv("js/test.csv", function(data) {
-       console.log("happy: ");
        console.log(data);
        RealTimeOverlay.data = data;
        g.selectAll("circle")
