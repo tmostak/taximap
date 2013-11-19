@@ -394,7 +394,7 @@ var MapD = {
 
            if (this.timeend >  (this.dataend-this.datastart)*.98 + this.datastart) {
              // pointLayer.clearGrid();
-             var updateInterval = (map.zoom > 7 : 10 ? 5);
+             var updateInterval = map.zoom > 7 ? 10 : 5;
              if (this.timeUpdates % updateInterval == 0) {
                   this.services.pointmap.reload();
                   this.services.heatmap.reload();

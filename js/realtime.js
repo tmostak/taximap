@@ -43,7 +43,7 @@ var RealTimeOverlay = {
        .attr("r", 3)
         .style("fill","white")
       .transition()
-       .delay(function() {return Math.round(Math.random() * 1000);})
+       .delay(function() {return Math.round(Math.random() * timeUpdateInterval);})
        .attr("cx",function(d){
           return pointProject([d.goog_x, d.goog_y])[0];
         })
@@ -147,7 +147,7 @@ var RealTimeOverlay = {
      //if (this.data != null) {
      this.g.selectAll("circle")
      .attr("cx",function(d){
-        console.log(d.goog_x);
+        //console.log(d.goog_x);
         return project([d.goog_x, d.goog_y])[0];
       })
      .attr("cy",function(d){
