@@ -212,6 +212,7 @@ var ScatterPlot =
     if (selectedVar == null)
       return null;
 
+    console.log("Selected var: " + selectedVar);
 
     this.xScale
       .domain([d3.min(this.data, function(d) {return d[selectedVar];}), d3.max(this.data, function(d) {return d[selectedVar];})]);
@@ -238,7 +239,7 @@ var ScatterPlot =
     var rScale = this.rScale;
     var cScale = this.cScale;
 
-    console.log("Selected Var: " +  selectedVar);
+    console.log("Selected Var 2: " +  selectedVar);
     console.log("ColorVar: " +  colorVar);
 
     if (dataNums == "Percents") {

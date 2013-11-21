@@ -56,6 +56,7 @@ var RealTimeOverlay = {
 
         g.selectAll("circle")
         .data(data, function(d) {return d.id;})
+        //.data([])
         .exit()
         .transition()
         //.delay(5000)
@@ -65,6 +66,20 @@ var RealTimeOverlay = {
         .remove();
      },
     
+
+  removeData: function() {
+    this.g.selectAll("circle")
+    .data([])
+    .exit()
+    .transition()
+    .duration(500)
+    .attr("r",0)
+    .style("opacity", 0.0)
+    .remove();
+  },
+
+
+
    addCsvData: function() {
       var svg = this.svg;
       var g = this.g;

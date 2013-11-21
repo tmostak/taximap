@@ -42,6 +42,7 @@ var MapD = {
   linkButton: null,
   fullScreen: false,
   timeUpdates: 0,
+  updateFlag: false,
   services: {
     baseLayerName: "Dark",
     pointmap: null,
@@ -404,7 +405,13 @@ var MapD = {
                   //this.services.graph.reload();
               //}
               this.timeUpdates++;
+              this.updateFlag = true;
             }
+            else if (this.updateFlag == true) {
+                this.updateFlag = false;
+                this.services.realtime.removeData();
+            }
+
         }
 
           setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
@@ -787,7 +794,7 @@ var TopKTokens = {
     ScatterPlot.setVars(json);
     //console.log("Selected var 1: " + ScatterPlot.selectedVar);
     //TopKTokens.xVar = ScatterPlot.selectedVar; 
-    TopKTokens.xVar = "pst045212";
+    //TopKTokens.xVar = "pst045212";
     //console.log("Xvar: " + TopKTokens.xVar);
     TopKTokens.reload();
     //ScatterPlot.init(this, this.displayDiv);
@@ -796,6 +803,7 @@ var TopKTokens = {
   scatterVarChange: function(e) {
     //console.log($(this).find("option:selected"));
     TopKTokens.xVar = $(this).find("option:selected").get(0).value;
+    console.log("Xvar: " + TopKTokens.xVar);
     ScatterPlot.selectedVar = TopKTokens.xVar;
     //console.log(ScatterPlot.selectedVar);
     TopKTokens.reload();
