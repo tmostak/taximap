@@ -2,7 +2,11 @@
 // heatmapreload:    tell HeatMap to reload
 // geocodeend:       geocoding service is ready
 
-var timeUpdateInterval = 1200;
+var timeUpdateInterval = 3600;
+newTime = 0
+lastTime = 0
+tweetNow = 0
+tweetLast = 0
 
 var BBOX = {
   //WORLD: "-19313026.92,-6523983.06,14187182.33,12002425.38",
@@ -288,8 +292,7 @@ var MapD = {
         this.services.settings.pointButtonFunction();
       if (mapParams.heatOn == 1)
         this.services.settings.heatButtonFunction();
-
-      setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
+      this.timeReload();
       //pointLayer.setVisibility(mapParams.pointOn);
       //heatLayer.setVisibility(mapParams.heatOn);
       //Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
@@ -391,19 +394,26 @@ var MapD = {
   },
 
   timeReload: function(e) {
+
     if (this.services.animation.isAnimating() == false ) { 
 
+           lastTime = newTime;
+           newTime = new Date().getTime();
+           //console.log(newTime - lastTime)
            if (this.timeend >  (this.dataend-this.datastart)*.98 + this.datastart) {
-             // pointLayer.clearGrid();
+             if (this.updateFlag == false) {
+                 this.services.tweets.reload(false);
+                  this.updateFlag = true;
+                  setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
+                  return;
+            }
+            
              var updateInterval = map.zoom > 7 ? 10 : 5;
              if (this.timeUpdates % updateInterval == 0) {
                   this.services.pointmap.reload();
                   this.services.heatmap.reload();
               }
-              //if (this.fullScreen == false) {
-                  this.services.tweets.reload(true);
-                  //this.services.graph.reload();
-              //}
+            this.services.tweets.reload(true);
               this.timeUpdates++;
               this.updateFlag = true;
             }
@@ -413,8 +423,9 @@ var MapD = {
             }
 
         }
-
-          setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
+        //this.timeReload();
+        //this.timeReload();
+        setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
    },
 
   reload: function(e) {
@@ -1592,6 +1603,7 @@ var Tweets =
   endRecord: 1,
   scrollTop:0,
   append: false,
+  numTweets: null,
   numResults: null,
 
 init: function(sortDiv, viewDiv) {
@@ -1755,7 +1767,7 @@ init: function(sortDiv, viewDiv) {
     //if (options.minId != null)
       //sortDesc = false;
     if (options.minId != null)
-        this.params.sql += " order by id " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
+        this.params.sql += " order by id " + (this.sortDesc == true ? "desc" : "") +  " limit 500";
     else
         this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
@@ -1782,6 +1794,11 @@ init: function(sortDiv, viewDiv) {
   // },
    
   onTweets: function(json) {
+      tweetLast = tweetNow;
+      tweetNow = new Date().getTime();
+      var delay = tweetNow - tweetLast;
+      console.log("Tweet delay: " + delay)
+
     if (json == null || json.results.length == 0) {
       if (this.append == false) {
         this.viewDiv.empty();
@@ -1791,6 +1808,7 @@ init: function(sortDiv, viewDiv) {
         this.numDisplayTweets = 0;
         $("#resultsCount").html(numberWithCommas(this.numTweets));
       }
+      console.log("returning");
 
       return;
     }
@@ -1809,9 +1827,9 @@ init: function(sortDiv, viewDiv) {
     else { 
       this.numTweets += json.n;
       this.numDisplayTweets += json.results.length; 
-      if (this.numDisplayTweets > 200) {
-        $(".tweet-container").slice(200).remove();
-        this.numDisplayTweets = 200;
+      if (this.numDisplayTweets > 500) {
+        $(".tweet-container").slice(500).remove();
+        this.numDisplayTweets = 500;
         }
       this.mapd.services.realtime.addData(json.results);
       }
@@ -1869,14 +1887,23 @@ init: function(sortDiv, viewDiv) {
     var numResults = results.length;
     var delay = Math.round(timeUpdateInterval / numResults);
     //console.log("delay: " + delay);
-
-    for (i in results)
-    {
-      var result = results[i];
-      if (!result || !result.tweet_text)
-        continue;
-      setTimeout($.proxy(this.add(result, i, container), this), delay * i);
+    badCount = 0;
+   
+    if (this.mapd.fullScreen == false) { 
+        for (var i = 0; i < numResults; i++)
+        {
+              //var result = results[i];
+              //if (!results[i] || !resulttweet_text)
+              //  continue;
+              this.add(results[i],i,container);
+              var timeDelay = delay * i;
+              //setTimeout($.proxy(this.add(result, i, container), this), timeDelay);
+              //setTimeout(this.add(result, i, container), timeDelay);
+              //setTimeout(function() {Tweets.add(result, i, container);}, timeDelay);
+        }
+        console.log(badCount +"/" + numResults);
     }
+
     $('.tweet-profile, .username').click( $.proxy(function(e) {
       var userName = $(e.target).html();
       //console.log($(this).html());
@@ -1895,10 +1922,12 @@ init: function(sortDiv, viewDiv) {
   },
 
   add: function(tweet, index, div) {
+    if (!("id" in tweet))
+        badCount++;
     var user = tweet.sender_name;
     var text = tweet.tweet_text;
-    if (tweet.id > this.minId)
-      this.minId = tweet.id;
+    if (tweet.id > Tweets.minId)
+      Tweets.minId = tweet.id;
     //tweet.time = tweet.time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
     var time = new Date(tweet.time * 1000);
     var x = tweet.goog_x;
@@ -1921,13 +1950,13 @@ init: function(sortDiv, viewDiv) {
     //console.log(hashtags)
     //console.log(urls)
     //console.log(users)
-    var selectColor = this.getRandomColor(); 
+    var selectColor = Tweets.getRandomColor(); 
     container.data({tweet: tweet, urls: urls, hashtags: hashtags, users: users, selectColor: selectColor});
-    container.mouseenter($.proxy(this.onMouseEnter,this, container));
-    container.mouseleave($.proxy(this.onMouseLeave,this, container));
-    container.click($.proxy(this.onClick,this,container));
+    container.mouseenter($.proxy(Tweets.onMouseEnter,Tweets, container));
+    container.mouseleave($.proxy(Tweets.onMouseLeave,Tweets, container));
+    container.click($.proxy(Tweets.onClick,Tweets,container));
     //container.mouseup($.proxy(this.onUnClick,this,container));
-    this.addPoint(x,y,index, selectColor);
+    //this.addPoint(x,y,index, selectColor);
 
   },
  

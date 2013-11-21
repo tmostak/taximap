@@ -1,4 +1,6 @@
 
+now = 0
+last = 0
 
  function pointProject (pos){
       var point= map.getViewPortPxFromLonLat(new OpenLayers.LonLat(pos[0], pos[1]));
@@ -34,23 +36,28 @@ var RealTimeOverlay = {
    addData: function(data) {
       //console.log(data);
       //this.data = data;
+      last = now;
+      now = new Date().getTime();
+      var diff = now -last;
+      console.log("Display delay: " + diff);
       var svg = this.svg;
       var g = this.g;
       g.selectAll("circle")
       .data(data, function(d) {return d.id;})
       .enter()
        .append("circle")
-       .attr("r", 3)
+       .attr("r", 2)
         .style("fill","white")
       .transition()
        .delay(function() {return Math.round(Math.random() * timeUpdateInterval);})
+       //.delay(function() {return Math.round(Math.random() * 3200);})
        .attr("cx",function(d){
           return pointProject([d.goog_x, d.goog_y])[0];
         })
        .attr("cy",function(d){
           return pointProject([d.goog_x, d.goog_y])[1];
         })
-       .attr("r", 3)
+       .attr("r", 2) 
         .style("fill","red")
        .style("opacity", 0.7);
 
@@ -60,7 +67,7 @@ var RealTimeOverlay = {
         .exit()
         .transition()
         //.delay(5000)
-        .duration(2000)
+        .duration(1000)
         .attr("r",0)
         .style("opacity", 0.0)
         .remove();
