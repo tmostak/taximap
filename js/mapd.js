@@ -31,8 +31,8 @@ var MapD = {
   //host: "http://127.0.0.1:8080/",
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd2.csail.mit.edu:8080/",
-  //host: "http://mapd.csail.mit.edu:8080/",
-  host: "http://140.221.141.152:8080/",
+  host: "http://mapd.csail.mit.edu:8080/",
+  //host: "http://140.221.141.152:8080/",
   //host: "http://www.velocidy.net:7000/",
   //host: "http://192.168.1.90:8080/",
   //host: "http://127.0.0.1:8080/",
@@ -292,7 +292,7 @@ var MapD = {
         this.services.settings.pointButtonFunction();
       if (mapParams.heatOn == 1)
         this.services.settings.heatButtonFunction();
-      this.timeReload();
+      //this.timeReload();
       //pointLayer.setVisibility(mapParams.pointOn);
       //heatLayer.setVisibility(mapParams.heatOn);
       //Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
@@ -486,6 +486,107 @@ var MapD = {
     this.user = user;
   },
 
+  parseQueryExpression: function(str) {
+    var numQuotes = 0;
+    var numStartParens = 0;
+    var numEndParens = 0;
+    for (i in str) {
+      if (str[i] == '"')
+        numQuotes++;
+      else if (str[i] == "(")
+        numStartParens++;
+      else if (str[i] == ")")
+        numEndParens++;
+    }
+    if (numQuotes % 2 != 0 || numStartParens != numEndParens)
+      return;
+
+    var returnString = "";
+    var queryTerms = str.split(/(AND|OR|"|\s+|NOT|\(|\))/);
+    var expectOperand = true;
+    var inQuote = false;
+    var atNot = false;
+    var searchString = "";
+    for (var i = 0; i != queryTerms.length; i++) {
+      var token = queryTerms[i];
+      if (token == "" || token == " ")
+        continue;
+      if (token == "AND" || token == "OR") {
+        if (expectOperand == true)  
+          return null;
+        expectOperand = true;
+        returnString += " " + token + " ";  
+      }
+      else if (token == "NOT") {
+        /*if (expectOperand == false)  
+          return null;*/
+        atNot = true;
+        //returnString += " " + token + " ";  
+      }
+      else if (token == "(") {
+        /*if (expectOperand == false)  
+          return null; */
+        returnString += " " + token + " ";  
+      }
+      else if (token == ")") {
+        /*if (expectOperand == true)  
+          return null;*/
+        returnString += " " + token + " ";  
+      }
+      else if (token == '"') {
+        if (expectOperand == false)  {
+          returnString += " AND ";
+          expectOperand = true;
+
+          //return null;
+        }
+        inQuote = !inQuote;
+        if (inQuote) {
+          if (atNot) {
+            searchString = "tweet_text not ilike '"  
+            atNot = false;
+          }
+          else
+            searchString = "tweet_text ilike '"  
+        }
+        else {
+          console.log("At end quote");
+          expectOperand = false;
+          if (searchString[searchString.length -1] == ' ') {
+            searchString = searchString.substr(0,searchString.length-1) + "'";
+          }
+          else {
+            searchString += "'";
+          }
+          returnString += searchString;
+          searchString = "";
+        }
+      }
+      else {
+        if (inQuote) {
+          searchString += token + " ";
+        }
+        else  {
+          if (expectOperand == false) {
+            returnString += " AND ";
+            //return null;
+          }
+          if (atNot) {
+            returnString += "tweet_text not ilike '" + token + "'";
+            atNot = false;
+          }
+          else  {
+            returnString += "tweet_text ilike '" + token + "'";
+          }
+          expectOperand = false;
+        }
+     }
+  }
+  return returnString;
+},
+            
+  
+
   setQueryTerms: function(queryTerms) {
     if (queryTerms[0] != '"' && this.queryTerms[this.queryTerms.length -1] != '"')
         this.queryTerms = queryTerms.trim().split(" ").filter(function(d) {return d});
@@ -530,6 +631,10 @@ var MapD = {
     var query = ""; 
     if (queryTerms.length) {
       queryTerms = this.parseQueryTerms(queryTerms);
+      console.log("Now doing parse Expression: ");
+      var expression = this.parseQueryExpression(this.services.search.termsInput.val());
+      console.log(expression);
+
       query += queryTerms + " and ";
     }
     if (user)
@@ -1956,7 +2061,7 @@ init: function(sortDiv, viewDiv) {
     container.mouseleave($.proxy(Tweets.onMouseLeave,Tweets, container));
     container.click($.proxy(Tweets.onClick,Tweets,container));
     //container.mouseup($.proxy(this.onUnClick,this,container));
-    //this.addPoint(x,y,index, selectColor);
+    this.addPoint(x,y,index, selectColor);
 
   },
  
@@ -2103,7 +2208,7 @@ var Search = {
     $(document).on('geocodeend', $.proxy(this.onGeoCodeEnd, this));
     this.map.events.register('moveend', this, this.onMapMove);
   },
- 
+
   onSearch: function() {
 
     var terms = this.termsInput.val();
