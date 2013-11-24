@@ -301,7 +301,7 @@ var MapD = {
 
       //this.reloadByGraph(this.timestart, this.timeend);
       //if (!linkRead)
-        this.reload();
+      this.reload();
     }
   },
   writeLink: function(fullEncode) {
@@ -508,6 +508,7 @@ var MapD = {
       return;
 
     var returnString = "(";
+    str = str.replace(/'/g, "''").replace("/&/g", "");
     var queryTerms = str.split(/(AND|OR|"|\s+|NOT|\(|\))/);
     var expectOperand = true;
     var inQuote = false;
@@ -688,7 +689,7 @@ var MapD = {
     
         var locQuery = "";
         if (this.location != null && this.location != "") {
-          locQuery = this.locationCat + " ilike '" + this.location + "' and";  
+          locQuery = this.locationCat + " ilike '" + this.location + "' and ";  
         }
       if (splitQuery) {
         var queryArray = new Array(2);
@@ -704,7 +705,7 @@ var MapD = {
       }
 
         if (queryArray[1])
-          queryArray[1] = " where " + queryArray[1].substr(0, queryArray[1].length-4);
+          queryArray[1] = " where " + queryArray[1].substr(0, queryArray[1].length-5);
 
         return queryArray;
 
@@ -718,7 +719,7 @@ var MapD = {
             whereQuery = this.getTimeQuery(timestart, timeend) + locQuery + this.getTermsAndUserQuery(queryTerms, user);
         }
         if (whereQuery)
-          whereQuery = " where " + whereQuery.substr(0, whereQuery.length-4);
+          whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
         return whereQuery;
       }
   }
@@ -1120,18 +1121,25 @@ var TopKTokens = {
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "Country") {
-      this.mapd.services.search.termsInput.val("country: " + token);
-      $('#termsInput').trigger('input');
+      //this.mapd.services.search.termsInput.val("country: " + token);
+      //this.mapd.services.search.locationCat = "Country";
+      $("#locCountry").click();
+      this.mapd.services.search.locationInput.val(token);
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "State") {
-      this.mapd.services.search.termsInput.val("state: " + token);
-      $('#termsInput').trigger('input');
+      //this.mapd.services.search.locationCat = "State";
+      $("#locState").click();
+      this.mapd.services.search.locationInput.val(token);
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "County") {
-      this.mapd.services.search.termsInput.val("county: " + token);
-      $('#termsInput').trigger('input');
+      //this.mapd.services.search.locationCat = "County";
+      $("#locCounty").click();
+      this.mapd.services.search.locationInput.val(token);
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "Zip") {
@@ -1167,25 +1175,30 @@ var TopKTokens = {
         //this.setMenuItem("Source", "Words", false);
       }
     else if (this.sourceSetting == "Country") {
-      this.mapd.services.search.termsInput.val("country: " + token);
+      $("#locCountry").click();
+      this.mapd.services.search.locationInput.val(token);
       $('#termsInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "State") {
-      this.mapd.services.search.termsInput.val("state: " + token);
+      $("#locState").click();
+      this.mapd.services.search.locationInput.val(token);
       $('#termsInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "County") {
-      this.mapd.services.search.termsInput.val("county: " + token);
+      $("#locCounty").click();
+      this.mapd.services.search.locationInput.val(token);
       $('#termsInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
+    /*
     else if (this.sourceSetting == "Zip") {
       this.mapd.services.search.termsInput.val("zip: " + token);
       $('#termsInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
+    */
     else if (this.sourceSetting == "OS-App") {
       this.mapd.services.search.termsInput.val("origin: " + token);
       $('#termsInput').trigger('input');
@@ -1551,7 +1564,7 @@ var HeatMap = {
       this.params.sql += "," + queryArray[0];
     this.params.sql += " from " + this.mapd.table + queryArray[1];
 
-    if (options.heatMax != undefined && options.heatMax != null) 
+    if (options.heatMax != undefined && options.heatMax != null && isNaN(options.heatMax) == false) 
       this.params.maxval = options.heatMax;
     else
       this.params.maxval = "auto"; 
