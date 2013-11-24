@@ -31,10 +31,10 @@ var MapD = {
   //host: "http://127.0.0.1:8080/",
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd2.csail.mit.edu:8080/",
-  host: "http://mapd.csail.mit.edu:8080/",
+  //host: "http://mapd.csail.mit.edu:8080/",
   //host: "http://140.221.141.152:8080/",
   //host: "http://www.velocidy.net:7000/",
-  //host: "http://192.168.1.90:8080/",
+  host: "http://192.168.1.90:8080/",
   //host: "http://127.0.0.1:8080/",
   table: "tweets",
   timestart: null,
@@ -501,7 +501,7 @@ var MapD = {
     if (numQuotes % 2 != 0 || numStartParens != numEndParens)
       return;
 
-    var returnString = "";
+    var returnString = "(";
     var queryTerms = str.split(/(AND|OR|"|\s+|NOT|\(|\))/);
     var expectOperand = true;
     var inQuote = false;
@@ -509,7 +509,7 @@ var MapD = {
     var searchString = "";
     for (var i = 0; i != queryTerms.length; i++) {
       var token = queryTerms[i];
-      if (token == "" || token == " ")
+      if (token == "" || token[0] == ' ')
         continue;
       if (token == "AND" || token == "OR") {
         if (expectOperand == true)  
@@ -582,7 +582,7 @@ var MapD = {
         }
      }
   }
-  return returnString;
+  return returnString + ")";
 },
             
   
@@ -630,10 +630,10 @@ var MapD = {
   getTermsAndUserQuery: function (queryTerms, user ) {
     var query = ""; 
     if (queryTerms.length) {
-      queryTerms = this.parseQueryTerms(queryTerms);
+      //queryTerms = this.parseQueryTerms(queryTerms);
       console.log("Now doing parse Expression: ");
-      var expression = this.parseQueryExpression(this.services.search.termsInput.val());
-      console.log(expression);
+      queryTerms = this.parseQueryExpression(this.services.search.termsInput.val());
+      console.log(queryTerms);
 
       query += queryTerms + " and ";
     }
@@ -2178,6 +2178,7 @@ var Search = {
   mapd: MapD,
   map: null,
   form: null,
+  zoomForm: null,
   termsInput: null,
   userInput: null,
   locationInput: null,
@@ -2187,7 +2188,7 @@ var Search = {
   locationChanged: false,
   io: null,
 
-  init: function(map, form, termsInput, userInput, locationInput) {
+  init: function(map, form, zoomForm, termsInput, userInput, locationInput) {
     $(document).on('propertychange keyup input paste', 'input.search-input', function() {
       var io = $(this).val().length ? 1: 0;
 
@@ -2200,14 +2201,31 @@ var Search = {
 
     this.map = map;
     this.form = form;
+    this.zoomForm = zoomForm;
     this.termsInput = termsInput;
     this.userInput = userInput;
     this.locationInput = locationInput;
     this.geocoder.setMap(this.map);
     this.form.submit($.proxy(this.onSearch, this));
+    this.zoomForm.submit($.proxy(this.onSearch, this));
     $(document).on('geocodeend', $.proxy(this.onGeoCodeEnd, this));
     this.map.events.register('moveend', this, this.onMapMove);
   },
+
+  function getLocation()
+        {
+              if (navigator.geolocation)
+                      {
+                              navigator.geolocation.getCurrentPosition(showPosition);
+                                  }
+                else{x.innerHTML="Geolocation is not supported by this browser.";}
+                  }
+  function showPosition(position)
+        {
+              x.innerHTML="Latitude: " + position.coords.latitude + 
+                    "<br>Longitude: " + position.coords.longitude; 
+                }
+  </script>
 
   onSearch: function() {
 
@@ -2553,11 +2571,16 @@ var Settings = {
       this.baseButton.removeClass("basemapButtonOnImg").addClass("basemapButtonOffImg");
     //this.baseButton.toggleClass("basemapButtonOffImg").toggleClass("basemapButtonOnImg");
     if (!this.baseOn) {
+      $("#zoom").addClass("zoom-blank");
+      $("#mapAnimControls").addClass("anim-blank");
       map.setBaseLayer(map.getLayersByName("Blank")[0]);
+
     }
     else {
       //console.log(BaseMap.currentLayer);
       //if (BaseMap.currentLayer != BaseMap.defaultLayer)
+    $("#zoom").removeClass("zoom-blank");
+    $("#mapAnimControls").removeClass("anim-blank");
       map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);
       //map.setBaseLayer(map.getLayersByName(MapD.services.baseLayerName)[0]);
     }

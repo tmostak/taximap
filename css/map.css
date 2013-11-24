@@ -327,7 +327,7 @@ div#mapAnimControls {
   //bottom: 14px;
   //right: 3px;
   bottom: 5px;
-  left: 110px;
+  left: 230px;
 }
 
 div#mapAnimControls .anim-input {
@@ -345,8 +345,23 @@ div#sizeButton {
 
 }
 
+#zoom {
+  position: absolute;
+  z-index:10000;
+  width:80px;
+  height:30px;
+  left: 100px;
+  bottom:8px;
 
+}
 
+.zoom-blank {
+  left: 0px !important;
+}
+
+.anim-blank {
+  left: 130px !important;
+}
 
 
 .expandImg {
