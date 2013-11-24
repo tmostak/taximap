@@ -41,6 +41,8 @@ var MapD = {
   timeend: null,
   queryTerms: [],
   user: null,
+  location: null,
+  locationCat: null,
   datastart: null,
   dataend: null,
   linkButton: null,
@@ -197,8 +199,8 @@ var MapD = {
 
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
-      //this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
-      this.timeend = this.dataend-30000; 
+     this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
+     //this.timeend = this.dataend-30000; 
      this.timestart = Math.max(this.dataend - 1814400,  Math.round((this.dataend-this.datastart)*.01 + this.datastart));
 
       var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: "pst045212", baseLayer: "Dark", fullScreen: 0};
@@ -297,11 +299,9 @@ var MapD = {
       //heatLayer.setVisibility(mapParams.heatOn);
       //Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
 
-      /*
-      this.reloadByGraph(this.timestart, this.timeend);
-      if (!linkRead)
+      //this.reloadByGraph(this.timestart, this.timeend);
+      //if (!linkRead)
         this.reload();
-      */
     }
   },
   writeLink: function(fullEncode) {
@@ -425,7 +425,7 @@ var MapD = {
         }
         //this.timeReload();
         //this.timeReload();
-        setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
+        //setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
    },
 
   reload: function(e) {
@@ -477,13 +477,19 @@ var MapD = {
 
   setDataTimeRange: function(json) {
     this.datastart = json.results[0].min;
-    this.dataend = json.results[0].max + 86400;
+    //this.dataend = json.results[0].max + 86400;
+    this.dataend = json.results[0].max;
     this.startCheck();
   },
 
 
   setUser: function(user) {
     this.user = user;
+  },
+
+  setLocation:function(locationCat, location) {
+    this.locationCat = locationCat;
+    this.location = location;
   },
 
   parseQueryExpression: function(str) {
@@ -642,6 +648,7 @@ var MapD = {
     return query;
   },
 
+
   getTimeQuery: function (timestart, timeend) {
     var query = "";
     if (timestart)
@@ -679,27 +686,39 @@ var MapD = {
     }
     //console.log("minid: " + minId);
     
+        var locQuery = "";
+        if (this.location != null && this.location != "") {
+          locQuery = this.locationCat + " ilike '" + this.location + "' and";  
+        }
       if (splitQuery) {
         var queryArray = new Array(2);
         queryArray[0] = this.getTermsAndUserQuery(queryTerms, user);
         if (queryArray[0])
           queryArray[0] = queryArray[0].substr(0, queryArray[0].length-5);
         queryArray[1] = this.getTimeQuery(timestart, timeend);
+      if (locQuery != "") {
+        if (queryArray[1] != "")
+          queryArray[1] += locQuery;
+        else
+          queryArray[1] = locQuery;
+      }
+
         if (queryArray[1])
-          queryArray[1] = " where " + queryArray[1].substr(0, queryArray[1].length-5);
+          queryArray[1] = " where " + queryArray[1].substr(0, queryArray[1].length-4);
+
         return queryArray;
 
       }
       else {
         var whereQuery ="";
         if (minId != null) {
-          whereQuery = "id > " + minId + " and " + this.getTermsAndUserQuery(queryTerms, user);
+          whereQuery = "id > " + minId + " and " + locQuery + this.getTermsAndUserQuery(queryTerms, user);
         }
         else {
-            whereQuery = this.getTimeQuery(timestart, timeend) + this.getTermsAndUserQuery(queryTerms, user);
+            whereQuery = this.getTimeQuery(timestart, timeend) + locQuery + this.getTermsAndUserQuery(queryTerms, user);
         }
         if (whereQuery)
-          whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
+          whereQuery = " where " + whereQuery.substr(0, whereQuery.length-4);
         return whereQuery;
       }
   }
@@ -857,6 +876,7 @@ var TopKTokens = {
   },
   
   getMenuItemClicked: function(target) {
+    var innerText = "";
     if (target.localName != "span")
         innerText = target.firstChild.innerText;
     else {
@@ -2148,6 +2168,7 @@ var GeoCoder = {
   },
 
   geocode: function(address) {
+   console.log("at geocode");
     this.address = address;
     this._geocoder.geocode({'address': address}, $.proxy(this.onGeoCoding, this));
   },
@@ -2178,17 +2199,23 @@ var Search = {
   mapd: MapD,
   map: null,
   form: null,
+  locateButton: null,
   zoomForm: null,
+  curLoc: null,
   termsInput: null,
   userInput: null,
+  locationCat: "Country",
+  locationCatMenu: null,
   locationInput: null,
+  zoomInput: null,
   terms: '',
   user: '',
   location: '',
-  locationChanged: false,
+  zoomTo: null, 
+  zoomToChanged: false,
   io: null,
 
-  init: function(map, form, zoomForm, termsInput, userInput, locationInput) {
+  init: function(map, form, zoomForm, curLoc, termsInput, userInput, locationCatMenu, locationInput, zoomInput) {
     $(document).on('propertychange keyup input paste', 'input.search-input', function() {
       var io = $(this).val().length ? 1: 0;
 
@@ -2202,30 +2229,70 @@ var Search = {
     this.map = map;
     this.form = form;
     this.zoomForm = zoomForm;
+    this.curLoc = curLoc;
     this.termsInput = termsInput;
     this.userInput = userInput;
     this.locationInput = locationInput;
+    this.locationCatMenu = locationCatMenu;
+    this.zoomInput = zoomInput;
     this.geocoder.setMap(this.map);
     this.form.submit($.proxy(this.onSearch, this));
     this.zoomForm.submit($.proxy(this.onSearch, this));
+    this.curLoc.click($.proxy(this.getPosition, this));
+    this.locationCatMenu.click($.proxy(function(e) {
+       this.locationCat = e.target.firstChild.innerText; 
+
+       var text = this.locationCat + " ▾";
+       $("#locationSelect").html(text);
+       $.getJSON(this.getLocNamesURL()).done($.proxy(this.loadLocMenu, this));
+    }, this));
+    
+
+
     $(document).on('geocodeend', $.proxy(this.onGeoCodeEnd, this));
     this.map.events.register('moveend', this, this.onMapMove);
+
+     $.getJSON(this.getLocNamesURL()).done($.proxy(this.loadLocMenu, this));
+
+
   },
 
-  function getLocation()
-        {
-              if (navigator.geolocation)
-                      {
-                              navigator.geolocation.getCurrentPosition(showPosition);
-                                  }
-                else{x.innerHTML="Geolocation is not supported by this browser.";}
-                  }
-  function showPosition(position)
-        {
-              x.innerHTML="Latitude: " + position.coords.latitude + 
-                    "<br>Longitude: " + position.coords.longitude; 
-                }
-  </script>
+  getLocNamesURL: function() {
+     var params = {request:"GetFeatureInfo"};
+     params.sql = "select name from " + this.locationCat + "_data";
+     var url = this.mapd.host + '?' + buildURI(params);
+     return url;
+  },
+
+   loadLocMenu: function(json) {
+    var names = [];
+    for (i in json.results)
+      names.push(json.results[i].name);
+
+    $("#locationInput").autocomplete({
+        source:names
+    });
+
+
+
+   },
+
+   getPosition: function() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(this.zoomToPosition);
+    }
+    else{ 
+      console.log("geolocation not supported!")
+    }
+   },
+
+   zoomToPosition: function(position) {
+    console.log(position);
+    var center = new OpenLayers.LonLat(position.coords.longitude, position.coords.latitude).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    map.setCenter(center, 16);
+    MapD.services.tweets.addPoint(center.x, center.y, 100, "#f00"); 
+
+   },
 
   onSearch: function() {
 
@@ -2271,16 +2338,20 @@ var Search = {
     }
     */
 
-    var location = this.locationInput.val();
-    this.locationChanged = this.location != location;
+    var zoomTo = this.zoomInput.val();
+    console.log(zoomTo);
+    this.zoomToChanged = this.zoomTo != zoomTo;
     this.terms = terms;
     this.user = this.userInput.val();
+    this.location = this.locationInput.val() 
     this.mapd.setQueryTerms(this.terms);
     this.mapd.setUser(this.user);
+    this.mapd.setLocation(this.locationCat, this.location);
     //console.log ("user: " + this.user);
-    if (this.locationChanged) {
-      this.location = location;
-      this.geocoder.geocode(this.location);
+    if (this.zoomToChanged) {
+      this.zoomTo = zoomTo;
+      console.log("about to zoom");
+      this.geocoder.geocode(this.zoomTo);
       return false;
     }
     //console.log("After this location changed");
@@ -2299,11 +2370,11 @@ var Search = {
   onMapMove: function() 
   {
     //console.log('in onMapMove');
-    if (this.locationChanged)
-      this.locationChanged = false;
+    if (this.zoomToChanged)
+      this.zoomToChanged = false;
     else {
-      this.location = "";
-      this.locationInput.val("");
+      this.zoomTo = "";
+      this.zoomInput.val("");
     }
   },
 }
@@ -2571,6 +2642,7 @@ var Settings = {
       this.baseButton.removeClass("basemapButtonOnImg").addClass("basemapButtonOffImg");
     //this.baseButton.toggleClass("basemapButtonOffImg").toggleClass("basemapButtonOnImg");
     if (!this.baseOn) {
+      $("#curLoc").addClass("curLoc-blank");
       $("#zoom").addClass("zoom-blank");
       $("#mapAnimControls").addClass("anim-blank");
       map.setBaseLayer(map.getLayersByName("Blank")[0]);
@@ -2579,6 +2651,7 @@ var Settings = {
     else {
       //console.log(BaseMap.currentLayer);
       //if (BaseMap.currentLayer != BaseMap.defaultLayer)
+    $("#curLoc").removeClass("curLoc-blank");
     $("#zoom").removeClass("zoom-blank");
     $("#mapAnimControls").removeClass("anim-blank");
       map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);

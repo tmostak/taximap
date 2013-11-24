@@ -77,7 +77,8 @@
       <span class="iconClear">X</span>
 	</div>
 	<div id="location" class="search">
-	  <input id="locationInput" class="search-input" type="text" name="location" placeholder=" Where"/>
+      <button id="locationSelect" class="search-drop-button" data-dropdown="#locDropdown">Country ▾</button>
+	  <input id="locationInput" class="search-input" type="text" name="location"/>
       <span class="iconClear">X</span>
 	</div>
 	<button id="submit" class="search-input" type="submit">
@@ -135,6 +136,7 @@
           <button class="stop anim-input stop-icon" type="button" title="Stop"></button>
         </div>
         <div id="sizeButton"></div>
+        <button id="curLoc"></button>
         <form id="zoom">
           <input id="zoomInput" class="search-input" type="text" name="location" placeholder=" Zoom To"/>
           <!--<span class="iconClear">X</span>-->
@@ -218,6 +220,28 @@
         </li>
       </ul>
     </div>
+
+    <div id="locDropdown" class="dropdown dropdown-anchor-left">
+      <ul id="locMenu" class="dropdown-menu drop-menu">
+       <li id="locCountry"><span>Country</span></li>
+       <li id="locState"><span>State</span></li>
+       <li id="locCounty"><span>County</span></li>
+      </ul>
+    </div>
+
+    <div id="heatDropdown" class="dropdown dropdown-anchor-right">
+      <ul id="heatMenu" class="dropdown-menu drop-menu">
+        <li id="heatBlurOpt">
+          <span style="float:left">Blur</span>
+          <div id="blurSlider"></div>
+          <div style="clear: both;"></div>
+
+    <div id="heatDropdown" class="dropdown dropdown-anchor-right">
+      <ul id="heatMenu" class="dropdown-menu drop-menu">
+        <li id="heatBlurOpt">
+          <span style="float:left">Blur</span>
+          <div id="blurSlider"></div>
+          <div style="clear: both;"></div>
 
     <div id="heatDropdown" class="dropdown dropdown-anchor-right">
       <ul id="heatMenu" class="dropdown-menu drop-menu">

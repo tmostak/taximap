@@ -88,11 +88,13 @@ span.iconClear{
 button#submit { 
   height: 30px;
   width: 30px;
+  margin-left: 0px;
   cursor: pointer;
 }
 
 
 div#submit-icon { 
+  position: left;
   margin: 2px
 }
 
@@ -246,18 +248,44 @@ div#social-share:hover {
   width: 100px;
   height:28px;
   opacity: 1.0;
-  border: none!important;
+  border: none !important;
 
 
 
   //borderft: 2px solid grey;
-  //border: none!important;
+  //border: none !important;
   //border-radius: 3px;
   //border: 0px solid #232323;
   //background-image: linear-gradient(#eee, #ccc 75%, #bbb);
   //webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
   //box-shadow: 0 0 2px rgba(255,255,255,.25);
 }
+
+
+.search-drop-button {
+  float: left;
+  background-color: #CCC;
+  border-radius: 6px 0px 0px 6px;
+  border: 2px outset #444;
+  //border: none !important;
+  position: relative;
+  color: black;
+  width: 80px;
+  height: 32px;
+  top:3px;
+  left:5px;
+  margin-right: 0px;
+}
+
+#locationInput {
+  border-radius: 0px 6px 6px 0px;
+  position: relative;
+  left: -8px;
+  //width:70px !important;
+  margin-right: 0px !important;
+  padding-right: 0px !important;
+}
+
 
 .settings-drop-button {
   margin: 0px;
@@ -272,7 +300,7 @@ div#social-share:hover {
   border-radius: 0px 6px 6px 0px;
   border: 1.5px outset #444;
   background-color:#252525;
-  //border: none!important;
+  border: none !important;
 }
 
 * {
@@ -327,11 +355,23 @@ div#mapAnimControls {
   //bottom: 14px;
   //right: 3px;
   bottom: 5px;
-  left: 230px;
+  left: 130px;
 }
 
 div#mapAnimControls .anim-input {
     margin: 0px 0px 3px 3px !important;
+}
+
+#curLoc {
+    background: #252525 url('../img/cur_loc.png') no-repeat center center;
+    border: none !important;
+    position:absolute;
+    width: 25px;
+    height: 25px;
+    z-index:10000;
+    right:0px;
+    bottom:17px;
+    border-radius: 5px;
 }
 
 div#sizeButton {
@@ -349,18 +389,24 @@ div#sizeButton {
   position: absolute;
   z-index:10000;
   width:80px;
-  height:30px;
-  left: 100px;
-  bottom:8px;
+  height:25px;
+  right: 76px;
+  bottom:25px;
 
+}
+
+.curLoc-blank {
+  //left: 5px !important;
+  bottom: 3px !important;
 }
 
 .zoom-blank {
-  left: 0px !important;
+  //left: 35px !important;
+  bottom: 12px !important;
 }
 
 .anim-blank {
-  left: 130px !important;
+  left: 30px !important;
 }
 
 
@@ -649,7 +695,7 @@ div#numTokensText {
     webkit-box-shadow: 0 0 2px rgba(50,50,50,.25);
     box-shadow: 0 0 2px rgba(100,100,100,.25);
     position:relative;
-    border: none!important;
+    border: none !important;
     margin: 0px 8px 3px 3px;
     border-radius: 3px;
     background-size: cover;
@@ -657,28 +703,28 @@ div#numTokensText {
 }
 
 .social-button {
-    border: none!important;
+    border: none !important;
     background-size: cover;
     padding:0px;
 }
 
 
 .play-icon {
-    //border: none!important;
+    border: none !important;
     background: url('../img/play-green-20px.png') no-repeat center center;
     width:40px;
     height:20px;
 }
 
 .pause-icon {
-    border: none!important;
+    border: none !important;
     background: url('../img/pause-blue-20px.png') no-repeat center center;
     width:40px;
     height:20px;
 }
     
 .stop-icon {
-    //border: none!important;
+    border: none !important;
     background: url('../img/stop-pink-20px.png') no-repeat center center;
     width:40px;
     height:20px;
@@ -700,48 +746,52 @@ div#widget {
 
 
 #twitter-icon {
-    border: none!important;
+    border: none !important;
     background: url('../img/twitter-logo.png') no-repeat center center;
     width:30px;
     height:30px;
 }
 
 #facebook-icon {
-    border: none!important;
+    border: none !important;
     background: url('../img/facebook-logo.png') no-repeat center center;
     width:30px;
     height:30px;
 }
 
 .basemapButtonOffImg {
+  border: none !important;
     background: #252525 url('../img/buttons/base_bw.png') no-repeat center center;
 }
 
 .basemapButtonOnImg {
+  border: none !important;
     background: #252525 url('../img/buttons/base_color.png') no-repeat center center;
 }
 
 .basemapButtonHoverImg {
-  border: none!important;
+  border: none !important;
   background: #252525 url('../img/buttons/base_color.png') no-repeat center center;
 }
 
 .polyButtonOffImg {
+  border: none !important;
     background: #252525 url('../img/buttons/rev_census_110x30_bw.png') no-repeat center center;
 }
 
 .polyButtonOnImg {
+  border: none !important;
     background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
 }
 
 .polyButtonHoverImg {
-  border: none!important;
+  border: none !important;
   background: #252525 url('../img/buttons/rev_census_110x30_color.png') no-repeat center center;
 }
 
 
 .pointButtonOffImg {
-    //border: none!important;
+    border: none !important;
     //width: 110px;
     //height:30px;
     background: #252525 url('../img/buttons/rev_points_110x30_bw.png') no-repeat center center;
@@ -749,6 +799,7 @@ div#widget {
 }
 
 .pointButtonOnImg {
+    border: none !important;
     //width: 110px;
     //height:30px;
     background: #252525 url('../img/buttons/rev_points_110x30_color.png') no-repeat center center;
@@ -756,7 +807,7 @@ div#widget {
 }
 
 .pointButtonHoverImg {
-    border: none!important;
+    border: none !important;
     //width: 110px;
     //height:30px;
     background: #252525 url('../img/buttons/rev_points_110x30_color.png') no-repeat center center;
@@ -778,12 +829,13 @@ div#widget {
 }
 
 .heatButtonHoverImg {
-    border: none!important;
+    border: none !important;
     //width: 110px;
     //height:30px;
     background: #252525 url('../img/buttons/rev_heat_110x30_color.png') no-repeat center center;
     opacity: 1.0;
 }
+
 
 .sprites { 
   width: 16px;
