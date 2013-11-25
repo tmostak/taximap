@@ -66,7 +66,7 @@
    }(document, 'script', 'facebook-jssdk'));</script>
 
     <div id="topbar">
-        <div id="promo"><a href="http://www.map-d.com" target="_blank"><img src="img/mapd_logo.png" class="logo-image"></a></div>
+      <!--<div id="promo"><a href="http://www.map-d.com" target="_blank"><img src="img/mapd_logo.png" class="logo-image"></a></div>-->
       <form id="search" class="search">
 	<div id="terms" class="search">
 	  <input id="termsInput" class="search-input" type="text" name="terms" placeholder=" What"/>
@@ -77,8 +77,7 @@
       <span class="iconClear">X</span>
 	</div>
 	<div id="location" class="search">
-      <button id="locationSelect" class="search-drop-button" data-dropdown="#locDropdown">Country ▾</button>
-	  <input id="locationInput" class="search-input" type="text" name="location"/>
+	  <input id="zoomInput" class="search-input" type="text" name="zoom" placeholder=" Where"/>
       <span class="iconClear">X</span>
 	</div>
 	<button id="submit" class="search-input" type="submit">
@@ -105,6 +104,7 @@
       <button id="stop" class="anim-input stop-icon" type="button" title="Stop"></button>
     </div>-->
     <div id="social">
+      <!--<div id="promo"><a href="http://www.map-d.com" target="_blank"><img src="img/mapd_logo.png" class="logo-image"></a></div>-->
      <div id="social-share" data-dropdown="#share-dropdown" title="Share a link to the current view with your current settings applied"> 
         <div id="share">Share this map ▾</div>
      </div>
@@ -137,14 +137,24 @@
         </div>
         <div id="sizeButton"></div>
         <button id="curLoc"></button>
-        <form id="zoom">
-          <input id="zoomInput" class="search-input" type="text" name="location" placeholder=" Zoom To"/>
-          <!--<span class="iconClear">X</span>-->
-        </form>
         </div>
         
       </div>
       <div id="control">
+      <div id="advSearch">
+        <div id="advSearchBar">Advanced Search ▾</div>
+      </div>
+
+      <!--  <div id="advSearchInput">
+          <div id="location">
+            <button id="locationSelect" class="search-drop-button" data-dropdown="#locDropdown">Country ▾</button>
+            <input id="locationInput" type="text" name="location"/>
+            <span class="iconClear">X</span>
+          </div>
+        </div>
+      </div>
+      <div style="clear: both;"></div>
+      -->
         <div id="sortOrder"></div>
         <div id="tweets"></div> 
             <div id="cloudBox">

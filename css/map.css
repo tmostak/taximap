@@ -88,13 +88,13 @@ span.iconClear{
 button#submit { 
   height: 30px;
   width: 30px;
-  margin-left: 0px;
+  margin-left: 8px;
   cursor: pointer;
 }
 
 
 div#submit-icon { 
-  position: left;
+  //position: left;
   margin: 2px
 }
 
@@ -217,7 +217,7 @@ div#social-share:hover {
 
 #promo {
   position: relative;
-  float: left;
+  float: right;
   color:#fff;
   font-size: 22px;
   font-weight: bold;
@@ -277,10 +277,15 @@ div#social-share:hover {
   margin-right: 0px;
 }
 
+#locationSelect {
+    height: 25px;
+}
+
 #locationInput {
   border-radius: 0px 6px 6px 0px;
   position: relative;
   left: -8px;
+  height:20px;
   //width:70px !important;
   margin-right: 0px !important;
   padding-right: 0px !important;
@@ -363,15 +368,18 @@ div#mapAnimControls .anim-input {
 }
 
 #curLoc {
-    background: #252525 url('../img/cur_loc.png') no-repeat center center;
+    //background: #252525 url('../img/cur_loc.png') no-repeat center center;
+    background: #00008B url('../img/define-location-white-16.png') no-repeat center center;
     border: none !important;
     position:absolute;
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     z-index:10000;
-    right:0px;
-    bottom:17px;
-    border-radius: 5px;
+    left: 13px;
+    top: 94px;
+    //right:0px;
+    //bottom:17px;
+    border-radius: 6px;
 }
 
 div#sizeButton {
@@ -446,12 +454,17 @@ div#map {
   background-image: linear-gradient(#33bcef,#019ad2)
 }
 
+#termsInput {
+    margin-left:4px !important;
+}
+
 div#control {
   //position: relative;
   position: fixed;
   width: 400px;
   height: 96%;
-  padding-top: 10px;
+  //padding-top: 10px;
+  padding-top: 0px;
   top: 40px;
   //bottom: 207px;
   border-radius: 5px;
@@ -464,6 +477,24 @@ div#control {
 //    top: 17px;
 //    left:14px;
 //}
+
+div#advSearch {
+    border: 1px solid #AAA;
+    border-radius: 0px 0px 4px 4px;
+    background-color: #343434;
+    color: white;
+}
+
+div#advSearchBar {
+    height:25px;
+    background-image: linear-gradient(#4f4f4f, #232323);
+    //margin-top:0px !important;
+    //padding-top:0px !important;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+}
+
 
 div#tweets { 
   //border-radius: 5px;
@@ -594,6 +625,11 @@ span .data-menu-category {
     width:390px;
 }
 */
+
+div#sortOrder {
+    padding-top: 10px;
+    //border-radius: 4px 4px 0px 0px;
+}
 
 div#sortPref {
   font-size: 12px;
