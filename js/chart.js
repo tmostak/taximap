@@ -53,7 +53,7 @@ var LineChart =
     this.margin = {top: 25, right: 25, bottom: 25, left: 25};
         //width = 400 - this.margin.left - this.margin.right,
         var cont =  $($(this.elems.container).get(0));
-        console.log("Chart width: " + cont.width());
+        //console.log("Chart width: " + cont.width());
         this.width = cont.width() - this.margin.left - this.margin.right;
         //this.width = cont.width() - cont.offset().left - this.margin.left - this.margin.right;
          this.height = this.chartHeight - this.margin.top - this.margin.bottom;
@@ -163,10 +163,10 @@ var LineChart =
   },
 
   updateSize: function() {
-    console.log("updating");
+    //console.log("updating");
     var cont =  $($(this.elems.container).get(0));
     this.width = cont.width() - this.margin.left - this.margin.right;
-    console.log("width: " + this.width);
+    //console.log("width: " + this.width);
     this.height = this.chartHeight - this.margin.top - this.margin.bottom;
     //this.svg.remove();
 
@@ -246,7 +246,7 @@ var LineChart =
   },
 
   brushdown: function() {
-    console.log("brushdown");
+    //console.log("brushdown");
     var brushChanged = (+this.brush.extent()[0] != +this.brushExtent[0] || +this.brush.extent()[1] != +this.brushExtent[1]);
     if (brushChanged)
         this.zoomCallback();
@@ -423,7 +423,7 @@ var LineChart =
         .html("<i>" + name + "</i>");
 
     if (this.series.length != 1) {
-      console.log("series: " + this.series.length);
+      //console.log("series: " + this.series.length);
        
       detail.append("div")
           .attr("class", "sprites remove zoom75")

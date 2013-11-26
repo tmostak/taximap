@@ -7,7 +7,7 @@
     }
 
 var joinParams = {
-    "countries": {jointable: "country_data", joinvar: "name", joinattrs: "pop_est,iso_a2", pop_var: "pop_est", map_key: "ISO2", data_key: "iso_a2", data_col: "country"},
+    "countries": {jointable: "country_data", joinvar: "name", joinattrs: "pst045212,iso_a2", pop_var: "pst045212", map_key: "ISO2", data_key: "iso_a2", data_col: "country"},
     "states": {jointable: "state_data", joinvar: "name", joinattrs: "pst045212", pop_var: "pst045212", map_key: "abbr", data_key: "label", data_col: "state"},
     "counties": {jointable: "county_data", joinvar: "name", joinattrs: "pst045212,fips", pop_var: "pst045212", map_key: "id", data_key: "fips", data_col: "county"}
 };
@@ -57,7 +57,7 @@ var Choropleth = {
      $("#polyMenu").click($.proxy(function(e) {
         var menu
         var choice = this.getMenuItemClicked(e.target);
-        console.log(choice);
+        //console.log(choice);
         this.setMenuItem(choice);
         
       }, this));
@@ -67,7 +67,7 @@ var Choropleth = {
      this.overlay = new OpenLayers.Layer.Vector("tweets");
      //this.overlay.setZIndex(0);
      this.overlay.afterAdd = $.proxy(function() {
-      console.log("After add!");
+      //console.log("After add!");
       var div = d3.selectAll("#" + this.overlay.div.id);
       div.selectAll("svg").remove();
       this.svg = div.append("svg").attr("class", "choropleth");
@@ -224,8 +224,8 @@ var Choropleth = {
       */
 
       var numFeatures = this.features[0].length;
-      console.log("numFeatures: " + numFeatures);
-      console.log("numVals: " + numVals);
+      //console.log("numFeatures: " + numFeatures);
+      //console.log("numVals: " + numVals);
 
       var wasFound = 0;
       var notFound = 0;
@@ -263,8 +263,8 @@ var Choropleth = {
               this.features[0][f].__data__.properties.n = null;
             }
         }
-        console.log("Found: " + wasFound);
-        console.log("Not found: " + notFound);
+        //console.log("Found: " + wasFound);
+        //console.log("Not found: " + notFound);
         this.draw();
         $(this).trigger('loadend');
         //setTimeout($.proxy(function() {$(this).trigger('loadend'); console.log('yeah');}, this),100);
@@ -331,20 +331,20 @@ var Choropleth = {
     },
 
    addGeoData: function(filename) {
-      console.log(filename);
+      //console.log(filename);
       //debugger;
       //this.g = "";
       d3.select("g").remove();
       this.g = this.svg.append("g");
       var g = this.g;
       var path = this.path;
-      var file = "data/" + filename;
+      var file = "tweetmap/data/" + filename;
       var fileParts = filename.split('.');
       this.curJoinParams = joinParams[fileParts[0]];
       this.params.jointable = this.curJoinParams.jointable;
       this.params.joinvar = this.curJoinParams.joinvar;
       this.params.joinattrs = this.curJoinParams.joinattrs;
-      console.log(this.curJoinParams);
+      //console.log(this.curJoinParams);
       if (filename == "counties.json") {
         d3.json(file, function(error,json) {
           Choropleth.features = g.selectAll("path")

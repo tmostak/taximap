@@ -2,6 +2,12 @@
 // heatmapreload:    tell HeatMap to reload
 // geocodeend:       geocoding service is ready
 
+var timeUpdateInterval = 3600;
+newTime = 0
+lastTime = 0
+tweetNow = 0
+tweetLast = 0
+
 var BBOX = {
   //WORLD: "-19313026.92,-6523983.06,14187182.33,12002425.38",
   WORLD: "-19813026.92,-8523983.06, 19813026.92,12002425.38",
@@ -26,16 +32,21 @@ var MapD = {
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd2.csail.mit.edu:8080/",
   host: "http://mapd.csail.mit.edu:8080/",
+  //host: "http://140.221.141.152:8080/",
   //host: "http://www.velocidy.net:7000/",
   table: "tweets",
   timestart: null,
   timeend: null,
   queryTerms: [],
   user: null,
+  location: null,
+  locationCat: null,
   datastart: null,
   dataend: null,
   linkButton: null,
   fullScreen: false,
+  timeUpdates: 0,
+  updateFlag: false,
   services: {
     baseLayerName: "Dark",
     pointmap: null,
@@ -48,12 +59,13 @@ var MapD = {
     settings: null,
     tweetclick: null,
     animation: null,
-    choropleth: null
+    choropleth: null,
+    realtime: null
   },
 
 
 
-  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation, choropleth) {
+  init: function(map, pointmap, heatmap, geotrends, topktokens, tweets, graph, search, settings, tweetclick, animation, choropleth, realtime) {
   
     //$("#dataDisplayBarchart").click(function() {console.log($(this).attr("id"));});  
     if (window.location.search == "?local")
@@ -86,6 +98,7 @@ var MapD = {
     this.services.tweetclick = tweetclick;
     this.services.animation = animation;
     this.services.choropleth = choropleth;
+    this.services.realtime = realtime;
     this.map.events.register('moveend', this, this.reload);
     //this.map.events.register('changebaselayer', this, this.moveBaseAttr);
 
@@ -124,17 +137,17 @@ var MapD = {
   },
 
   moveBaseAttr: function() {
-    console.log("movebaseattr");
+    //console.log("movebaseattr");
     $(".gmnoprint").each(function() {
         var right = parseInt($(this).css("right"), 10);
-        console.log(right);
+        //console.log(right);
         $(this).css("right", right+40);
     })
     $(".gmnoprint").hide();
   },
 
   displayLink: function(response) {
-    console.log(response.data.url);
+    //console.log(response.data.url);
     $("#link-dialog").html(response.data.url).dialog({width: 200, height: 70});
   },
     
@@ -151,14 +164,14 @@ var MapD = {
 
   genLink: function(fullEncode, callback) {
     var link = this.writeLink(fullEncode);
-    console.log ("long link: " + link);
+    //console.log ("long link: " + link);
     this.getShortURL(link, callback);
   },
   
   facebookShare: function(response) {
     //var link = this.writeLink(true);
     var link = response.data.url; 
-    console.log(link);
+    //console.log(link);
     var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
     var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
     window.open(
@@ -169,7 +182,7 @@ var MapD = {
   sendTweet: function(response) {
     //var link = this.writeLink(true);
     var link = response.data.url; 
-    console.log("tweet link");
+    //console.log("tweet link");
     var countLinkUrl= "http://mapd.csail.mit.edu/tweetmap";
     var message = "Check out this interactive tweetmap I made with GPU-powered mapD!"; 
     window.open("https://twitter.com/share?" +
@@ -189,10 +202,10 @@ var MapD = {
       this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
       this.timestart = Math.max(this.dataend - 864000,  Math.round((this.dataend-this.datastart)*.01 + this.datastart));
 
-      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: null, baseLayer: "Dark", fullScreen: 0};
+      var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: "pst045212", baseLayer: "Dark", fullScreen: 0};
       mapParams = this.readLink(mapParams);
-      console.log("map params");
-      console.log(mapParams);
+      //console.log("map params");
+      //console.log(mapParams);
       this.timestart = mapParams.t0;
       this.timeend = mapParams.t1;
       if ("what" in mapParams) {
@@ -207,7 +220,7 @@ var MapD = {
       this.services.topktokens.setMenuItem("Display", mapParams.dataDisplay, false);
 
       this.services.topktokens.xVar = mapParams.scatterXVar; 
-      console.log("xvar: " + this.services.topktokens.xVar);
+      //console.log("xvar: " + this.services.topktokens.xVar);
       //console.log("Join attrs: " + this.services.topktokens.params.joinattrs);
       ScatterPlot.selectedVar = mapParams.scatterXVar;
       if (mapParams.fullScreen == 1) {
@@ -260,14 +273,13 @@ var MapD = {
       if (mapParams.pointColorBy == "sender_name" || mapParams.pointColorBy == "origin") 
           $("#pointStaticColor").hide();
       var radius = parseInt(mapParams.pointRadius);
-      console.log("radius: " + radius);
+      //console.log("radius: " + radius);
       //$(".circle").eq(radius - 1).addClass("circle-selected");
       $(".point-size").eq(radius + 1).addClass("point-size-selected");
       this.services.pointmap.params.radius = parseInt(radius);
       var hexColor = '#' + toHex(parseInt(mapParams.pointR)) + toHex(parseInt(mapParams.pointG)) +  toHex(parseInt(mapParams.pointB));
       $("#pointColorPicker").minicolors('value', hexColor);
-      console.log("lao;ksdfasdflk;j");
-      console.log(mapParams.heatRamp);
+      //console.log(mapParams.heatRamp);
       this.services.heatmap.setRamp(mapParams.heatRamp, false);
       /*
       this.services.heatmap.params.colorramp = mapParams.heatRamp;
@@ -281,16 +293,14 @@ var MapD = {
         this.services.settings.pointButtonFunction();
       if (mapParams.heatOn == 1)
         this.services.settings.heatButtonFunction();
-
+      //this.timeReload();
       //pointLayer.setVisibility(mapParams.pointOn);
       //heatLayer.setVisibility(mapParams.heatOn);
       //Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
 
-      /*
-      this.reloadByGraph(this.timestart, this.timeend);
-      if (!linkRead)
-        this.reload();
-      */
+      //this.reloadByGraph(this.timestart, this.timeend);
+      //if (!linkRead)
+      this.reload();
     }
   },
   writeLink: function(fullEncode) {
@@ -337,9 +347,9 @@ var MapD = {
 
   readLink: function(mapParams) {
     if (window.location.search.substr(0,1) == "?") {
-      console.log("params");
+      //console.log("params");
       params = this.getURIJson();
-      console.log(params);
+      //console.log(params);
 
       // next two are to provide backward compatibility
       if ("dataSource" in params) {
@@ -382,6 +392,41 @@ var MapD = {
     return search; */
   },
 
+  timeReload: function(e) {
+
+    if (this.services.animation.isAnimating() == false ) { 
+
+           lastTime = newTime;
+           newTime = new Date().getTime();
+           //console.log(newTime - lastTime)
+           if (this.timeend >  (this.dataend-this.datastart)*.98 + this.datastart) {
+             if (this.updateFlag == false) {
+                 this.services.tweets.reload(false);
+                  this.updateFlag = true;
+                  setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
+                  return;
+            }
+            
+             var updateInterval = map.zoom > 7 ? 10 : 5;
+             if (this.timeUpdates % updateInterval == 0) {
+                  this.services.pointmap.reload();
+                  this.services.heatmap.reload();
+              }
+            this.services.tweets.reload(true);
+              this.timeUpdates++;
+              this.updateFlag = true;
+            }
+            else if (this.updateFlag == true) {
+                this.updateFlag = false;
+                this.services.realtime.removeData();
+            }
+
+        }
+        //this.timeReload();
+        //this.timeReload();
+        //setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
+   },
+
   reload: function(e) {
 
     if (this.fullScreen == false) {
@@ -391,7 +436,7 @@ var MapD = {
       this.services.graph.reload();
     }
     if (e.type != "moveend") {
-        console.log("reloading");
+        //console.log("reloading");
         this.services.choropleth.reload();
     }
   },
@@ -431,6 +476,7 @@ var MapD = {
 
   setDataTimeRange: function(json) {
     this.datastart = json.results[0].min;
+    //this.dataend = json.results[0].max + 86400;
     this.dataend = json.results[0].max;
     this.startCheck();
   },
@@ -439,6 +485,113 @@ var MapD = {
   setUser: function(user) {
     this.user = user;
   },
+
+  setLocation:function(locationCat, location) {
+    this.locationCat = locationCat;
+    this.location = location;
+  },
+
+  parseQueryExpression: function(str) {
+    var numQuotes = 0;
+    var numStartParens = 0;
+    var numEndParens = 0;
+    for (i in str) {
+      if (str[i] == '"')
+        numQuotes++;
+      else if (str[i] == "(")
+        numStartParens++;
+      else if (str[i] == ")")
+        numEndParens++;
+    }
+    if (numQuotes % 2 != 0 || numStartParens != numEndParens)
+      return;
+
+    var returnString = "(";
+    str = str.replace(/'/g, "''").replace("/&/g", "");
+    var queryTerms = str.split(/(AND|OR|"|\s+|NOT|\(|\))/);
+    var expectOperand = true;
+    var inQuote = false;
+    var atNot = false;
+    var searchString = "";
+    for (var i = 0; i != queryTerms.length; i++) {
+      var token = queryTerms[i];
+      if (token == "" || token[0] == ' ')
+        continue;
+      if (token == "AND" || token == "OR") {
+        if (expectOperand == true)  
+          return null;
+        expectOperand = true;
+        returnString += " " + token + " ";  
+      }
+      else if (token == "NOT") {
+        /*if (expectOperand == false)  
+          return null;*/
+        atNot = true;
+        //returnString += " " + token + " ";  
+      }
+      else if (token == "(") {
+        /*if (expectOperand == false)  
+          return null; */
+        returnString += " " + token + " ";  
+      }
+      else if (token == ")") {
+        /*if (expectOperand == true)  
+          return null;*/
+        returnString += " " + token + " ";  
+      }
+      else if (token == '"') {
+        if (expectOperand == false)  {
+          returnString += " AND ";
+          expectOperand = true;
+
+          //return null;
+        }
+        inQuote = !inQuote;
+        if (inQuote) {
+          if (atNot) {
+            searchString = "tweet_text not ilike '"  
+            atNot = false;
+          }
+          else
+            searchString = "tweet_text ilike '"  
+        }
+        else {
+          console.log("At end quote");
+          expectOperand = false;
+          if (searchString[searchString.length -1] == ' ') {
+            searchString = searchString.substr(0,searchString.length-1) + "'";
+          }
+          else {
+            searchString += "'";
+          }
+          returnString += searchString;
+          searchString = "";
+        }
+      }
+      else {
+        if (inQuote) {
+          searchString += token + " ";
+        }
+        else  {
+          if (expectOperand == false) {
+            returnString += " AND ";
+            //return null;
+          }
+          if (atNot) {
+            returnString += "tweet_text not ilike '" + token + "'";
+            atNot = false;
+          }
+          else  {
+            returnString += "tweet_text ilike '" + token + "'";
+          }
+          expectOperand = false;
+        }
+     }
+  }
+  return returnString + ")";
+},
+            
+  
 
   setQueryTerms: function(queryTerms) {
     if (queryTerms[0] != '"' && this.queryTerms[this.queryTerms.length -1] != '"')
@@ -452,7 +605,7 @@ var MapD = {
   },
 
   parseQueryTerms: function(queryTerms) { 
-    console.log(queryTerms);
+    //console.log(queryTerms);
     if (queryTerms[0] == "multilanguage:") {
         var query = "tweet_text ilike 'coffee' or tweet_text ilike 'café' or tweet_text ilike 'caffè' or tweet_text ilike 'kaffe' or tweet_text ilike 'kaffe' or tweet_text ilike 'кофе' or tweet_text ilike 'kahve' or tweet_text ilike 'قهوة' or tweet_text ilike '咖啡' or tweet_text ilike '커피' or tweet_text ilike 'コーヒー' or tweet_text ilike 'kopi'";
 	return query;
@@ -483,13 +636,18 @@ var MapD = {
   getTermsAndUserQuery: function (queryTerms, user ) {
     var query = ""; 
     if (queryTerms.length) {
-      queryTerms = this.parseQueryTerms(queryTerms);
+      //queryTerms = this.parseQueryTerms(queryTerms);
+      console.log("Now doing parse Expression: ");
+      queryTerms = this.parseQueryExpression(this.services.search.termsInput.val());
+      console.log(queryTerms);
+
       query += queryTerms + " and ";
     }
     if (user)
       query += "sender_name ilike '" + user + "' and ";
     return query;
   },
+
 
   getTimeQuery: function (timestart, timeend) {
     var query = "";
@@ -506,9 +664,10 @@ var MapD = {
     var user = this.user;
     var splitQuery = false; // don't split query into two parts 
     var queryTerms = this.queryTerms;
+    var minId = null;
     if (options) {
       if (options.time) {
-        console.log("time " + options.time.timestart);
+        //console.log("time " + options.time.timestart);
         timestart = options.time.timestart;
         timeend = options.time.timeend;
       }
@@ -519,21 +678,45 @@ var MapD = {
       }
       if ("splitQuery" in options) 
         splitQuery = options.splitQuery;
+
+      if ("minId" in options)
+        minId = options.minId; 
+
+      
     }
+    //console.log("minid: " + minId);
     
+        var locQuery = "";
+        if (this.location != null && this.location != "") {
+          locQuery = this.locationCat + " ilike '" + this.location + "' and ";  
+        }
       if (splitQuery) {
         var queryArray = new Array(2);
         queryArray[0] = this.getTermsAndUserQuery(queryTerms, user);
         if (queryArray[0])
           queryArray[0] = queryArray[0].substr(0, queryArray[0].length-5);
         queryArray[1] = this.getTimeQuery(timestart, timeend);
+      if (locQuery != "") {
+        if (queryArray[1] != "")
+          queryArray[1] += locQuery;
+        else
+          queryArray[1] = locQuery;
+      }
+
         if (queryArray[1])
           queryArray[1] = " where " + queryArray[1].substr(0, queryArray[1].length-5);
+
         return queryArray;
 
       }
       else {
-        var whereQuery = this.getTimeQuery(timestart, timeend) + this.getTermsAndUserQuery(queryTerms, user);
+        var whereQuery ="";
+        if (minId != null) {
+          whereQuery = "id > " + minId + " and " + locQuery + this.getTermsAndUserQuery(queryTerms, user);
+        }
+        else {
+            whereQuery = this.getTimeQuery(timestart, timeend) + locQuery + this.getTermsAndUserQuery(queryTerms, user);
+        }
         if (whereQuery)
           whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
         return whereQuery;
@@ -613,7 +796,7 @@ var TopKTokens = {
   settingDict: {Display: 'displaySetting', Source: 'sourceSetting', Mode: 'modeSetting'},
   locked: false,
   tokens: [],
-  xVar: null,
+  xVar: "pst045212",
   params: {
     request: "GroupByToken",
     sql: null,
@@ -693,6 +876,7 @@ var TopKTokens = {
   },
   
   getMenuItemClicked: function(target) {
+    var innerText = "";
     if (target.localName != "span")
         innerText = target.firstChild.innerText;
     else {
@@ -706,12 +890,12 @@ var TopKTokens = {
   },
 
   setMenuItem: function(menu, choice, reload) {   
-    console.log("menu: " + menu);
+    //console.log("menu: " + menu);
     var menuDiv = "#data" + menu;
     var dropdownDiv = menuDiv + "Dropdown";
     var choiceDiv = menuDiv + choice;
-    console.log(menuDiv);
-    console.log(choiceDiv);
+    //console.log(menuDiv);
+    //console.log(choiceDiv);
     $(dropdownDiv + " span.checkmark").css("visibility", "hidden");
     $(choiceDiv + " .checkmark").css("visibility","visible");
     $(menuDiv + " span.choice-text").text(choice);
@@ -745,7 +929,7 @@ var TopKTokens = {
   },
 
   getScatterVarsURL: function() {
-    console.log("getscattervars");
+    //console.log("getscattervars");
     var scatterParams = {};
     scatterParams.request = "GetTableCols";
     //scatterParams.table = this.sourceSetting + "_data";
@@ -757,21 +941,22 @@ var TopKTokens = {
   },
 
   onScatterVarsLoad: function(json) {
-    console.log("onscattervarsload");
+    //console.log("Selected var 0: " + ScatterPlot.selectedVar);
     ScatterPlot.setVars(json);
-    TopKTokens.xVar = ScatterPlot.selectedVar; 
+    //console.log("Selected var 1: " + ScatterPlot.selectedVar);
+    //TopKTokens.xVar = ScatterPlot.selectedVar; 
+    //TopKTokens.xVar = "pst045212";
+    //console.log("Xvar: " + TopKTokens.xVar);
     TopKTokens.reload();
     //ScatterPlot.init(this, this.displayDiv);
-    //console.log(json);
   },
 
   scatterVarChange: function(e) {
-    //console.log(this);
-    //console.log(e);
     //console.log($(this).find("option:selected"));
     TopKTokens.xVar = $(this).find("option:selected").get(0).value;
+    console.log("Xvar: " + TopKTokens.xVar);
     ScatterPlot.selectedVar = TopKTokens.xVar;
-    console.log(ScatterPlot.selectedVar);
+    //console.log(ScatterPlot.selectedVar);
     TopKTokens.reload();
   },
 
@@ -825,7 +1010,7 @@ var TopKTokens = {
         this.params.jointable = null;
         this.params.joinvar = null;
         this.params.joinattrs = null;
-        this.xVar = null;
+        //this.xVar = null;
         ScatterPlot.selectedVar = null;
         this.params.sort = "true";
     }
@@ -838,10 +1023,10 @@ var TopKTokens = {
     }
 
     var query = this.mapd.getWhere(options);
-    console.log("query: " + query);
+    //console.log("query: " + query);
 
     this.params.stoptable = "";
-    console.log(this.sourceSetting);
+    //console.log(this.sourceSetting);
     if (this.sourceSetting == "Word") {
         this.params.sql = "select tweet_text";
         this.params.stoptable = "multistop";
@@ -898,9 +1083,9 @@ var TopKTokens = {
     if (this.modeSetting == "Trends") {
         var timestart = parseInt(this.mapd.timestart);
         var timeend = parseInt(this.mapd.timeend);
-        console.log(timestart);
-        console.log(midTime);
-        console.log(timeend);
+        //console.log(timestart);
+        //console.log(midTime);
+        //console.log(timeend);
         if (options == undefined || options == null)  
             options = {};
         else if (options.time != undefined && options.time != null) {
@@ -950,18 +1135,25 @@ var TopKTokens = {
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "Country") {
-      this.mapd.services.search.termsInput.val("country: " + token);
-      $('#termsInput').trigger('input');
+      //this.mapd.services.search.termsInput.val("country: " + token);
+      //this.mapd.services.search.locationCat = "Country";
+      $("#locCountry").click();
+      this.mapd.services.search.locationInput.val(token);
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "State") {
-      this.mapd.services.search.termsInput.val("state: " + token);
-      $('#termsInput').trigger('input');
+      //this.mapd.services.search.locationCat = "State";
+      $("#locState").click();
+      this.mapd.services.search.locationInput.val(token);
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "County") {
-      this.mapd.services.search.termsInput.val("county: " + token);
-      $('#termsInput').trigger('input');
+      //this.mapd.services.search.locationCat = "County";
+      $("#locCounty").click();
+      this.mapd.services.search.locationInput.val(token);
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "Zip") {
@@ -980,13 +1172,13 @@ var TopKTokens = {
 
 
   addClickedWord: function(event) {
-    console.log(event);
+    //console.log(event);
     //var token = event.originalEvent.srcElement.innerText;
     var token = event.target.innerHTML;
     //console.log("circle cloud token: " + token);
     if (token.substring(0,5) != "<span") {
       //console.log(this.mapd);
-      console.log(this.sourceSetting);
+      //console.log(this.sourceSetting);
       if (this.sourceSetting == "Word") {
         this.mapd.services.search.termsInput.val(this.mapd.services.search.termsInput.val() + " " + token);
         $('#termsInput').trigger('input');
@@ -997,25 +1189,30 @@ var TopKTokens = {
         //this.setMenuItem("Source", "Words", false);
       }
     else if (this.sourceSetting == "Country") {
-      this.mapd.services.search.termsInput.val("country: " + token);
+      $("#locCountry").click();
+      this.mapd.services.search.locationInput.val(token);
       $('#termsInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "State") {
-      this.mapd.services.search.termsInput.val("state: " + token);
+      $("#locState").click();
+      this.mapd.services.search.locationInput.val(token);
       $('#termsInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "County") {
-      this.mapd.services.search.termsInput.val("county: " + token);
+      $("#locCounty").click();
+      this.mapd.services.search.locationInput.val(token);
       $('#termsInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
+    /*
     else if (this.sourceSetting == "Zip") {
       this.mapd.services.search.termsInput.val("zip: " + token);
       $('#termsInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
+    */
     else if (this.sourceSetting == "OS-App") {
       this.mapd.services.search.termsInput.val("origin: " + token);
       $('#termsInput').trigger('input');
@@ -1080,14 +1277,14 @@ var TopKTokens = {
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
-        console.log("num results to exclude: " + numResultsToExclude);
+        //console.log("num results to exclude: " + numResultsToExclude);
         BarChart.addData(json, numResultsToExclude, this.modeSetting);
     }
     else if (this.displaySetting == "Scatter") {
         //if (update) 
         ScatterPlot.init(this, this.displayDiv);
-        console.log("at load scatter");
-        console.log(ScatterPlot);
+        //console.log("at load scatter");
+        //console.log(ScatterPlot);
         var numResultsToExclude = 0;
         if (this.sourceSetting == "Word")
           numResultsToExclude = numQueryTerms; 
@@ -1096,7 +1293,7 @@ var TopKTokens = {
 
     var label = (this.sourceSetting == "Word") ? "# Words: " : ((this.sourceSetting == "User") ? "# Tweets: " : "# Tweets: ");
     $('#numTokensText').text(label + numberWithCommas(n));
-    console.log("triggering loadend");
+    //console.log("triggering loadend");
     $(this).trigger('loadend');
 
   }
@@ -1117,6 +1314,7 @@ var PointMap = {
     r: 0,
     g: 0,
     b: 255,
+    rand:0,
     radius: 1,
     format: "image/png",
     transparent: true,
@@ -1135,7 +1333,7 @@ var PointMap = {
     $("#pointColorPicker").minicolors({ 
         changeDelay:50,
         change: $.proxy (function (hex) {
-            console.log(hex);
+            //console.log(hex);
             var rgb = $("#pointColorPicker").minicolors('rgbObject');
             this.params.r = rgb.r;
             this.params.g = rgb.g;
@@ -1150,7 +1348,7 @@ var PointMap = {
     $(".point-size").click($.proxy(function(e) { 
       //this.params.radius = $(e.target).index() + 1;
       this.params.radius = $(e.target).index() - 1;
-      console.log("this.params.radius: " + this.params.radius);
+      //console.log("this.params.radius: " + this.params.radius);
       $(".point-size").removeClass("point-size-selected");
       $(e.target).addClass("point-size-selected");
       this.reload();
@@ -1192,12 +1390,13 @@ var PointMap = {
       this.params.sql += ", " + this.colorBy;
     this.params.sql += " from " + this.mapd.table;
     this.params.sql += this.mapd.getWhere(options);
-    console.log(this.params.sql);
+    //console.log(this.params.sql);
     return this.params;
   },
 
   reload: function(options) {
-    console.log("reload");
+    //console.log("reload");
+    this.params.rand = Math.round(Math.random() * 10000);
     this.wms.mergeNewParams(this.getParams(options));
   }
 };
@@ -1223,7 +1422,7 @@ var BaseMap = {
           .appendTo(baseMenu);
       }
     }
-    console.log(this.baseLayerNames);
+    //console.log(this.baseLayerNames);
     
     $(".base-choice").click($.proxy(function(e) { 
       this.currentLayer = $(e.target).text();
@@ -1303,20 +1502,20 @@ var HeatMap = {
   },
 
   processColorRamps: function(json) {
-    console.log(json);
+    //console.log(json);
     var rampsCont = $("#colorRamps");
     var x = 80;
     var y = 20;
     for (var i = 0; i < json.length; ++i) {
-      console.log(json[i]);
+      //console.log(json[i]);
       var canvas = $('<canvas></canvas>').attr("id", json[i].name).attr("class", "color-ramp").prop("width", x).prop("height",y).appendTo(rampsCont).click($.proxy(this.changeRamp,this)).get(0);
-      console.log(canvas);
+      //console.log(canvas);
       var context = canvas.getContext("2d");
       context.rect(0,0,x-2,y-2);
       var gradient = context.createLinearGradient(0, 0, x, 0);
       var colors = json[i].colors;
       for (var c = 0; c != colors.length; ++c) {
-        console.log(json[i].name + " - " + colors[c].stop + " (" + colors[c].r + "," + colors[c].g + "," + colors[c].b + ")");
+        //console.log(json[i].name + " - " + colors[c].stop + " (" + colors[c].r + "," + colors[c].g + "," + colors[c].b + ")");
         gradient.addColorStop(colors[c].stop, "rgb(" + colors[c].r +"," + colors[c].g +"," + colors[c].b+")");
       }
       context.fillStyle=gradient;
@@ -1379,7 +1578,7 @@ var HeatMap = {
       this.params.sql += "," + queryArray[0];
     this.params.sql += " from " + this.mapd.table + queryArray[1];
 
-    if (options.heatMax != undefined && options.heatMax != null) 
+    if (options.heatMax != undefined && options.heatMax != null && isNaN(options.heatMax) == false) 
       this.params.maxval = options.heatMax;
     else
       this.params.maxval = "auto"; 
@@ -1550,9 +1749,13 @@ var Tweets =
   bottomOffset: null,
   startRecordSpan:null,
   endRecordSpan:null,
+  numDisplayTweets:null,
+  minId: 0,
   startRecord: 0,
   endRecord: 1,
   scrollTop:0,
+  append: false,
+  numTweets: null,
   numResults: null,
 
 init: function(sortDiv, viewDiv) {
@@ -1703,16 +1906,35 @@ init: function(sortDiv, viewDiv) {
   },
 
   getURL: function(options) {
-    this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
+    if (options.minId != null) {
+      this.params.sql = "select id, goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
+      this.append = true;
+    }
+    else {
+      this.params.sql = "select goog_x, goog_y, time, sender_name, tweet_text from " + this.mapd.table;
+      this.append = false;
+    }
     this.params.sql += this.mapd.getWhere(options);
-    this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
+    //var sortDesc = this.sortDesc;
+    //if (options.minId != null)
+      //sortDesc = false;
+    if (options.minId != null)
+        this.params.sql += " order by id " + (this.sortDesc == true ? "desc" : "") +  " limit 500";
+    else
+        this.params.sql += " order by time " + (this.sortDesc == true ? "desc" : "") +  " limit 100";
     this.params.bbox = this.mapd.map.getExtent().toBBOX();
+    //console.log(this.params.sql);
     var url = this.mapd.host + '?' + buildURI(this.params);
     return url;
   },
 
-  reload: function() {
-    $.getJSON(this.getURL()).done($.proxy(this.onTweets, this));
+  reload: function(getMinId) {
+    var options = {}
+    if (getMinId == true) {
+      options.minId =this.minId;
+    }
+    //console.log(options);
+    $.getJSON(this.getURL(options)).done($.proxy(this.onTweets, this));
   },
   //oldSortFunc :function () { 
   //    console.log("oldsort");
@@ -1724,8 +1946,48 @@ init: function(sortDiv, viewDiv) {
   // },
    
   onTweets: function(json) {
-    //console.log('in onTweets');
-    this.viewDiv.empty();
+      tweetLast = tweetNow;
+      tweetNow = new Date().getTime();
+      var delay = tweetNow - tweetLast;
+      console.log("Tweet delay: " + delay)
+
+    if (json == null || json.results.length == 0) {
+      if (this.append == false) {
+        this.viewDiv.empty();
+        this.startRecord = 0;
+        this.endRecord = 1;
+        this.numTweets = 0; 
+        this.numDisplayTweets = 0;
+        $("#resultsCount").html(numberWithCommas(this.numTweets));
+      }
+      console.log("returning");
+
+      return;
+    }
+
+      //console.log("This numDisplaytweets: " + this.numDisplayTweets);
+    var prepend = true;
+    //if (!("id" in json.results[0])) {
+    if (this.append == false) {
+      prepend = false;
+      this.viewDiv.empty();
+      this.startRecord = 0;
+      this.endRecord = 1;
+      this.numTweets = json.n;
+      this.numDisplayTweets = json.results.length; 
+    }
+    else { 
+      this.numTweets += json.n;
+      this.numDisplayTweets += json.results.length; 
+      if (this.numDisplayTweets > 500) {
+        $(".tweet-container").slice(500).remove();
+        this.numDisplayTweets = 500;
+        }
+      this.mapd.services.realtime.addData(json.results);
+      }
+
+
+
     if (this.sortDesc) {
       $("#newSort").addClass("link-visited");
       $("#oldSort").removeClass("link-visited");
@@ -1736,8 +1998,7 @@ init: function(sortDiv, viewDiv) {
     }
 
     //$('#oldSort').click($.proxy(this.oldSortFunc, this));
-    var container = $('').appendTo(this.viewDiv);
-
+    var container = $('<div></div>').prependTo(this.viewDiv);
     if (json == null) return;
     if (vectors) map.removeLayer(vectors);
     vectors = new OpenLayers.Layer.Vector("Vector Layer", {'displayInLayerSwitcher': false});
@@ -1769,19 +2030,32 @@ init: function(sortDiv, viewDiv) {
     map.addLayer(markers);
     markers.setZIndex(Number(vectors.getZIndex()) + 1);
 
-    this.numTweets = json.n;
+    
     $("#resultsCount").html(numberWithCommas(this.numTweets));
     this.topOffset = this.viewDiv.offset().top + 1;
     this.bottomOffset = this.topOffset + this.viewDiv.height(); 
 
     var results = json.results;
-    for (i in results)
-    {
-      var result = results[i];
-      if (!result || !result.tweet_text)
-        continue;
-      this.add(result, i);
+    var numResults = results.length;
+    var delay = Math.round(timeUpdateInterval / numResults);
+    //console.log("delay: " + delay);
+    badCount = 0;
+   
+    if (this.mapd.fullScreen == false) { 
+        for (var i = 0; i < numResults; i++)
+        {
+              //var result = results[i];
+              //if (!results[i] || !resulttweet_text)
+              //  continue;
+              this.add(results[i],i,container);
+              var timeDelay = delay * i;
+              //setTimeout($.proxy(this.add(result, i, container), this), timeDelay);
+              //setTimeout(this.add(result, i, container), timeDelay);
+              //setTimeout(function() {Tweets.add(result, i, container);}, timeDelay);
+        }
+        console.log(badCount +"/" + numResults);
     }
+
     $('.tweet-profile, .username').click( $.proxy(function(e) {
       var userName = $(e.target).html();
       //console.log($(this).html());
@@ -1799,15 +2073,19 @@ init: function(sortDiv, viewDiv) {
 
   },
 
-  add: function(tweet, index) {
+  add: function(tweet, index, div) {
+    if (!("id" in tweet))
+        badCount++;
     var user = tweet.sender_name;
     var text = tweet.tweet_text;
+    if (tweet.id > Tweets.minId)
+      Tweets.minId = tweet.id;
     //tweet.time = tweet.time - 4 * 60 * 60; // hack: original data set is ahead by 4 hours.
     var time = new Date(tweet.time * 1000);
     var x = tweet.goog_x;
     var y = tweet.goog_y;
     
-    var container = $('<li></li>').addClass("tweet-container").appendTo(this.viewDiv);
+    var container = $('<li></li>').addClass("tweet-container").appendTo(div);
     var header = $('<div></div>').addClass("tweet-header").appendTo(container);
     var content = $('<p></p>').addClass("tweet-content").appendTo(container);
     var profile = $('<a></a>').addClass("tweet-profile").appendTo(header);
@@ -1824,11 +2102,11 @@ init: function(sortDiv, viewDiv) {
     //console.log(hashtags)
     //console.log(urls)
     //console.log(users)
-    var selectColor = this.getRandomColor(); 
+    var selectColor = Tweets.getRandomColor(); 
     container.data({tweet: tweet, urls: urls, hashtags: hashtags, users: users, selectColor: selectColor});
-    container.mouseenter($.proxy(this.onMouseEnter,this, container));
-    container.mouseleave($.proxy(this.onMouseLeave,this, container));
-    container.click($.proxy(this.onClick,this,container));
+    container.mouseenter($.proxy(Tweets.onMouseEnter,Tweets, container));
+    container.mouseleave($.proxy(Tweets.onMouseLeave,Tweets, container));
+    container.click($.proxy(Tweets.onClick,Tweets,container));
     //container.mouseup($.proxy(this.onUnClick,this,container));
     this.addPoint(x,y,index, selectColor);
 
@@ -1917,6 +2195,7 @@ var GeoCoder = {
   },
 
   geocode: function(address) {
+   console.log("at geocode");
     this.address = address;
     this._geocoder.geocode({'address': address}, $.proxy(this.onGeoCoding, this));
   },
@@ -1930,7 +2209,7 @@ var GeoCoder = {
       return;
     }
     if (data.length != 1)  {
-      console.log('Geocoding service returned', data.length);
+      //console.log('Geocoding service returned', data.length);
     }
     var viewport = data[0].geometry.viewport;
     var ne = viewport.getNorthEast();
@@ -1947,16 +2226,23 @@ var Search = {
   mapd: MapD,
   map: null,
   form: null,
+  locateButton: null,
+  zoomForm: null,
+  curLoc: null,
   termsInput: null,
   userInput: null,
+  locationCat: "Country",
+  locationCatMenu: null,
   locationInput: null,
+  zoomInput: null,
   terms: '',
   user: '',
   location: '',
-  locationChanged: false,
+  zoomTo: null, 
+  zoomToChanged: false,
   io: null,
 
-  init: function(map, form, termsInput, userInput, locationInput) {
+  init: function(map, form, zoomForm, curLoc, termsInput, userInput, locationCatMenu, locationInput, zoomInput) {
     $(document).on('propertychange keyup input paste', 'input.search-input', function() {
       var io = $(this).val().length ? 1: 0;
 
@@ -1969,15 +2255,72 @@ var Search = {
 
     this.map = map;
     this.form = form;
+    this.zoomForm = zoomForm;
+    this.curLoc = curLoc;
     this.termsInput = termsInput;
     this.userInput = userInput;
     this.locationInput = locationInput;
+    this.locationCatMenu = locationCatMenu;
+    this.zoomInput = zoomInput;
     this.geocoder.setMap(this.map);
     this.form.submit($.proxy(this.onSearch, this));
+    this.zoomForm.submit($.proxy(this.onSearch, this));
+    this.curLoc.click($.proxy(this.getPosition, this));
+    this.locationCatMenu.click($.proxy(function(e) {
+       this.locationCat = e.target.firstChild.innerText; 
+
+       var text = this.locationCat + " ▾";
+       $("#locationSelect").html(text);
+       $.getJSON(this.getLocNamesURL()).done($.proxy(this.loadLocMenu, this));
+    }, this));
+    
+
+
     $(document).on('geocodeend', $.proxy(this.onGeoCodeEnd, this));
     this.map.events.register('moveend', this, this.onMapMove);
+
+     $.getJSON(this.getLocNamesURL()).done($.proxy(this.loadLocMenu, this));
+
+
   },
- 
+
+  getLocNamesURL: function() {
+     var params = {request:"GetFeatureInfo"};
+     params.sql = "select name from " + this.locationCat + "_data";
+     var url = this.mapd.host + '?' + buildURI(params);
+     return url;
+  },
+
+   loadLocMenu: function(json) {
+    var names = [];
+    for (i in json.results)
+      names.push(json.results[i].name);
+
+    $("#locationInput").autocomplete({
+        source:names
+    });
+
+
+
+   },
+
+   getPosition: function() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(this.zoomToPosition);
+    }
+    else{ 
+      console.log("geolocation not supported!")
+    }
+   },
+
+   zoomToPosition: function(position) {
+    console.log(position);
+    var center = new OpenLayers.LonLat(position.coords.longitude, position.coords.latitude).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    map.setCenter(center, 16);
+    MapD.services.tweets.addPoint(center.x, center.y, 100, "#f00"); 
+
+   },
+
   onSearch: function() {
 
     var terms = this.termsInput.val();
@@ -1998,7 +2341,7 @@ var Search = {
     }
     else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" || terms.substring(0,4) == "zip:") {
         var colonPosition = terms.indexOf(":");
-        console.log(colonPosition);
+        //console.log(colonPosition);
         if (terms.substring(1,colonPosition) == this.mapd.services.topktokens.sourceSetting.substring(1))
           this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
@@ -2022,19 +2365,23 @@ var Search = {
     }
     */
 
-    var location = this.locationInput.val();
-    this.locationChanged = this.location != location;
+    var zoomTo = this.zoomInput.val();
+    console.log(zoomTo);
+    this.zoomToChanged = this.zoomTo != zoomTo;
     this.terms = terms;
     this.user = this.userInput.val();
+    this.location = this.locationInput.val() 
     this.mapd.setQueryTerms(this.terms);
     this.mapd.setUser(this.user);
-    console.log ("user: " + this.user);
-    if (this.locationChanged) {
-      this.location = location;
-      this.geocoder.geocode(this.location);
+    this.mapd.setLocation(this.locationCat, this.location);
+    //console.log ("user: " + this.user);
+    if (this.zoomToChanged) {
+      this.zoomTo = zoomTo;
+      console.log("about to zoom");
+      this.geocoder.geocode(this.zoomTo);
       return false;
     }
-    console.log("After this location changed");
+    //console.log("After this location changed");
     $(document).trigger({type: 'mapdreload'});
     $(document).trigger({type: 'pointmapreload'});
     $(document).trigger({type: 'heatmapreload'});
@@ -2050,11 +2397,11 @@ var Search = {
   onMapMove: function() 
   {
     //console.log('in onMapMove');
-    if (this.locationChanged)
-      this.locationChanged = false;
+    if (this.zoomToChanged)
+      this.zoomToChanged = false;
     else {
-      this.location = "";
-      this.locationInput.val("");
+      this.zoomTo = "";
+      this.zoomInput.val("");
     }
   },
 }
@@ -2101,7 +2448,7 @@ var Animation = {
   },
 
   layerLoadEnd: function () {
-    console.log(this.numLayersLoaded);
+    //console.log(this.numLayersLoaded);
     if (this.playing == true) {
       var numLayersVisible = this.mapd.services.settings.getNumLayersVisible(); 
       if (this.mapd.fullScreen == false)
@@ -2113,10 +2460,10 @@ var Animation = {
           var curTime = new Date().getTime();
           this.numLayersLoaded = 0;
           var timeDiff = curTime - this.prevTime;
-          console.log("Time diff: " + timeDiff);
+          //console.log("Time diff: " + timeDiff);
           if (timeDiff <  this.frameWait) {
               var waitTime = this.frameWait - timeDiff;
-              console.log("setting timeout");
+              //console.log("setting timeout");
               setTimeout($.proxy(this.animFunc,this),waitTime);
           }
           else
@@ -2130,7 +2477,7 @@ var Animation = {
   },
 
   animFunc: function() {
-     console.log("animating");
+     //console.log("animating");
      if (this.frameEnd < this.animEnd) {
         this.prevTime = new Date().getTime();
         var options = {time: {timestart: Math.floor(this.frameStart), timeend: Math.floor(this.frameEnd)}, heatMax: this.heatMax}; 
@@ -2152,11 +2499,9 @@ var Animation = {
 
 
   playFunc: function () {
-    console.log("play");
     if (this.playing == false) {
       this.playing = true;
       this.playPauseButton.removeClass("play-icon").addClass("pause-icon");
-      console.log("anim play");
       if (this.animStart == null) { // won't trigger if paused
         this.animStart = this.mapd.datastart;
         this.animEnd = this.mapd.dataend;
@@ -2179,13 +2524,12 @@ var Animation = {
                 radius = 1;
             this.mapd.services.pointmap.params.radius = radius;
         }
-        console.log(this.heatMax);
+        //console.log(this.heatMax);
         this.formerGraphLockedState = this.wordGraph.locked;
         //this.wordGraph.params.sort = "false";
         this.formerGraphDisplayMode = this.wordGraph.displaySetting;
 
         this.wordGraph.setMenuItem("Display", "Bar", false);
-        console.log("changing to sync"); 
         $.ajaxSetup({
             async: false
         });
@@ -2195,7 +2539,7 @@ var Animation = {
         $.ajaxSetup({
             async: true
         });
-        console.log("changing to async"); 
+        //console.log("changing to async"); 
 
         //this.wordGraph.locked = true;
         if (this.wordGraph.modeSetting != "Trends" && this.formerGraphLockedState == false) {
@@ -2262,8 +2606,8 @@ var Settings = {
     this.polyButton = polyButton;
     this.pointOn = pointLayer.getVisibility();
     this.heatOn = heatLayer.getVisibility();
-    console.log("settings point: " + this.pointOn);
-    console.log("settings heat: " + this.heatOn);
+    //console.log("settings point: " + this.pointOn);
+    //console.log("settings heat: " + this.heatOn);
     //$("#pointButton").button().next().button().parent().buttonset().next().hide().menu();
 
 
@@ -2313,7 +2657,7 @@ var Settings = {
 
   baseButtonFunction: function(baseOn) {
     
-    console.log($.type(baseOn));
+    //console.log($.type(baseOn));
     if ($.type(baseOn) != "object") {
       this.baseOn = parseInt(baseOn);
     }
@@ -2325,11 +2669,18 @@ var Settings = {
       this.baseButton.removeClass("basemapButtonOnImg").addClass("basemapButtonOffImg");
     //this.baseButton.toggleClass("basemapButtonOffImg").toggleClass("basemapButtonOnImg");
     if (!this.baseOn) {
+      $("#curLoc").addClass("curLoc-blank");
+      $("#zoom").addClass("zoom-blank");
+      $("#mapAnimControls").addClass("anim-blank");
       map.setBaseLayer(map.getLayersByName("Blank")[0]);
+
     }
     else {
-      console.log(BaseMap.currentLayer);
+      //console.log(BaseMap.currentLayer);
       //if (BaseMap.currentLayer != BaseMap.defaultLayer)
+    $("#curLoc").removeClass("curLoc-blank");
+    $("#zoom").removeClass("zoom-blank");
+    $("#mapAnimControls").removeClass("anim-blank");
       map.setBaseLayer(map.getLayersByName(BaseMap.currentLayer)[0]);
       //map.setBaseLayer(map.getLayersByName(MapD.services.baseLayerName)[0]);
     }
@@ -2341,8 +2692,8 @@ var Settings = {
     }
     else
       this.polyOn = !this.polyOn; 
-    console.log("at poly function");
-    console.log(this.polyOn);
+    //console.log("at poly function");
+    //console.log(this.polyOn);
     if (this.polyOn) {
       this.polyButton.removeClass("polyButtonOffImg").addClass("polyButtonOnImg");
       Choropleth.activate();
