@@ -44,7 +44,7 @@ div#topbar button:hover {
   position: relative;
   float: left;
   height: 20px;
-  width: 90px;
+  width: 100px;
   margin: 4px 0 4px 10px;
   padding: 4px;
   //padding-right: 17px;
@@ -55,6 +55,18 @@ div#topbar button:hover {
   box-shadow: 0 0 2px rgba(255,255,255,.25);
 }
 
+.adv-search-input {
+  height: 15px;
+  width: 80px;
+  margin: 4px 0px 4px 4px;
+  padding: 4px;
+  //padding-right: 17px;
+  //border-radius: 3px;
+  border-radius: 6px;
+  border: 1px solid #232323;
+  webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
+  box-shadow: 0 0 2px rgba(255,255,255,.25);
+}
 
 
 button#pause {
@@ -70,6 +82,17 @@ button#pause {
 .color-ramp:hover {
   border: 1px solid #FFFF00;
 }
+
+#searchMenu span.iconClear{
+  position:absolute;
+  right:35px;    
+  top:19px;
+  display:none;
+  cursor:pointer;
+  font: bold 1em sans-serif;
+  color:#38468F;  
+}
+
 
 span.iconClear{
   position:absolute;
@@ -124,6 +147,10 @@ div#submit-icon {
 
 #shareMenu span{
     margin-left: 35px;
+}
+
+#searchMenu li:hover {
+    background-color: #232323 !important;
 }
 
 
@@ -290,19 +317,24 @@ div#social-share:hover {
   margin-right: 0px;
 }
 
+
 #locationSelect {
-    height: 25px;
+    float: left;
+    margin-top:6px;
+    height: 21px;
 }
 
+/*
 #locationInput {
   border-radius: 0px 6px 6px 0px;
-  position: relative;
-  left: -8px;
-  height:20px;
+  //position: relative;
+  //left: -8px;
+  //height:20px;
   //width:70px !important;
   margin-right: 0px !important;
   padding-right: 0px !important;
 }
+*/
 
 
 .settings-drop-button {
@@ -477,7 +509,7 @@ div#control {
   width: 400px;
   height: 96%;
   //padding-top: 10px;
-  padding-top: 0px;
+  //padding-top: 5px;
   top: 40px;
   //bottom: 207px;
   border-radius: 5px;

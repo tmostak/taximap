@@ -142,11 +142,12 @@
         
       </div>
       <div id="control">
+      <!--
       <div id="advSearch">
         <div id="advSearchBar">Advanced Search ▾</div>
       </div>
 
-      <!--  <div id="advSearchInput">
+      <div id="advSearchInput">
           <div id="location">
             <button id="locationSelect" class="search-drop-button" data-dropdown="#locDropdown">Country ▾</button>
             <input id="locationInput" type="text" name="location"/>
@@ -191,6 +192,31 @@
       <div id="chart"></div>
     </div>
     <div id="link-dialog" title="Link to this map view"> </div>
+
+    <div id="advSearchDropdown" class="dropdown dropdown-anchor-right">
+        <ul id="searchMenu"class="dropdown-menu drop-menu">
+          <li>
+          <div id="originSearch">
+            <span style="margin-left: 5px; margin-right: 23px;" >OS/App</span>
+            <input id="originInput" class="adv-search-input" type="text" name="origin"/>
+            <span class="iconClear">X</span>
+          </div>
+          <div id="loc">
+            <!--<button id="locationSelect" class="search-drop-button" data-dropdown="#locDropdown">Country ▾</button>-->
+
+            <select id="locationSelect">
+              <option value="Country">Country</value>
+              <option value="State">State</value>
+              <option value="County">County</value>
+            </select>
+        
+            <input id="locationInput" class="adv-search-input"  type="text" name="location"/>
+            <span class="iconClear">X</span>
+            </div>
+          </li>
+        </ul>
+    </div>
+
 
     <div id="baseDropdown" class="dropdown dropdown-anchor-right">
         <ul id="baseMenu"class="dropdown-menu drop-menu">
