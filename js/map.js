@@ -12,6 +12,7 @@ var clickControl;
 function init()
 { 
   //map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", maxResolution: 156543.0339, numZoomLevels:24});
+  //$("#termsInput").css("margin-left", "4px");
   var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
   map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.ZoomPanel(), new OpenLayers.Control.KeyboardDefaults(), new OpenLayers.Control.ScaleLine(), /* new OpenLayers.Control.LayerSwitcher({'ascending':true})*/], projection: "EPSG:900913", restrictedExtent: extent,  maxResolution: 156543.0339,  numZoomLevels:24});
 
@@ -50,7 +51,7 @@ function init()
   TopKTokens.init($('div#cloud'));
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
-  Search.init(map, $('form#search'), $('form#zoom'), $('#curLoc'), $('input#termsInput'), $('input#userInput'), $('#locMenu'), $('input#locationInput'), $('input#zoomInput'));
+  Search.init(map, $('form#search'), $('id#zoom'), $('#curLoc'), $('input#termsInput'), $('input#userInput'), $('#locationSelect'), $('input#locationInput'), $('input#zoomInput'), $('input#originInput'));
   Settings.init(pointLayer, heatLayer, $('button#basemapButton'), $('button#pointButton'), $('button#heatButton'), $('button#polyButton'));
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));

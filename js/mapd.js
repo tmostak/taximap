@@ -486,6 +486,10 @@ var MapD = {
     this.user = user;
   },
 
+  setOrigin: function(origin) {
+    this.origin = origin;
+  },
+    
   setLocation:function(locationCat, location) {
     this.locationCat = locationCat;
     this.location = location;
@@ -633,6 +637,16 @@ var MapD = {
     return whereTerms;
   },
 
+  getOriginQuery: function () {
+    console.log("origin: " + this.origin);
+    if (this.origin != undefined && this.origin != null && this.origin != "") {
+      var query = "";
+      query += "origin ilike '" + this.origin + "' and ";
+      return query;
+    }
+    return "";
+  },
+
   getTermsAndUserQuery: function (queryTerms, user ) {
     var query = ""; 
     if (queryTerms.length) {
@@ -662,6 +676,7 @@ var MapD = {
     var timestart = this.timestart;
     var timeend = this.timeend;
     var user = this.user;
+    var origin = this.origin;
     var splitQuery = false; // don't split query into two parts 
     var queryTerms = this.queryTerms;
     var minId = null;
@@ -686,6 +701,7 @@ var MapD = {
     }
     //console.log("minid: " + minId);
     
+        var addedOrigin = false;
         var locQuery = "";
         if (this.location != null && this.location != "") {
           locQuery = this.locationCat + " ilike '" + this.location + "' and ";  
@@ -693,9 +709,20 @@ var MapD = {
       if (splitQuery) {
         var queryArray = new Array(2);
         queryArray[0] = this.getTermsAndUserQuery(queryTerms, user);
-        if (queryArray[0])
+        console.log("Query array!: " + queryArray[0]);
+        if (queryArray[0] != "") {
           queryArray[0] = queryArray[0].substr(0, queryArray[0].length-5);
+        }
+        else {
+            queryArray[0] = this.getOriginQuery()
+            queryArray[0] = queryArray[0].substr(0, queryArray[0].length-5);
+            
+            addedOrigin = true;
+        }
         queryArray[1] = this.getTimeQuery(timestart, timeend);
+      if (!addedOrigin)
+        queryArray[1] += this.getOriginQuery();
+
       if (locQuery != "") {
         if (queryArray[1] != "")
           queryArray[1] += locQuery;
@@ -715,7 +742,7 @@ var MapD = {
           whereQuery = "id > " + minId + " and " + locQuery + this.getTermsAndUserQuery(queryTerms, user);
         }
         else {
-            whereQuery = this.getTimeQuery(timestart, timeend) + locQuery + this.getTermsAndUserQuery(queryTerms, user);
+            whereQuery = this.getTimeQuery(timestart, timeend) + locQuery + this.getTermsAndUserQuery(queryTerms, user) + this.getOriginQuery();
         }
         if (whereQuery)
           whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
@@ -1137,21 +1164,25 @@ var TopKTokens = {
     else if (this.sourceSetting == "Country") {
       //this.mapd.services.search.termsInput.val("country: " + token);
       //this.mapd.services.search.locationCat = "Country";
-      $("#locCountry").click();
+      $("#locationSelect").val("Country");
+      //$("#locationSelect").children().eq(defaultIndex).prop('selected', true);
       this.mapd.services.search.locationInput.val(token);
       $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "State") {
       //this.mapd.services.search.locationCat = "State";
-      $("#locState").click();
+      //$("#locState").click();
+      $("#locationSelect").val("State");
+      console.log("State!");
       this.mapd.services.search.locationInput.val(token);
       $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "County") {
       //this.mapd.services.search.locationCat = "County";
-      $("#locCounty").click();
+      //$("#locCounty").click();
+      $("#locationSelect").val("County");
       this.mapd.services.search.locationInput.val(token);
       $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
@@ -1162,8 +1193,8 @@ var TopKTokens = {
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "OS-App") {
-      this.mapd.services.search.termsInput.val("origin: " + token);
-      $('#termsInput').trigger('input');
+      this.mapd.services.search.originInput.val(token);
+      $('#originInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
 
@@ -1189,21 +1220,27 @@ var TopKTokens = {
         //this.setMenuItem("Source", "Words", false);
       }
     else if (this.sourceSetting == "Country") {
-      $("#locCountry").click();
+      //$("#locCountry").click();
+      $("#locationSelect").val("Country");
+      this.mapd.services.search.locationCat = "Country";
       this.mapd.services.search.locationInput.val(token);
-      $('#termsInput').trigger('input');
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "State") {
-      $("#locState").click();
+      //$("#locState").click();
+      $("#locationSelect").val("State");
+      this.mapd.services.search.locationCat = "State";
       this.mapd.services.search.locationInput.val(token);
-      $('#termsInput').trigger('input');
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     else if (this.sourceSetting == "County") {
-      $("#locCounty").click();
+      //$("#locCounty").click();
+      $("#locationSelect").val("County");
+      this.mapd.services.search.locationCat = "County";
       this.mapd.services.search.locationInput.val(token);
-      $('#termsInput').trigger('input');
+      $('#locationInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     /*
@@ -1214,8 +1251,8 @@ var TopKTokens = {
     }
     */
     else if (this.sourceSetting == "OS-App") {
-      this.mapd.services.search.termsInput.val("origin: " + token);
-      $('#termsInput').trigger('input');
+      this.mapd.services.search.originInput.val(token);
+      $('#originInput').trigger('input');
       //this.setMenuItem("Source", "Words", false);
     }
     this.mapd.services.search.form.submit();
@@ -2235,6 +2272,7 @@ var Search = {
   locationCatMenu: null,
   locationInput: null,
   zoomInput: null,
+  originInput: null,
   terms: '',
   user: '',
   location: '',
@@ -2242,8 +2280,8 @@ var Search = {
   zoomToChanged: false,
   io: null,
 
-  init: function(map, form, zoomForm, curLoc, termsInput, userInput, locationCatMenu, locationInput, zoomInput) {
-    $(document).on('propertychange keyup input paste', 'input.search-input', function() {
+  init: function(map, form, zoomForm, curLoc, termsInput, userInput, locationCatMenu, locationInput, zoomInput, originInput) {
+    $(document).on('propertychange keyup input paste', 'input.search-input.adv-search-input', function() {
       var io = $(this).val().length ? 1: 0;
 
       $(this).next('.iconClear').stop().fadeTo(300,io);
@@ -2253,6 +2291,15 @@ var Search = {
         Search.form.submit();
       });
 
+    $(document).on('propertychange keyup input paste', 'input.adv-search-input', function() {
+      var io = $(this).val().length ? 1: 0;
+
+      $(this).next('.iconClear').stop().fadeTo(300,io);
+      }).on('click', '.iconClear', function() {
+        $(this).delay(300).fadeTo(300,0).prev('input').val('');
+
+        Search.form.submit();
+      });
     this.map = map;
     this.form = form;
     this.zoomForm = zoomForm;
@@ -2262,18 +2309,25 @@ var Search = {
     this.locationInput = locationInput;
     this.locationCatMenu = locationCatMenu;
     this.zoomInput = zoomInput;
+    this.originInput = originInput;
     this.geocoder.setMap(this.map);
     this.form.submit($.proxy(this.onSearch, this));
     this.zoomForm.submit($.proxy(this.onSearch, this));
     this.curLoc.click($.proxy(this.getPosition, this));
-    this.locationCatMenu.click($.proxy(function(e) {
-       this.locationCat = e.target.firstChild.innerText; 
+    this.loadOSMenu();
+    this.locationCatMenu.change($.proxy(function(e) {
+       this.locationCat = this.locationCatMenu.val(); //e.target.firstChild.innerText; 
 
-       var text = this.locationCat + " ▾";
-       $("#locationSelect").html(text);
+       //var text = this.locationCat + " ▾";
+       //$("#locationSelect").html(text);
        $.getJSON(this.getLocNamesURL()).done($.proxy(this.loadLocMenu, this));
+       return false;
     }, this));
     
+
+    $("#searchMenu input").click(function() {
+        return false;
+    });
 
 
     $(document).on('geocodeend', $.proxy(this.onGeoCodeEnd, this));
@@ -2291,18 +2345,25 @@ var Search = {
      return url;
   },
 
-   loadLocMenu: function(json) {
-    var names = [];
-    for (i in json.results)
-      names.push(json.results[i].name);
-
-    $("#locationInput").autocomplete({
-        source:names
+   loadOSMenu: function() {
+     var names = ["iOS", "Android", "Blackberry", "Foursquare", "Instagram", "Other"];
+    $("#originInput").autocomplete({
+        source:names,
+        position: {my: "right top", at: "right top"}
     });
-
-
-
    },
+
+    loadLocMenu: function(json) {
+     var names = [];
+     for (i in json.results)
+       names.push(json.results[i].name);
+ 
+     $("#locationInput").autocomplete({
+         source:names
+     });
+    },
+
+
 
    getPosition: function() {
     if (navigator.geolocation) {
@@ -2324,6 +2385,7 @@ var Search = {
   onSearch: function() {
 
     var terms = this.termsInput.val();
+    var origin = this.originInput.val();
     if (terms == "" && this.userInput.val() == "") {
       //$("#dataModePercents").prop('disabled',true);
       //$("#dataModePercents").children().prop('disabled',true);
@@ -2339,6 +2401,7 @@ var Search = {
     if (this.userInput.val().length > 0) {
       this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
+    /*
     else if (terms.substring(0,8) == "country:" || terms.substring(0,6) == "state:" || terms.substring(0,7) == "county:" || terms.substring(0,4) == "zip:") {
         var colonPosition = terms.indexOf(":");
         //console.log(colonPosition);
@@ -2348,6 +2411,7 @@ var Search = {
     else if (terms.substring(0,7) == "origin:") { 
       this.mapd.services.topktokens.setMenuItem("Source", "Word", false);
     }
+    */
 
 
     /*
@@ -2373,6 +2437,7 @@ var Search = {
     this.location = this.locationInput.val() 
     this.mapd.setQueryTerms(this.terms);
     this.mapd.setUser(this.user);
+    this.mapd.setOrigin(origin);
     this.mapd.setLocation(this.locationCat, this.location);
     //console.log ("user: " + this.user);
     if (this.zoomToChanged) {

@@ -44,10 +44,10 @@ div#topbar button:hover {
   position: relative;
   float: left;
   height: 20px;
-  width: 90px;
+  width: 100px;
   margin: 4px 0 4px 10px;
   padding: 4px;
-  padding-right: 17px;
+  //padding-right: 17px;
   //border-radius: 3px;
   border-radius: 6px;
   border: 1px solid #232323;
@@ -55,6 +55,18 @@ div#topbar button:hover {
   box-shadow: 0 0 2px rgba(255,255,255,.25);
 }
 
+.adv-search-input {
+  height: 15px;
+  width: 80px;
+  margin: 4px 0px 4px 4px;
+  padding: 4px;
+  //padding-right: 17px;
+  //border-radius: 3px;
+  border-radius: 6px;
+  border: 1px solid #232323;
+  webkit-box-shadow: 0 0 2px rgba(255,255,255,.25);
+  box-shadow: 0 0 2px rgba(255,255,255,.25);
+}
 
 
 button#pause {
@@ -70,6 +82,18 @@ button#pause {
 .color-ramp:hover {
   border: 1px solid #FFFF00;
 }
+
+#searchMenu span.iconClear{
+  position:absolute;
+  right:35px;    
+  top:19px;
+  display:none;
+  cursor:pointer;
+  font: bold 1em sans-serif;
+  //color:#38468F;  
+  color:black;  
+}
+
 
 span.iconClear{
   position:absolute;
@@ -88,16 +112,29 @@ span.iconClear{
 button#submit { 
   height: 30px;
   width: 30px;
-  margin-left: 0px;
+  margin-left: 8px;
   cursor: pointer;
+  border-radius: 6px 0px 0px 6px !important;
+  padding-right:0px !important;;
+  margin-right: 0px !important;
 }
 
 
 div#submit-icon { 
-  position: left;
-  margin: 2px
+  //position: left;
+  margin: 2px 2px 0px 2px;
 }
 
+#advSearchButton {
+   border-radius: 0px 6px 6px 0px !important;
+   height:30px;
+   margin-left: 0px !important;
+   padding-left: 0px !important;
+   border-left: 1px solid #333;
+   width: 20px;
+   left: -2px;
+
+}
 
 /*.data-dropdown {
     background-color: #232323;
@@ -111,6 +148,10 @@ div#submit-icon {
 
 #shareMenu span{
     margin-left: 35px;
+}
+
+#searchMenu li:hover {
+    background-color: #232323 !important;
 }
 
 
@@ -276,15 +317,25 @@ div#social-share:hover {
   left:5px;
   margin-right: 0px;
 }
+.ui-autocomplete {top:120px !important;}
 
+#locationSelect {
+    float: left;
+    margin-top:6px;
+    height: 21px;
+}
+
+/*
 #locationInput {
   border-radius: 0px 6px 6px 0px;
-  position: relative;
-  left: -8px;
+  //position: relative;
+  //left: -8px;
+  //height:20px;
   //width:70px !important;
   margin-right: 0px !important;
   padding-right: 0px !important;
 }
+*/
 
 
 .settings-drop-button {
@@ -363,15 +414,18 @@ div#mapAnimControls .anim-input {
 }
 
 #curLoc {
-    background: #252525 url('../img/cur_loc.png') no-repeat center center;
+    //background: #252525 url('../img/cur_loc.png') no-repeat center center;
+    background: #00008B url('../img/define-location-white-16.png') no-repeat center center;
     border: none !important;
     position:absolute;
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     z-index:10000;
-    right:0px;
-    bottom:17px;
-    border-radius: 5px;
+    left: 13px;
+    top: 94px;
+    //right:0px;
+    //bottom:17px;
+    border-radius: 6px;
 }
 
 div#sizeButton {
@@ -446,12 +500,17 @@ div#map {
   background-image: linear-gradient(#33bcef,#019ad2)
 }
 
+//#termsInput {
+//    margin-left:4px !important;
+//}
+
 div#control {
   //position: relative;
   position: fixed;
   width: 400px;
   height: 96%;
-  padding-top: 10px;
+  //padding-top: 10px;
+  //padding-top: 5px;
   top: 40px;
   //bottom: 207px;
   border-radius: 5px;
@@ -464,6 +523,24 @@ div#control {
 //    top: 17px;
 //    left:14px;
 //}
+
+div#advSearch {
+    border: 1px solid #AAA;
+    border-radius: 0px 0px 4px 4px;
+    background-color: #343434;
+    color: white;
+}
+
+div#advSearchBar {
+    height:25px;
+    background-image: linear-gradient(#4f4f4f, #232323);
+    //margin-top:0px !important;
+    //padding-top:0px !important;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+}
+
 
 div#tweets { 
   //border-radius: 5px;
@@ -594,6 +671,11 @@ span .data-menu-category {
     width:390px;
 }
 */
+
+div#sortOrder {
+    padding-top: 10px;
+    //border-radius: 4px 4px 0px 0px;
+}
 
 div#sortPref {
   font-size: 12px;
