@@ -57,26 +57,35 @@
 
   <body>
     <div id="fb-root"></div>
-   <script>(function(d, s, id) {
+    <script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=230516837113085";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+
+
+   <!--script>(function(d, s, id) {
      var js, fjs = d.getElementsByTagName(s)[0];
      if (d.getElementById(id)) return;
      js = d.createElement(s); js.id = id;
      js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
      fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));</script>
+     }(document, 'script', 'facebook-jssdk'));</script>-->
 
     <div id="topbar">
       <div id="promo"><a href="http://www.map-d.com" target="_blank"><img src="img/mapd_logo.png" class="logo-image"></a></div>
       <form id="search" class="search">
-	<div id="terms" class="search">
+	<div id="terms">
 	  <input id="termsInput" class="search-input" type="text" name="terms" placeholder=" What"/>
       <span class="iconClear">X</span>
 	</div>
-	<div id="user" class="search">
+	<div id="user">
 	  <input id="userInput" class="search-input" type="text" name="user" placeholder=" Who"/>
       <span class="iconClear">X</span>
 	</div>
-	<div id="location" class="search">
+	<div id="location">
 	  <input id="zoomInput" class="search-input" type="text" name="zoom" placeholder=" Where"/>
       <span class="iconClear">X</span>
 	</div>
@@ -109,7 +118,8 @@
      <div id="social-share" data-dropdown="#share-dropdown" title="Share a link to the current view with your current settings applied"> 
         <div id="share">Share this map ▾</div>
      </div>
-      <div class="fb-like" data-href="https://www.facebook.com/datarefined" data-width="120" data-height="30" data-colorscheme="dark" data-layout="button_count" data-action="like" data-show-faces="false" data-send="false"></div>
+     <div class="fb-like" data-href="https://www.facebook.com/datarefined" data-width="120" data-height="30" data-colorscheme="dark" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+     <!--<div class="fb-like" data-href="https://www.facebook.com/datarefined" data-width="120" data-height="30" data-colorscheme="dark" data-layout="button_count" data-action="like" data-show-faces="false" data-send="false"></div>-->
 
     <a href="https://twitter.com/datarefined" id="twitter-follow" class="twitter-follow-button" data-show-count="false">Follow @datarefined</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
@@ -196,13 +206,17 @@
     <div id="advSearchDropdown" class="dropdown dropdown-anchor-right">
         <ul id="searchMenu"class="dropdown-menu drop-menu">
           <li>
+          <div id="lang">
+            <span style="margin-left: 5px; margin-right: 11px;" >Language</span>
+            <input id="langInput" class="adv-search-input"  type="text" name="language"/>
+            <span class="iconClear">X</span>
+            </div>
           <div id="originSearch">
             <span style="margin-left: 5px; margin-right: 23px;" >OS/App</span>
             <input id="originInput" class="adv-search-input" type="text" name="origin"/>
             <span class="iconClear">X</span>
           </div>
           <div id="loc">
-            <!--<button id="locationSelect" class="search-drop-button" data-dropdown="#locDropdown">Country ▾</button>-->
 
             <select id="locationSelect">
               <option value="Country">Country</value>
@@ -248,6 +262,7 @@
             <div id='pointColorNone' class="color-by-cat">None</div>
             <div id='pointColorUser' class="color-by-cat">User</div>
             <div id='pointColorOS'class="color-by-cat">OS/App</div>
+            <div id='pointColorLang'class="color-by-cat">Language</div>
             <div style="clear: both;"></div>
         </li>
         <li id="pointStaticColor">

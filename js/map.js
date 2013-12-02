@@ -51,7 +51,7 @@ function init()
   TopKTokens.init($('div#cloud'));
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
-  Search.init(map, $('form#search'), $('id#zoom'), $('#curLoc'), $('input#termsInput'), $('input#userInput'), $('#locationSelect'), $('input#locationInput'), $('input#zoomInput'), $('input#originInput'));
+  Search.init(map, $('form#search'), $('id#zoom'), $('#curLoc'), $('input#termsInput'), $('input#userInput'), $('#locationSelect'), $('input#locationInput'), $('input#langInput'), $('input#zoomInput'), $('input#originInput'));
   Settings.init(pointLayer, heatLayer, $('button#basemapButton'), $('button#pointButton'), $('button#heatButton'), $('button#polyButton'));
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));

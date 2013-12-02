@@ -33,7 +33,7 @@ var Choropleth = {
     request: "GroupByToken",
     sql: null,
     sort: "false",
-    jointable: "state_data",
+    jointable: "country_data",
     joinvar: "name",
     joinattrs: "pst045212",
     k: 5000 
@@ -338,7 +338,7 @@ var Choropleth = {
       this.g = this.svg.append("g");
       var g = this.g;
       var path = this.path;
-      var file = "tweetmap/data/" + filename;
+      var file = "data/" + filename;
       var fileParts = filename.split('.');
       this.curJoinParams = joinParams[fileParts[0]];
       this.params.jointable = this.curJoinParams.jointable;

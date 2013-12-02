@@ -31,7 +31,7 @@ var MapD = {
   //host: "http://127.0.0.1:8080/",
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd2.csail.mit.edu:8080/",
-  host: "http://mapd.csail.mit.edu:8080/",
+  host: "http://mapd2.csail.mit.edu:8081/",
   //host: "http://140.221.141.152:8080/",
   //host: "http://www.velocidy.net:7000/",
   table: "tweets",
@@ -489,6 +489,10 @@ var MapD = {
   setOrigin: function(origin) {
     this.origin = origin;
   },
+
+  setLang: function(lang) {
+    this.lang = lang;
+  },
     
   setLocation:function(locationCat, location) {
     this.locationCat = locationCat;
@@ -647,6 +651,15 @@ var MapD = {
     return "";
   },
 
+  getLangQuery: function() {
+    if (this.lang != undefined && this.lang != null && this.lang != "") {
+      var query = "";
+      query += "lang ilike '" + this.lang + "' and ";
+      return query;
+    }
+    return "";
+  },
+
   getTermsAndUserQuery: function (queryTerms, user ) {
     var query = ""; 
     if (queryTerms.length) {
@@ -702,6 +715,7 @@ var MapD = {
     //console.log("minid: " + minId);
     
         var addedOrigin = false;
+        var addedLang = false;
         var locQuery = "";
         if (this.location != null && this.location != "") {
           locQuery = this.locationCat + " ilike '" + this.location + "' and ";  
@@ -714,14 +728,13 @@ var MapD = {
           queryArray[0] = queryArray[0].substr(0, queryArray[0].length-5);
         }
         else {
-            queryArray[0] = this.getOriginQuery()
+            queryArray[0] = this.getOriginQuery() + this.getLangQuery();
             queryArray[0] = queryArray[0].substr(0, queryArray[0].length-5);
-            
             addedOrigin = true;
         }
         queryArray[1] = this.getTimeQuery(timestart, timeend);
       if (!addedOrigin)
-        queryArray[1] += this.getOriginQuery();
+        queryArray[1] += this.getOriginQuery() + this.getLangQuery();
 
       if (locQuery != "") {
         if (queryArray[1] != "")
@@ -742,7 +755,7 @@ var MapD = {
           whereQuery = "id > " + minId + " and " + locQuery + this.getTermsAndUserQuery(queryTerms, user);
         }
         else {
-            whereQuery = this.getTimeQuery(timestart, timeend) + locQuery + this.getTermsAndUserQuery(queryTerms, user) + this.getOriginQuery();
+            whereQuery = this.getTimeQuery(timestart, timeend) + locQuery + this.getTermsAndUserQuery(queryTerms, user) + this.getOriginQuery() + this.getLangQuery();
         }
         if (whereQuery)
           whereQuery = " where " + whereQuery.substr(0, whereQuery.length-5);
@@ -1405,6 +1418,10 @@ var PointMap = {
           break;
         case "pointColorOS":
           this.colorBy = "origin";
+          $("#pointStaticColor").hide();
+          break;
+        case "pointColorLang":
+          this.colorBy = "lang";
           $("#pointStaticColor").hide();
           break;
       }
@@ -2271,6 +2288,7 @@ var Search = {
   locationCat: "Country",
   locationCatMenu: null,
   locationInput: null,
+  langInput: null,
   zoomInput: null,
   originInput: null,
   terms: '',
@@ -2280,9 +2298,11 @@ var Search = {
   zoomToChanged: false,
   io: null,
 
-  init: function(map, form, zoomForm, curLoc, termsInput, userInput, locationCatMenu, locationInput, zoomInput, originInput) {
-    $(document).on('propertychange keyup input paste', 'input.search-input.adv-search-input', function() {
+  init: function(map, form, zoomForm, curLoc, termsInput, userInput, locationCatMenu, locationInput, langInput, zoomInput, originInput) {
+    $(document).on('propertychange keyup input paste', 'input.search-input', function() {
       var io = $(this).val().length ? 1: 0;
+      console.log("at icon clear");
+      console.log(io);
 
       $(this).next('.iconClear').stop().fadeTo(300,io);
       }).on('click', '.iconClear', function() {
@@ -2308,6 +2328,7 @@ var Search = {
     this.userInput = userInput;
     this.locationInput = locationInput;
     this.locationCatMenu = locationCatMenu;
+    this.langInput = langInput;
     this.zoomInput = zoomInput;
     this.originInput = originInput;
     this.geocoder.setMap(this.map);
@@ -2315,6 +2336,7 @@ var Search = {
     this.zoomForm.submit($.proxy(this.onSearch, this));
     this.curLoc.click($.proxy(this.getPosition, this));
     this.loadOSMenu();
+    this.loadLangMenu();
     this.locationCatMenu.change($.proxy(function(e) {
        this.locationCat = this.locationCatMenu.val(); //e.target.firstChild.innerText; 
 
@@ -2343,6 +2365,14 @@ var Search = {
      params.sql = "select name from " + this.locationCat + "_data";
      var url = this.mapd.host + '?' + buildURI(params);
      return url;
+  },
+
+   loadLangMenu: function() {
+      var names = ["en", "es", "id", "pt", "tr", "ar", "ja", "und", "fr", "tl", "ru", "th", "nl", "it", "ko", "de", "et", "sv", "vi", "sl", "ht", "lv", "pl", "sk", "da", "hu", "he", "fi", "no", "zh", "bg", "el", "lt", "fa", "is", "uk", "ur", "hi", "ta", "ne", "bn", "ka", "hy", "lo", "si"];
+    $("#langInput").autocomplete({
+        source:names,
+        position: {my: "right top", at: "right top"}
+    });
   },
 
    loadOSMenu: function() {
@@ -2386,7 +2416,8 @@ var Search = {
 
     var terms = this.termsInput.val();
     var origin = this.originInput.val();
-    if (terms == "" && this.userInput.val() == "") {
+    var lang = this.langInput.val(); 
+    if (terms == "" && this.userInput.val() == "" && origin == "" && lang == "" ) {
       //$("#dataModePercents").prop('disabled',true);
       //$("#dataModePercents").children().prop('disabled',true);
       $("#dataModePercents").hide();
@@ -2438,6 +2469,7 @@ var Search = {
     this.mapd.setQueryTerms(this.terms);
     this.mapd.setUser(this.user);
     this.mapd.setOrigin(origin);
+    this.mapd.setLang(lang);
     this.mapd.setLocation(this.locationCat, this.location);
     //console.log ("user: " + this.user);
     if (this.zoomToChanged) {

@@ -39,12 +39,20 @@ div#topbar button:hover {
   margin: 0;
   padding: 0;
 }
+#search {
+    position: relative;
+    //max-height:20px;
+    width:35%;
+    max-width: 380px;
+}
+
 
 .search-input {
   position: relative;
   float: left;
   height: 20px;
-  width: 100px;
+  width:22%;
+  max-width: 100px;
   margin: 4px 0 4px 10px;
   padding: 4px;
   //padding-right: 17px;
@@ -82,8 +90,8 @@ button#pause {
 .color-ramp:hover {
   border: 1px solid #FFFF00;
 }
-
-#searchMenu span.iconClear{
+/*
+span.iconClear{
   position:absolute;
   right:35px;    
   top:19px;
@@ -93,20 +101,22 @@ button#pause {
   //color:#38468F;  
   color:black;  
 }
-
+*/
 
 span.iconClear{
-  position:absolute;
+  position:relative;
+  float:left;
   right:10px;    
   top: 10px;
   display:none;
   cursor:pointer;
   font: bold 1em sans-serif;
   color:#38468F;  
-                                    }
-                                    span.iconClear:hover{
-                                        color:#f52;
-                                      }
+}
+
+span.iconClear:hover{
+  color:#f52;
+}
 
 
 button#submit { 
@@ -286,7 +296,8 @@ div#social-share:hover {
   //webkit-box-shadow: 2px rgba(255,255,255,.25);
   //box-shadow: 2px rgba(255,255,255,.25);
   cursor: pointer;
-  width: 100px;
+  //width: 25%;
+  width:100px;
   height:28px;
   opacity: 1.0;
   border: none !important;
@@ -317,7 +328,7 @@ div#social-share:hover {
   left:5px;
   margin-right: 0px;
 }
-.ui-autocomplete {top:120px !important;}
+.ui-autocomplete {top:152px !important;}
 
 #locationSelect {
     float: left;
