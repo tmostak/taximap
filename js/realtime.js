@@ -79,8 +79,9 @@ var RealTimeOverlay = {
     .data([])
     .exit()
     .transition()
-    .duration(500)
+    .duration(800)
     .attr("r",0)
+    .attr("fill", "58FCD0")
     .style("opacity", 0.0)
     .remove();
   },

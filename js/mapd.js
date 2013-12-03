@@ -2,7 +2,7 @@
 // heatmapreload:    tell HeatMap to reload
 // geocodeend:       geocoding service is ready
 
-var timeUpdateInterval = 3600;
+var timeUpdateInterval = 1500;
 newTime = 0
 lastTime = 0
 tweetNow = 0
@@ -199,7 +199,7 @@ var MapD = {
 
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
-      this.timeend = Math.round((this.dataend-this.datastart)*.99 + this.datastart);
+      this.timeend = Math.round((this.dataend-this.datastart)*1.15 + this.datastart);
       this.timestart = Math.max(this.dataend - 864000,  Math.round((this.dataend-this.datastart)*.01 + this.datastart));
 
       var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: "pst045212", baseLayer: "Dark", fullScreen: 0};
@@ -293,7 +293,7 @@ var MapD = {
         this.services.settings.pointButtonFunction();
       if (mapParams.heatOn == 1)
         this.services.settings.heatButtonFunction();
-      //this.timeReload();
+      this.timeReload();
       //pointLayer.setVisibility(mapParams.pointOn);
       //heatLayer.setVisibility(mapParams.heatOn);
       //Settings.init(pointLayer, heatLayer, $('button#pointButton'), $('button#heatButton'));
@@ -424,7 +424,7 @@ var MapD = {
         }
         //this.timeReload();
         //this.timeReload();
-        //setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
+        setTimeout($.proxy(this.timeReload,this),timeUpdateInterval);
    },
 
   reload: function(e) {

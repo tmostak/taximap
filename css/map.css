@@ -39,20 +39,23 @@ div#topbar button:hover {
   margin: 0;
   padding: 0;
 }
+/*
 #search {
     position: relative;
+    float:left;
+    width: 35%;
     //max-height:20px;
-    width:35%;
-    max-width: 380px;
+    //max-width: 420px;
 }
+*/
 
 
 .search-input {
   position: relative;
   float: left;
   height: 20px;
-  width:22%;
-  max-width: 100px;
+  //width:22%;
+  width: 100px;
   margin: 4px 0 4px 10px;
   padding: 4px;
   //padding-right: 17px;
@@ -90,24 +93,29 @@ button#pause {
 .color-ramp:hover {
   border: 1px solid #FFFF00;
 }
-/*
-span.iconClear{
+
+#searchMenu span.iconClear{
   position:absolute;
-  right:35px;    
-  top:19px;
+  right:15px;    
+  top:20px;
   display:none;
   cursor:pointer;
   font: bold 1em sans-serif;
-  //color:#38468F;  
-  color:black;  
+  color:#38468F !important;
+  //color:black;  
 }
-*/
+
+#searchMenu span.iconClear:hover{
+  color:#f52 !important;
+}
 
 span.iconClear{
-  position:relative;
+  position:absolute;
   float:left;
   right:10px;    
   top: 10px;
+  margin: 0;
+  padding: 0;
   display:none;
   cursor:pointer;
   font: bold 1em sans-serif;
@@ -115,7 +123,7 @@ span.iconClear{
 }
 
 span.iconClear:hover{
-  color:#f52;
+  color:#f52 !important;
 }
 
 
