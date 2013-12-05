@@ -39,7 +39,7 @@ var RealTimeOverlay = {
       last = now;
       now = new Date().getTime();
       var diff = now -last;
-      console.log("Display delay: " + diff);
+      //console.log("Display delay: " + diff);
       var svg = this.svg;
       var g = this.g;
       g.selectAll("circle")
@@ -59,17 +59,16 @@ var RealTimeOverlay = {
         })
        .attr("r", 2) 
         .style("fill","red")
-       .style("opacity", 0.7);
-
-        g.selectAll("circle")
-        .data(data, function(d) {return d.id;})
-        //.data([])
-        .exit()
+       .style("opacity", 0.7)
         .transition()
         //.delay(5000)
         .duration(1000)
         .attr("r",0)
-        .style("opacity", 0.0)
+        .style("opacity", 0.0);
+
+        g.selectAll("circle")
+        .data(data, function(d) {return d.id;})
+        .exit()
         .remove();
      },
     

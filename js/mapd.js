@@ -31,7 +31,7 @@ var MapD = {
   //host: "http://127.0.0.1:8080/",
   //host: "http://geops.cga.harvard.edu:8080/",
   //host: "http://mapd2.csail.mit.edu:8080/",
-  host: "http://mapd2.csail.mit.edu:8081/",
+  host: "http://mapd2.csail.mit.edu:8080/",
   //host: "http://140.221.141.152:8080/",
   //host: "http://www.velocidy.net:7000/",
   table: "tweets",
@@ -199,7 +199,7 @@ var MapD = {
 
   startCheck: function() {
     if (this.datastart != null && this.dataend != null) {
-      this.timeend = Math.round((this.dataend-this.datastart)*1.15 + this.datastart);
+      this.timeend = Math.round((this.dataend-this.datastart)*1.01 + this.datastart);
       this.timestart = Math.max(this.dataend - 864000,  Math.round((this.dataend-this.datastart)*.01 + this.datastart));
 
       var mapParams = {extent: new OpenLayers.Bounds(BBOX.WORLD.split(',')), baseOn: 1, pointOn: 1, heatOn: 0, polyOn: 0, dataDisplay: "Cloud", dataSource: "Word", dataMode: "Counts",  dataLocked: 0, t0: this.timestart, t1: this.timeend, pointR:88,  pointG:252, pointB:208, pointRadius:-1, pointColorBy: "none", heatRamp: "green_red", scatterXVar: "pst045212", baseLayer: "Dark", fullScreen: 0};
@@ -2003,7 +2003,7 @@ init: function(sortDiv, viewDiv) {
       tweetLast = tweetNow;
       tweetNow = new Date().getTime();
       var delay = tweetNow - tweetLast;
-      console.log("Tweet delay: " + delay)
+      //console.log("Tweet delay: " + delay)
 
     if (json == null || json.results.length == 0) {
       if (this.append == false) {
@@ -2033,9 +2033,9 @@ init: function(sortDiv, viewDiv) {
     else { 
       this.numTweets += json.n;
       this.numDisplayTweets += json.results.length; 
-      if (this.numDisplayTweets > 500) {
-        $(".tweet-container").slice(500).remove();
-        this.numDisplayTweets = 500;
+      if (this.numDisplayTweets > 300) {
+        $(".tweet-container").slice(300).remove();
+        this.numDisplayTweets = 300;
         }
       this.mapd.services.realtime.addData(json.results);
       }
@@ -2107,7 +2107,7 @@ init: function(sortDiv, viewDiv) {
               //setTimeout(this.add(result, i, container), timeDelay);
               //setTimeout(function() {Tweets.add(result, i, container);}, timeDelay);
         }
-        console.log(badCount +"/" + numResults);
+        //console.log(badCount +"/" + numResults);
     }
 
     $('.tweet-profile, .username').click( $.proxy(function(e) {

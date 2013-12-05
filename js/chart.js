@@ -50,7 +50,7 @@ var LineChart =
     this.compareCallback = compareCallback;
     this.chartHeight = chartHeight;
     
-    this.margin = {top: 25, right: 25, bottom: 25, left: 25};
+    this.margin = {top: 25, right: 80, bottom: 25, left: 25};
         //width = 400 - this.margin.left - this.margin.right,
         var cont =  $($(this.elems.container).get(0));
         //console.log("Chart width: " + cont.width());
@@ -58,7 +58,7 @@ var LineChart =
         //this.width = cont.width() - cont.offset().left - this.margin.left - this.margin.right;
          this.height = this.chartHeight - this.margin.top - this.margin.bottom;
 
-    this.x = d3.time.scale().range([0, this.width - 39]);
+    this.x = d3.time.scale().range([0, this.width]);
     this.y = d3.scale.linear().range([this.height, 0]);
 
     this.brush =d3.svg.brush()
@@ -287,8 +287,12 @@ var LineChart =
   },
 
   getXDomain: function() {
+    //jvar xDomain = [this.series.xDomain[0], this.series.xDomain[1]];
     var xDomain = [d3.min(this.series, function(s) { return s.xDomain[0] }), 
-                   d3.max(this.series, function(s) { return s.xDomain[1] })];
+                   d3.max(this.series, function(s) { return s.xDomain[1]})];
+    console.log(xDomain);
+    xDomain[1] = new Date(xDomain[1].getTime() + 60 *30000);
+    console.log(xDomain);
     return xDomain;
   },
 
@@ -325,6 +329,7 @@ var LineChart =
         this.x.domain(this.getXDomain());
     }
     */
+    console.log("X domain");
     this.x.domain(this.getXDomain());
     this.y.domain(this.getYDomain());
     this.zoom.x(this.x);   
