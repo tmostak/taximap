@@ -1,1 +1,1 @@
-**TwitGeo** is a visualization tool to explore trends on Twitter across different geographical regions. Powered by a Massively Parallel Database (MapD) backend, TwitGeo uses NVIDIA GPUs to detect trending topics on Twitter in an instant. TwitGeo's interactive map and timeline makes it addicting and fun to discover news and events anywhere around the world.
+map for taxis
