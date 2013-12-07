@@ -13,7 +13,8 @@ function init()
 { 
   //map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.Zoom(), new OpenLayers.Control.LayerSwitcher({'ascending':true})], projection: "EPSG:900913", maxResolution: 156543.0339, numZoomLevels:24});
   //$("#termsInput").css("margin-left", "4px");
-  var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
+  //var extent = new OpenLayers.Bounds(BBOX.WORLD.split(','));  
+  var extent = new OpenLayers.Bounds(BBOX.BOSTON.split(','));  
   map = new OpenLayers.Map('map', { controls: [new OpenLayers.Control.Navigation(), new OpenLayers.Control.ZoomPanel(), new OpenLayers.Control.KeyboardDefaults(), new OpenLayers.Control.ScaleLine(), /* new OpenLayers.Control.LayerSwitcher({'ascending':true})*/], projection: "EPSG:900913", restrictedExtent: extent,  maxResolution: 156543.0339,  numZoomLevels:24});
 
   //var darkStyle = [ { featureType: "all", elementType: "all", stylers: [ {visibility: "simplified" }, /*{hue: "#333"},*/ {saturation: -50}, {lightness: -50} ] } ];
@@ -37,8 +38,8 @@ function init()
 
   map.zoomToExtent(extent);
   BaseMap.init();
-  MapD.init(map, PointMap, HeatMap, GeoTrends, TopKTokens, Tweets, Chart, Search, Settings, TweetClick, Animation, Choropleth, RealTimeOverlay);
-  Choropleth.init("Country");
+  MapD.init(map, PointMap, HeatMap, GeoTrends,/* TopKTokens, */ Tweets, Chart, Search, Settings, TweetClick, Animation, Choropleth/*, RealTimeOverlay*/);
+  Choropleth.init("block_groups");
   pointLayer = new OpenLayers.Layer.WMS("Point Map", PointMap.mapd.host, PointMap.getParams(), {singleTile: true, ratio: 1.0, "displayInLayerSwitcher": false, removeBackBufferDelay:0});
   heatLayer = new OpenLayers.Layer.WMS("Heat Map", HeatMap.mapd.host, HeatMap.getParams(), {singleTile: true, opacity: 0.55, ratio: 1.0, "displayInLayerSwitcher": false});
   pointLayer.setVisibility(false);
@@ -48,7 +49,7 @@ function init()
 
   Tweets.init($('div#sortOrder'), $('div#tweets'));
   TweetClick.init();
-  TopKTokens.init($('div#cloud'));
+  //TopKTokens.init($('div#cloud'));
   PointMap.init(pointLayer);
   HeatMap.init(heatLayer);
   Search.init(map, $('form#search'), $('id#zoom'), $('#curLoc'), $('input#termsInput'), $('input#userInput'), $('#locationSelect'), $('input#locationInput'), $('input#langInput'), $('input#zoomInput'), $('input#originInput'));
@@ -56,7 +57,7 @@ function init()
   //Settings.init($('button#gridSmall'), $('button#gridMedium'), $('button#gridLarge'));
   Chart.init($('div#chart'));
   Animation.init(pointLayer, heatLayer, TopKTokens, Choropleth, $('.play-pause'), $('.stop'));
-  RealTimeOverlay.init();
+  //RealTimeOverlay.init();
   //RealTimeOverlay.addData();
   MapD.start();
   //baseLayer.display(false);
